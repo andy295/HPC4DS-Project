@@ -236,6 +236,7 @@ int find_encoding(char letter, struct TreeNode* root, char* dst, int depth){
 
 	int found = 0; 
 	if (root->letter == letter){
+		dst[depth] = '\0';
 		return 1;  
 	} else {
 		
@@ -283,15 +284,47 @@ int main() {
 
 	for (int i = 0; i < res.number_of_letters; i++) {
 		printf("%c, %s\n", encodings[i].letter, encodings[i].encoding); 
+		// char * ptr;
+		// long parsed = strtol(encodings[i].encoding, & ptr, 2);
+		// printf("%b\n", parsed);
 	}
-	
-	// pass through song and replace letters with encoding
+
+
+	FILE *fp;
+	fp = fopen("output", "wb");
+
+	int charIndex = 0; 
+	for (int i = 0; i < count; i++) {
+		for (int j = 0; j < res.number_of_letters; j++) {
+			if (text[i] == encodings[j].letter) {
+				int strlength = strlen(encodings[j].encoding);
+
+				char c = 0;
+				for (int k = 0; k < strlength; k++) {
+
+					if (encodings[j].encoding[k] == '1') {
+						c |= 1 << charIndex;
+					}
+
+					if (charIndex == 7) {
+						fwrite(&c, sizeof(char), 1, fp);
+						charIndex = 0;
+						c = 0;
+					} else {
+						charIndex++;
+					}
+				}
+			}
+		}
+	}
+
+	fclose(fp);
 
 	// use reverse encoding table to decode
 
-	for (int i = 0; i < res.number_of_letters; i++) {
-		printf("%c: %d\n", res.letterFreqs[i].letter, res.letterFreqs[i].frequency); 
-	}
+	// for (int i = 0; i < res.number_of_letters; i++) {
+	// 	printf("%c: %d\n", res.letterFreqs[i].letter, res.letterFreqs[i].frequency); 
+	// }
 	
 	return 0;
 }
