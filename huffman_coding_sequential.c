@@ -2,62 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-char text[] = 
-	"Life is a dream " 
-	"A gift we receive"
-	"To live and to love"
-	"We forge the path"
-
-	"Our nightmare in birth"
-	"Our struggle for worth"
-	"In vain we carry on"
-	"Our mission to become"
-
-	"Adapt to this world"
-	"This chance we must take"
-	"We\'ll sing our song"
-	"We\'ll play our hand"
-
-	"Why allow (broken world)"
-	"This crooked fate? (Retaliate)"
-	"The tunnel\'s light (accept defeat)"
-	"Is unmoving (don\'t be afraid)"
-	"It burns your eyes (obscures the path)"
-	"But you persevere"
-	"You must adapt because it\'s there"
-
-	"Climb, find your way"
-	"Scale high, don\'t look back"
-	"With hope you will find"
-	"The life you seek"
-
-	"Judgement from birth"
-	"Criticize our worth"
-	"We struggled to uphold"
-	"Struck down, will we fold?"
-
-	"Climb, find your way"
-	"Scale high, don\'t look back"
-	"With hope you will find"
-	"The life you seek"
-
-	"I wish I could be some one"
-	"Be the moon and be the sun"
-	"Ambition burned my wings ablaze"
-	"Shed a tear in these dark days"
-	"Tearing down the walls of love"
-	"Soaring through the fire above"
-	"Pride exists to be reclaimed"
-	"Roll the dice don\'t lose the game"
-	"Carry the weight of the world"
-	"The summit says you\'ll prove my worth"
-	"Let me claim what\'s rightfully"
-	"Yours to take and mine to keep"
-	"Stars begin to swarm around"
-	"The path of fate this tired ground"
-	"Challenge met but all the while"
-	"A mountain build on greed and guile"; 
+#include <time.h>
 
 struct LetterFreq {
 	int frequency; 
@@ -265,46 +210,57 @@ void get_encoding_from_tree(struct LetterFreqDict* allLetters, struct TreeNode* 
 	}
 }
 
-int main() {
-	int count = sizeof(text) / sizeof(text[0]);
-	
-	struct LetterFreqDict res;
-	res.number_of_letters = 0; 
-	res.letterFreqs = malloc(sizeof(struct LetterFreq) * MAX_UNIQUE_LETTERS); 
-
-	get_freqs_from(text, count, &res); 
-
-	sort_freqs(&res);
-
-	struct TreeNode* root = create_huffman_tree(&res); 
-
-	struct LetterEncoding* encodings = malloc(sizeof(struct LetterEncoding) * res.number_of_letters);
- 
-	get_encoding_from_tree(&res, root, encodings); 
-
-	for (int i = 0; i < res.number_of_letters; i++) {
-		printf("%c, %s\n", encodings[i].letter, encodings[i].encoding); 
-		// char * ptr;
-		// long parsed = strtol(encodings[i].encoding, & ptr, 2);
-		// printf("%b\n", parsed);
+void print_binary(char c){
+	for (int i = 0; i < 8; i++){
+		printf("%d", (c >> i) & 1); 
 	}
 
+	printf("\n");
+}
 
+char* read_file(char* filename){
+	FILE* fp = fopen(filename, "r"); 
+	fseek(fp, 0, SEEK_END); 
+	long fsize = ftell(fp); 
+	fseek(fp, 0, SEEK_SET); 
+
+	char* string = malloc(fsize + 1); 
+	fread(string, fsize, 1, fp); 
+	fclose(fp); 
+
+	string[fsize] = '\0'; 
+
+	return string; 
+}
+
+int get_string_length(char* string){
+	int i = 0; 
+	while(string[i] != '\0'){
+		i++; 
+	}
+
+	return i; 
+}
+
+void encode_to_file(char* text, struct LetterEncoding* encodings, int unique_letters, int total_letters){
+	
 	FILE *fp;
 	fp = fopen("output", "wb");
 
 	int charIndex = 0; 
-	for (int i = 0; i < count; i++) {
-		for (int j = 0; j < res.number_of_letters; j++) {
+	char c = 0;
+	for (int i = 0; i < total_letters; i++) {
+		for (int j = 0; j < unique_letters; j++) {
 			if (text[i] == encodings[j].letter) {
 				int strlength = strlen(encodings[j].encoding);
 
-				char c = 0;
 				for (int k = 0; k < strlength; k++) {
 
 					if (encodings[j].encoding[k] == '1') {
 						c |= 1 << charIndex;
-					}
+					} 
+
+					printf("%c", encodings[j].encoding[k]);
 
 					if (charIndex == 7) {
 						fwrite(&c, sizeof(char), 1, fp);
@@ -318,13 +274,99 @@ int main() {
 		}
 	}
 
+	if (charIndex != 7) {
+		fwrite(&c, sizeof(char), 1, fp);
+	}
+
 	fclose(fp);
+}
 
-	// use reverse encoding table to decode
+void decode_from_file(struct TreeNode* root){
 
-	// for (int i = 0; i < res.number_of_letters; i++) {
-	// 	printf("%c: %d\n", res.letterFreqs[i].letter, res.letterFreqs[i].frequency); 
-	// }
+	FILE *fp2;
+	fp2 = fopen("output", "rb");
+
+	char c;
+	char lastContinuousChar = 0;
+
+	struct TreeNode* intermediateNode = root;
+
+	while (fread(&c, sizeof(char), 1, fp2)) {
+
+		print_binary(c);
+
+		for (int i = 0; i < 8; i++) {
+			if (intermediateNode->letter != '$') {
+				printf("%c", intermediateNode->letter);
+				intermediateNode = root;
+			}
+
+			if (c & (1 << i)) {
+				intermediateNode = intermediateNode->rightChild;
+			} else {
+				intermediateNode = intermediateNode->leftChild;
+			}
+		}
+	}
+
+	fclose(fp2);
+}
+
+int get_file_size(char* filename){
+	FILE* fp = fopen(filename, "r"); 
+	fseek(fp, 0, SEEK_END); 
+	long fsize = ftell(fp); 
+	fseek(fp, 0, SEEK_SET); 
+
+	fclose(fp); 
+
+	return fsize * 8; 
+}
+
+struct timespec get_time(){
+	struct timespec time; 
+	clock_gettime(CLOCK_MONOTONIC, &time); 
+	return time; 
+}
+
+double get_execution_time(struct timespec start, struct timespec end){
+	double time_taken; 
+	time_taken = (end.tv_sec - start.tv_sec) * 1e9; 
+	time_taken = (time_taken + (end.tv_nsec - start.tv_nsec)) * 1e-9; 
+
+	return time_taken; 
+}
+
+int main() {
+	char* text = read_file("text.txt");
+	int count = get_string_length(text);
+	
+	struct timespec start = get_time();
+	// ENCODING
+	struct LetterFreqDict res;
+	res.number_of_letters = 0; 
+	res.letterFreqs = malloc(sizeof(struct LetterFreq) * MAX_UNIQUE_LETTERS); 
+	get_freqs_from(text, count, &res); 
+	sort_freqs(&res);
+	struct TreeNode* root = create_huffman_tree(&res); 
+	struct LetterEncoding* encodings = malloc(sizeof(struct LetterEncoding) * res.number_of_letters);
+	get_encoding_from_tree(&res, root, encodings); 
+	encode_to_file(text, encodings, res.number_of_letters, count); 
+
+	struct timespec end = get_time();
+	printf("\nEncoding time: %f seconds\n", get_execution_time(start, end));
+
+	start = get_time();
+
+	// DECODING
+	decode_from_file(root); 
+
+	end = get_time();
+	printf("\nDecoding time: %f seconds\n", get_execution_time(start, end));
+
+	printf("\nCompression: \n");
+	printf("Original file size: %d bits\n", get_file_size("text.txt"));
+	printf("Compressed file size: %d bits\n", get_file_size("output"));
 	
 	return 0;
 }
