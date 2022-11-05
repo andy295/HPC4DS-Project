@@ -12,7 +12,7 @@
 #include "utils/file_utils.c"
 #include "utils/print_utils.c"
 
-#define VERBOSE 0
+#define VERBOSE 1
 
 int MAX_UNIQUE_LETTERS = 100; 
 
@@ -49,24 +49,6 @@ void get_encoding_from_tree(struct LetterFreqDict* allLetters, struct TreeNode* 
 	}
 }
 
-void append_string_to_binary_file(char* string, FILE* fp, int* charIndex, char* currentChar){
-	int strlength = strlen(string);
-	for (int k = 0; k < strlength; k++) {
-
-		if (string[k] == '1') {
-			*currentChar |= 1 << *charIndex;
-		} 
-
-		if (*charIndex == 7) {
-			fwrite(currentChar, sizeof(char), 1, fp);
-			*charIndex = 0;
-			*currentChar = 0;
-		} else {
-			*charIndex += 1;
-		}
-	}
-}
-
 void encode_to_file(char* text, struct LetterEncoding* encodings, int unique_letters, int total_letters){
 	
 	FILE *fp;
@@ -82,9 +64,9 @@ void encode_to_file(char* text, struct LetterEncoding* encodings, int unique_let
 		}
 	}
 
-	if (charIndex != 7) {
-		fwrite(&c, sizeof(char), 1, fp);
-	}
+	// appends and writes custom end of file character
+	append_string_to_binary_file(encodings[unique_letters-1].encoding, fp, &charIndex, &c); 
+	fwrite(&c, sizeof(char), 1, fp);
 
 	fclose(fp);
 }
@@ -99,10 +81,20 @@ void decode_from_file(struct TreeNode* root){
 
 	struct TreeNode* intermediateNode = root;
 
+	int endReached = 0;
 	while (fread(&c, sizeof(char), 1, fp2)) {
+
+		if (endReached == 1) {
+			break;
+		}
 
 		for (int i = 0; i < 8; i++) {
 			if (intermediateNode->letter != '$') {
+
+				if (intermediateNode->letter == '#'){
+					endReached = 1;
+					break;
+				}
 
 				if (VERBOSE){
 					printf("%c", intermediateNode->letter);

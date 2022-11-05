@@ -12,7 +12,6 @@ struct LinkedListTreeNodeItem {
 	struct LinkedListTreeNodeItem* next; 
 }; 
 
-
 struct LinkedListTreeNodeItem* new_node(char letter, int freq){
 	struct TreeNode* r = malloc(sizeof(struct TreeNode)); 
 	r->letter = letter; 
@@ -37,7 +36,6 @@ struct LinkedListTreeNodeItem* ordered_append_to_freq(struct LinkedListTreeNodeI
 	struct LinkedListTreeNodeItem* prev = NULL; 
 	struct LinkedListTreeNodeItem* firstStart = start; 
 
-
 	if (item->item->frequency < start->item->frequency){
 		item->next = start; 
 		return item; 
@@ -50,6 +48,7 @@ struct LinkedListTreeNodeItem* ordered_append_to_freq(struct LinkedListTreeNodeI
 
 			return firstStart; 
 		}
+
 		prev = start; 
 		start = start->next; 
 	}

@@ -27,6 +27,12 @@ void get_freqs_from(char data[], int count, struct LetterFreqDict* res) {
 			res->number_of_letters += 1; 
 		}
 	}
+
+	// use # as a special character to indicate the end of the file (commento da copilot, complimenti)
+	res->letterFreqs[res->number_of_letters].letter = '#'; 
+	res->letterFreqs[res->number_of_letters].frequency = 1000; 
+	res->number_of_letters += 1; 
+
 }
 
 void sort_freqs(struct LetterFreqDict* res){
