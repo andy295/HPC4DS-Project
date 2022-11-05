@@ -4,6 +4,10 @@
 #include <string.h>
 #include <time.h>
 
+#define VERBOSE 0
+
+int MAX_UNIQUE_LETTERS = 100; 
+
 struct LetterFreq {
 	int frequency; 
 	char letter; 
@@ -31,8 +35,6 @@ struct LetterEncoding {
 	char letter; 
 	char* encoding; 
 }; 
-
-int MAX_UNIQUE_LETTERS = 100; 
 
 void get_freqs_from(char data[], int count, struct LetterFreqDict* res) {	
 	for (int i = 0; i < count; i++){
@@ -250,8 +252,6 @@ void append_string_to_binary_file(char* string, FILE* fp, int* charIndex, char* 
 			*currentChar |= 1 << *charIndex;
 		} 
 
-		// printf("%c", string[k]);
-
 		if (*charIndex == 7) {
 			fwrite(currentChar, sizeof(char), 1, fp);
 			*charIndex = 0;
@@ -296,11 +296,13 @@ void decode_from_file(struct TreeNode* root){
 
 	while (fread(&c, sizeof(char), 1, fp2)) {
 
-		// print_binary(c);
-
 		for (int i = 0; i < 8; i++) {
 			if (intermediateNode->letter != '$') {
-				// printf("%c", intermediateNode->letter);
+
+				if (VERBOSE){
+					printf("%c", intermediateNode->letter);
+				}
+
 				intermediateNode = root;
 			}
 
@@ -343,8 +345,9 @@ double get_execution_time(struct timespec start, struct timespec end){
 int main() {
 	char* text = read_file("text.txt");
 	int count = get_string_length(text);
-	
+
 	struct timespec start = get_time();
+
 	// ENCODING
 	struct LetterFreqDict res;
 	res.number_of_letters = 0; 
@@ -356,20 +359,26 @@ int main() {
 	get_encoding_from_tree(&res, root, encodings); 
 	encode_to_file(text, encodings, res.number_of_letters, count); 
 
-	struct timespec end = get_time();
-	printf("\nEncoding time: %f seconds\n", get_execution_time(start, end));
-
-	start = get_time();
+	if (VERBOSE){
+		struct timespec end = get_time();
+		printf("\nEncoding time: %f seconds\n", get_execution_time(start, end));
+		start = get_time();
+	}
 
 	// DECODING
 	decode_from_file(root); 
 
-	end = get_time();
-	printf("\nDecoding time: %f seconds\n", get_execution_time(start, end));
+	if (VERBOSE){
+		struct timespec end = get_time();
+		printf("\nDecoding time: %f seconds\n", get_execution_time(start, end));
+	}
 
 	printf("\nCompression stats: \n");
 	printf("Original file size: %d bits\n", get_file_size("text.txt"));
 	printf("Compressed file size: %d bits\n", get_file_size("output"));
+	printf("Compression rate: %.2f%%\n", (1 - (double)get_file_size("output") / (double)get_file_size("text.txt")) * 100);
 	
+	printf("\n");
+
 	return 0;
 }
