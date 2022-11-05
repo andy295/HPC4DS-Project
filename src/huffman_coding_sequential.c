@@ -242,6 +242,26 @@ int get_string_length(char* string){
 	return i; 
 }
 
+void append_string_to_binary_file(char* string, FILE* fp, int* charIndex, char* currentChar){
+	int strlength = strlen(string);
+	for (int k = 0; k < strlength; k++) {
+
+		if (string[k] == '1') {
+			*currentChar |= 1 << *charIndex;
+		} 
+
+		// printf("%c", string[k]);
+
+		if (*charIndex == 7) {
+			fwrite(currentChar, sizeof(char), 1, fp);
+			*charIndex = 0;
+			*currentChar = 0;
+		} else {
+			*charIndex += 1;
+		}
+	}
+}
+
 void encode_to_file(char* text, struct LetterEncoding* encodings, int unique_letters, int total_letters){
 	
 	FILE *fp;
@@ -252,24 +272,7 @@ void encode_to_file(char* text, struct LetterEncoding* encodings, int unique_let
 	for (int i = 0; i < total_letters; i++) {
 		for (int j = 0; j < unique_letters; j++) {
 			if (text[i] == encodings[j].letter) {
-				int strlength = strlen(encodings[j].encoding);
-
-				for (int k = 0; k < strlength; k++) {
-
-					if (encodings[j].encoding[k] == '1') {
-						c |= 1 << charIndex;
-					} 
-
-					printf("%c", encodings[j].encoding[k]);
-
-					if (charIndex == 7) {
-						fwrite(&c, sizeof(char), 1, fp);
-						charIndex = 0;
-						c = 0;
-					} else {
-						charIndex++;
-					}
-				}
+				append_string_to_binary_file(encodings[j].encoding, fp, &charIndex, &c); 
 			}
 		}
 	}
@@ -293,11 +296,11 @@ void decode_from_file(struct TreeNode* root){
 
 	while (fread(&c, sizeof(char), 1, fp2)) {
 
-		print_binary(c);
+		// print_binary(c);
 
 		for (int i = 0; i < 8; i++) {
 			if (intermediateNode->letter != '$') {
-				printf("%c", intermediateNode->letter);
+				// printf("%c", intermediateNode->letter);
 				intermediateNode = root;
 			}
 
@@ -364,7 +367,7 @@ int main() {
 	end = get_time();
 	printf("\nDecoding time: %f seconds\n", get_execution_time(start, end));
 
-	printf("\nCompression: \n");
+	printf("\nCompression stats: \n");
 	printf("Original file size: %d bits\n", get_file_size("text.txt"));
 	printf("Compressed file size: %d bits\n", get_file_size("output"));
 	
