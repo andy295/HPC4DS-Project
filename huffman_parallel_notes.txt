@@ -1,0 +1,32 @@
+ --- ENCODING
+
+split text for each processor, 
+calculate frequencies individually
+
+join frequencies and sum 
+
+global huffman tree -> no parallelization can be applied
+
+keep global tree and split again 
+for each process encode the sequence
+
+"Using such parallel
+encoding assumes alignment at block boundaries, so that
+some bits may be lost at the end of each block"
+
+this means that we need to decide block size, 
+have padding bits to fill the space, 
+and also have an END_OF_BLOCK sequence, 
+since padding bits may be decodable (error in decoding)
+
+ --- DECODING
+
+let processor i decode block i 
+then continue till sync point is reached 
+and pass the decoded sequence for joining
+
+in the meantime, processor i+1 has started decoding of block i+1
+but from the sync point 
+(so we have to pass through the sequence first and check sync presence 
+in first block (i guess))
+
