@@ -2,6 +2,7 @@
 #define VERBOSE 1
 #define MAX_UNIQUE_LETTERS 100
 #define ENCODED_FILE "encoded_file"
+#define SOURCE_FILE "text.txt"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -156,7 +157,7 @@ void decode_from_file(struct TreeNode* root){
 }
 
 int main() {
-	char* text = read_file("text.txt");
+	char* text = read_file(SOURCE_FILE);
 	int count = strlen(text);
 
 	struct timespec start = get_time();
@@ -192,9 +193,9 @@ int main() {
 	}
 
 	printf("\nCompression stats: \n");
-	printf("Original file size: %d bits\n", get_file_size("text.txt"));
-	printf("Compressed file size: %d bits\n", get_file_size("output"));
-	printf("Compression rate: %.2f%%\n", (1 - (double)get_file_size("output") / (double)get_file_size("text.txt")) * 100);
+	printf("Original file size: %d bits\n", get_file_size(SOURCE_FILE));
+	printf("Compressed file size: %d bits\n", get_file_size(ENCODED_FILE));
+	printf("Compression rate: %.2f%%\n", (1 - (double)get_file_size(ENCODED_FILE) / (double)get_file_size(SOURCE_FILE)) * 100);
 	
 	printf("\n");
 
