@@ -1,4 +1,8 @@
 
+#define VERBOSE 1
+#define MAX_UNIQUE_LETTERS 100
+#define ENCODED_FILE "encoded_file"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,9 +16,6 @@
 #include "utils/file_utils.c"
 #include "utils/print_utils.c"
 
-#define VERBOSE 1
-
-int MAX_UNIQUE_LETTERS = 100; 
 
 int find_encoding(char letter, struct TreeNode* root, char* dst, int depth){
 
@@ -38,7 +39,7 @@ int find_encoding(char letter, struct TreeNode* root, char* dst, int depth){
 	return found; 
 }
 
-void get_encoding_from_tree(struct LetterFreqDict* allLetters, struct TreeNode* root, struct LetterEncoding* encodings){
+void get_encoding_from_tree(struct LetterFreqDictionary* allLetters, struct TreeNode* root, struct LetterEncoding* encodings){
 
 	for (int i = 0; i < allLetters->number_of_letters; i++){
 		
@@ -52,7 +53,7 @@ void get_encoding_from_tree(struct LetterFreqDict* allLetters, struct TreeNode* 
 void encode_to_file(char* text, struct LetterEncoding* encodings, int unique_letters, int total_letters){
 	
 	FILE *fp;
-	fp = fopen("output", "wb");
+	fp = fopen(ENCODED_FILE, "wb");
 
 	int charIndex = 0; 
 	char c = 0;
@@ -71,10 +72,50 @@ void encode_to_file(char* text, struct LetterEncoding* encodings, int unique_let
 	fclose(fp);
 }
 
+
+void append_string_to_byte_array(char* string, char* byte_array, int* byteArrayIndex, int* charIndex, char* currentChar){
+	int stringLength = strlen(string); 
+	for (int k = 0; k < stringLength; k++){
+		
+		if (string[k] == '1'){
+			*currentChar |= 1 << *charIndex;
+		}
+
+		if (*charIndex == 7){
+			byte_array[*byteArrayIndex] = *currentChar; 
+			*byteArrayIndex = *byteArrayIndex + 1;
+			*charIndex = 0; 
+			*currentChar = 0; 
+		} else {
+			*charIndex += 1; 
+		} 
+	}
+}
+
+char* encode_to_byte_array(char* text, struct LetterEncoding* encodings, int unique_letters, int total_letters, int* byteArrayIndex){
+	
+	int charIndex = 0; 
+	char c = 0;
+	char* encoded_text = malloc(sizeof(char) * total_letters); 
+
+	for (int i = 0; i < total_letters; i++) {
+		for (int j = 0; j < unique_letters; j++) {
+			if (text[i] == encodings[j].letter) {
+				append_string_to_byte_array(encodings[j].encoding, encoded_text, byteArrayIndex, &charIndex, &c); 
+			}
+		}
+	}
+
+	// appends and writes custom end of file character
+	append_string_to_byte_array(encodings[unique_letters-1].encoding, encoded_text, byteArrayIndex, &charIndex, &c); 
+
+	return encoded_text; 
+}
+
 void decode_from_file(struct TreeNode* root){
 
 	FILE *fp2;
-	fp2 = fopen("output", "rb");
+	fp2 = fopen(ENCODED_FILE, "rb");
 
 	char c;
 	char lastContinuousChar = 0;
@@ -121,15 +162,20 @@ int main() {
 	struct timespec start = get_time();
 
 	// ENCODING
-	struct LetterFreqDict res;
-	res.number_of_letters = 0; 
-	res.letterFreqs = malloc(sizeof(struct LetterFreq) * MAX_UNIQUE_LETTERS); 
-	get_freqs_from(text, count, &res); 
-	sort_freqs(&res);
-	struct TreeNode* root = create_huffman_tree(&res); 
-	struct LetterEncoding* encodings = malloc(sizeof(struct LetterEncoding) * res.number_of_letters);
-	get_encoding_from_tree(&res, root, encodings); 
-	encode_to_file(text, encodings, res.number_of_letters, count); 
+	struct LetterFreqDictionary* res = get_letter_freqs(text, count);
+	sort_freqs(res);
+	struct TreeNode* root = create_huffman_tree(res); 
+	struct LetterEncoding* encodings = malloc(sizeof(struct LetterEncoding) * res->number_of_letters);
+	get_encoding_from_tree(res, root, encodings); 
+	//encode_to_file(text, encodings, res->number_of_letters, count); 
+
+	int byteArrayFinalSize = 0; 
+	char* encoded_data = encode_to_byte_array(text, encodings, res->number_of_letters, count, &byteArrayFinalSize);
+	// write to file
+	FILE *fp;
+	fp = fopen(ENCODED_FILE, "wb");
+	fwrite(encoded_data, sizeof(char), byteArrayFinalSize, fp); // encode only the necessary bytes
+	fclose(fp);
 
 	if (VERBOSE){
 		struct timespec end = get_time();

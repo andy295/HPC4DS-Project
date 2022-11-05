@@ -57,7 +57,7 @@ struct LinkedListTreeNodeItem* ordered_append_to_freq(struct LinkedListTreeNodeI
 	return firstStart;
 }
 
-struct LinkedListTreeNodeItem* create_linked_list(struct LetterFreqDict* res) {
+struct LinkedListTreeNodeItem* create_linked_list(struct LetterFreqDictionary* res) {
 	struct LinkedListTreeNodeItem* start = new_node(res->letterFreqs[0].letter, res->letterFreqs[0].frequency); 
 
 	struct LinkedListTreeNodeItem* old; 
@@ -71,7 +71,7 @@ struct LinkedListTreeNodeItem* create_linked_list(struct LetterFreqDict* res) {
 	return start; 
 }
 
-struct TreeNode* create_huffman_tree(struct LetterFreqDict* res){
+struct TreeNode* create_huffman_tree(struct LetterFreqDictionary* res){
 	struct LinkedListTreeNodeItem* start = create_linked_list(res); 
 
 	do{
