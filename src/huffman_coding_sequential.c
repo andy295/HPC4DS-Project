@@ -16,7 +16,7 @@
 #include "utils/time_utils.c"
 #include "utils/file_utils.c"
 #include "utils/print_utils.c"
-
+#include "utils/sort_utils.c"
 
 int find_encoding(char letter, struct TreeNode* root, char* dst, int depth){
 
