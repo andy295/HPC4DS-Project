@@ -153,6 +153,9 @@ int main() {
 		// sort the LetterFreqDictionary only in the master process
 		sort_freqs(allLetters);
 
+		// append the sync character to the LetterFreqDictionary
+		append_to_freq(allLetters, '$', 10000);
+
 		// create the Huffman tree
 		struct TreeNode* root = create_huffman_tree(allLetters);
 
@@ -174,30 +177,35 @@ int main() {
 		// noi abbiamo fatto solo encode to file, ma servirebbe un encode to byte array, 
 		// che poi viene mandato al master process, che lo scrive su file (questa riga di commento è stata scritta da copilot)
 		
-		// encode the processes' portion of text
-		// encode_to_file(subtext, encodings, allLetters->number_of_letters, total_text_length);
+		// encode the processes' portion of text to buffer	
+		char* buffer = encode_to_buffer(subtext, encodings, allLetters->number_of_letters);
+		
+		// add to buffer sync character
+		buffer = strcat(buffer, encodings[allLetters->number_of_letters-1].encoding); //TODO: check if this is correct
+
+		// send the buffer to the master process
+		MPI_Send(buffer, strlen(buffer), MPI_BYTE, 0, 0, MPI_COMM_WORLD);
 	}
 
+	// master process receives all buffers
+	if (pid == 0) {
+		FILE *fp;
+		fp = fopen(ENCODED_FILE, "wb");
 
+		// master writes his own buffer to file
+		fwrite(buffer, sizeof(char), strlen(buffer), fp);
 
-	// struct timespec start = get_time();
+		for (int i = 1; i < NUM_OF_PROCESSES; i++) {
+			// receive buffer
+			char* buffer = malloc(sizeof(char) * total_text_length);
+			MPI_Recv(buffer, total_text_length, MPI_BYTE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			
+			// write buffer to file
+			fwrite(buffer, sizeof(char), strlen(buffer), fp);
+		}
 
-	// ENCODING
-	// struct LetterFreqDictionary res;
-	// res.number_of_letters = 0; 
-	// res.letterFreqs = malloc(sizeof(struct LetterFreq) * MAX_UNIQUE_LETTERS); 
-	// get_freqs_from(text, count, &res); 
-	// sort_freqs(&res);
-	// struct TreeNode* root = create_huffman_tree(&res); 
-	// struct LetterEncoding* encodings = malloc(sizeof(struct LetterEncoding) * res.number_of_letters);
-	// get_encoding_from_tree(&res, root, encodings); 
-	// encode_to_file(text, encodings, res.number_of_letters, count); 
-
-	// if (VERBOSE){
-	// 	struct timespec end = get_time();
-	// 	printf("\nEncoding time: %f seconds\n", get_execution_time(start, end));
-	// 	start = get_time();
-	// }
+		fclose(fp);
+	}
 
 	// DECODING
 	// decode_from_file(root); 

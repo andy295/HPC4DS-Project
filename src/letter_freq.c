@@ -9,29 +9,35 @@ struct LetterFreqDictionary {
 	struct LetterFreq* letterFreqs; 
 }; 
 
+void append_to_freq_dict(struct LetterFreqDictionary* dict, char letter){
+	int assigned = 0; 
+	for (int i = 0; i < dict->number_of_letters; i++){
+		if (dict->letterFreqs[i].letter == letter){
+			dict->letterFreqs[i].frequency++; 
+			assigned = 1; 
+			break; 
+		}
+	}
+	if (assigned == 0){
+		dict->letterFreqs[dict->number_of_letters].letter = letter; 
+		dict->letterFreqs[dict->number_of_letters].frequency = 1; 
+		dict->number_of_letters++; 
+	}
+}
+
+void append_to_freq(struct LetterFreqDictionary* dict, char letter, int freq){
+	res->letterFreqs[res->number_of_letters].letter = letter; 
+	res->letterFreqs[res->number_of_letters].frequency = freq; 
+	res->number_of_letters += 1; 
+}
+
 void get_freqs_from(char data[], int count, struct LetterFreqDictionary* res) {	
 	for (int i = 0; i < count; i++){
-		char letter = data[i]; 
-
-		int assigned = 0; 
-		for (int j = 0; j < res->number_of_letters; j++) {
-			if (res->letterFreqs[j].letter == letter){
-				res->letterFreqs[j].frequency += 1; 
-				assigned = 1; 
-			}
-		}
-
-		if (!assigned) {
-			res->letterFreqs[res->number_of_letters].letter = letter; 
-			res->letterFreqs[res->number_of_letters].frequency = 1; 
-			res->number_of_letters += 1; 
-		}
+		append_to_freq_dict(res, data[i]);
 	}
 
 	// use # as a special character to indicate the end of the file (commento da copilot, complimenti)
-	res->letterFreqs[res->number_of_letters].letter = '#'; 
-	res->letterFreqs[res->number_of_letters].frequency = 1000; 
-	res->number_of_letters += 1; 
+	append_to_freq(res, '#', 1000);
 }
 
 void sort_freqs(struct LetterFreqDictionary* res){
