@@ -41,7 +41,7 @@ long read_file(const char* fileName, char** fileDest, int processId) {
 
 		(*fileDest)[fSize] = '\0';
 
-		#ifdef VERBOSE
+		#if VERBOSE == 2
 			printf("process %d:\n%s\n", processId, *fileDest);
 			printf("total text length: %ld\n", fSize);
 		#endif
