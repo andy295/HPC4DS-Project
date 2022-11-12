@@ -1,12 +1,4 @@
 #include "include/huffman_coding.h"
-#include "include/letter_freq.h"
-// #include <huffman_tree.c>
-// #include <letter_encoding.c>
-
-#include "utils/file_utils.h"
-#include "utils/string_utils.h"
-// #include <utils/time_utils.c>
-// #include <utils/print_utils.c>
 
 // int find_encoding(char letter, struct TreeNode* root, char* dst, int depth){
 
@@ -115,26 +107,14 @@ int main()
 	int pid;
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
+	// get the processes' portion of text
 	char *text = NULL;
 	long total_text_length = read_file(fileName, &text, pid);
 
-	//printf("\nProcess: %d - size: %d\n%s\n", pid, total_text_length, text);
-
-	//char **subtexts = malloc(sizeof(char *) * NUM_OF_PROCESSES);
-	// for (int i = 0; i < NUM_OF_PROCESSES; i++)
-	// {
-	// 	subtexts[i] = substring(text, i * substring_length, substring_length);
-	// 	printf("Process%d:\n%s\n\n", i, subtexts[i]);
-	// }
-	// // get letter frequencies for the processes' portion of text
-	// for (int i = 0; i < NUM_OF_PROCESSES; i++)
-	// {
-	// 	LetterFreqDictionary allLetters = {.number_of_letters = 0, .letterFreqs = NULL};
-	// 	init_letter_freq_dictionary(&allLetters, subtexts[i], substring_length);
-
-	// 	free(allLetters.letterFreqs);
-	// }
-
+	// get characters frequencies for the processes' portion of text
+	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
+	init_char_freq_dictionary(&allChars, text, total_text_length);
+		
 	// // send LetterFreqDictionary to master process
 	// if (pid != 0) {
 	// 	// copilot dice di mandare tutto come unico messaggio, con datatype MPI_BYTE
@@ -223,6 +203,9 @@ int main()
 	// printf("Compression rate: %.2f%%\n", (1 - (double)get_file_size("output") / (double)get_file_size("text.txt")) * 100);
 
 	// printf("\n");
+
+	if (allChars.charFreqs != NULL)
+		free(allChars.charFreqs);
 
 	if (text != NULL)
 		free(text);

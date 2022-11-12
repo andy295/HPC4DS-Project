@@ -22,7 +22,6 @@ void printPos(int processId) {
 
 long read_file(const char* fileName, char** fileDest, int processId) {
 	FILE* fp = fopen(fileName, "r"); 
-
 	if (fp != NULL) {
 		fseek(fp, 0, SEEK_END); 
 		long fSize = ftell(fp);
@@ -44,6 +43,7 @@ long read_file(const char* fileName, char** fileDest, int processId) {
 
 		#ifdef VERBOSE
 			printf("process %d:\n%s\n", processId, *fileDest);
+			printf("total text length: %ld\n", fSize);
 		#endif
 
 		return fSize;

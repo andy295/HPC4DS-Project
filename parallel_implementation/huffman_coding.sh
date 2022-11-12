@@ -9,6 +9,6 @@
 
 module load mpich-3.2
 
-mpicc -g -Wall -o Project/huffman_coding Project/src/huffman_coding.c Project/src/utils/file_utils.c
+mpicc -g -Wall -o Project/huffman_coding Project/src/huffman_coding.c Project/src/utils/file_utils.c Project/src/char_freq.c
 
 mpirun.actual -n 4 ./Project/huffman_coding
