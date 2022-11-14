@@ -26,9 +26,9 @@ void append_to_freq_dict(struct LetterFreqDictionary* dict, char letter){
 }
 
 void append_to_freq(struct LetterFreqDictionary* dict, char letter, int freq){
-	res->letterFreqs[res->number_of_letters].letter = letter; 
-	res->letterFreqs[res->number_of_letters].frequency = freq; 
-	res->number_of_letters += 1; 
+	dict->letterFreqs[dict->number_of_letters].letter = letter; 
+	dict->letterFreqs[dict->number_of_letters].frequency = freq; 
+	dict->number_of_letters += 1; 
 }
 
 void get_freqs_from(char data[], int count, struct LetterFreqDictionary* res) {	

@@ -40,7 +40,7 @@ int find_encoding(char letter, struct TreeNode* root, char* dst, int depth){
 	return found; 
 }
 
-void get_encoding_from_tree(struct LetterFreqDictionary* allLetters, struct TreeNode* root, struct LetterEncoding* encodings){
+struct LetterEncoding* get_encoding_from_tree(struct LetterFreqDictionary* allLetters, struct TreeNode* root){
 	struct LetterEncoding* encodings = malloc(sizeof(struct LetterEncoding) * allLetters->number_of_letters);
 
 	for (int i = 0; i < allLetters->number_of_letters; i++){
@@ -168,7 +168,7 @@ int main() {
 	struct LetterFreqDictionary* res = get_letter_freqs(text, count);
 	sort_freqs(res);
 	struct TreeNode* root = create_huffman_tree(res); 
-	struct LetterEncoding* encodings = get_encoding_from_tree(res, root, encodings); 
+	struct LetterEncoding* encodings = get_encoding_from_tree(res, root); 
 	//encode_to_file(text, encodings, res->number_of_letters, count); 
 
 	int byteArrayFinalSize = 0; 
