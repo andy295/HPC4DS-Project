@@ -98,43 +98,69 @@
 // 	fclose(fp2);
 // }
 
-void fillMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict) {
-	int i;
- 
-	msgDict->header.id = MSG_DICTIONARY;
-	msgDict->header.version = 0;
-
-	#if VERBOSE == 2
-		printf("size of int: %lu\n", sizeof(int));
-		printf("size of char: %lu\n", sizeof(char));
-		printf("size of msgHeader: %lu\n", sizeof(MsgHeader));
-		printf("size of msgDict: %lu\n", sizeof(MsgDictionary));
-		printf("size of CharFreq: %lu\n", sizeof(CharFreq));
-		printf("size of CharFreq * number of chars : %lu * %u = %lu\n", sizeof(CharFreq), dict->number_of_chars, sizeof(CharFreq) * dict->number_of_chars);
-	#endif
-
-	msgDict->header.size = sizeof(MsgDictionary) + dict->number_of_chars * sizeof(CharFreq);
-
-	msgDict->charsNr = dict->number_of_chars;
-	msgDict->charFreqs = malloc(dict->number_of_chars * sizeof(CharFreq));
-
-	// maybe we could use memcpy here
-	for (i = 0; i < dict->number_of_chars; i++) {
-		msgDict->charFreqs[i].character = dict->charFreqs[i].character;
-		msgDict->charFreqs[i].frequency = dict->charFreqs[i].frequency;
+void freeBuffer(void* buffer) {
+	if (buffer != NULL) {
+		free(buffer);
 	}
+}
+
+void fillMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDictionary, MPI_Datatype* newType) {
+	int i;
+	MPI_Aint idAddr, sizeAddr, charsNrAddr, charsAddr, freqsAddr;
+
+	msgDictionary->header.id = MSG_DICTIONARY;
+	msgDictionary->header.size = FIVE;
+
+	msgDictionary->charsNr = dict->number_of_chars;
+
+	msgDictionary->characters = malloc(sizeof(char) * dict->number_of_chars);
+	msgDictionary->frequencies = malloc(sizeof(int) * dict->number_of_chars);
+
+	// maybe we can use multithreading here 
+	for (i = 0; i < dict->number_of_chars; i++) {
+		msgDictionary->characters[i] = dict->charFreqs[i].character;
+		msgDictionary->frequencies[i] = dict->charFreqs[i].frequency;
+	}
+
+	int block_length[FIVE] = {1, 1, 1, dict->number_of_chars, dict->number_of_chars};
+	
+	MPI_Aint displacement[FIVE];
+	
+	MPI_Get_address(&msgDictionary->header.id, &idAddr);
+	MPI_Get_address(&msgDictionary->header.size, &sizeAddr);
+	MPI_Get_address(&msgDictionary->charsNr, &charsNrAddr);
+	MPI_Get_address(msgDictionary->characters, &charsAddr);
+	MPI_Get_address(msgDictionary->frequencies, &freqsAddr);
+
+	displacement[1] = sizeAddr - idAddr;
+	displacement[2] = charsNrAddr - idAddr;
+	displacement[3] = charsAddr - idAddr;
+	displacement[4] = freqsAddr - idAddr;
+	
+	MPI_Datatype types[FIVE] = {MPI_INT, MPI_INT, MPI_INT, MPI_CHAR, MPI_INT};
+
+	MPI_Type_create_struct(FIVE, block_length, displacement, types, newType);
+	MPI_Type_commit(newType);
 }
 
 void getMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict) {
 	int i;
 
-	dict->number_of_chars = msgDict->charsNr;
-	dict->charFreqs = malloc(msgDict->charsNr * sizeof(CharFreq));
+	if (dict->number_of_chars == 0) {
+		i = 0;
 
-	// maybe we could use memcpy here
-	for (i = 0; i < msgDict->charsNr; i++) {
-		dict->charFreqs[i].character = msgDict->charFreqs[i].character;
-		dict->charFreqs[i].frequency = msgDict->charFreqs[i].frequency;
+		dict->number_of_chars = msgDict->charsNr;
+		dict->charFreqs = malloc(msgDict->charsNr * sizeof(CharFreq));
+	} else {
+		i = dict->number_of_chars;
+
+		dict->number_of_chars += msgDict->charsNr;
+		dict->charFreqs = realloc(dict->charFreqs, dict->number_of_chars * sizeof(CharFreq));
+	}
+
+	for (; i < msgDict->charsNr; i++) {
+		dict->charFreqs[i].character = msgDict->characters[i];
+		dict->charFreqs[i].frequency = msgDict->frequencies[i];
 	}
 }
 
@@ -157,17 +183,16 @@ int main()
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	get_chars_freqs(&allChars, text, total_text_length);
 
+	MPI_Datatype newType;
+	MsgDictionary msgDictSnd;
+	fillMsgDictionary(&allChars, &msgDictSnd, &newType);
+
 	if (pid != 0) {
 		// send CharFreqDictionary to master process
-		MsgDictionary msgDict;
-		fillMsgDictionary(&allChars, &msgDict);
 
 		// maybe we could use the send version that uses the mpi buffer 
-		// in this way we can empty the msgDict.charFreqs without risks 
-		MPI_Send(&msgDict, msgDict.header.size, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-		
-		if (msgDict.charFreqs != NULL)
-			free(msgDict.charFreqs);
+		// in this way we can empty the msgDict without risks 
+		MPI_Send(&newType, 1, newType, 0, 0, MPI_COMM_WORLD);
 	} else {
 		// master process receives all the slaves processes
 	 	for (i = 1; i < NUM_OF_PROCESSES; i++) {
@@ -175,57 +200,21 @@ int main()
 
 			printf("\nProcess dest %d - process send %d: i'm here 0\n", pid, i);
 
-			MsgHeader *msg;
-			BYTE *buffer;
 			MPI_Status status;
-			int bufferSize;
+			MsgDictionary msgDictRcv;
 
 			printf("\nProcess dest %d - process send %d: i'm here 1\n", pid, i);
 
-			// Probe for an incoming message from process zero
-			MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
-			
+			// Now receive the message with the allocated buffer
+			MPI_Recv(&msgDictRcv, 1, newType, i, 0, MPI_COMM_WORLD, &status);
+
 			printf("\nProcess dest %d - process send %d: i'm here 2\n", pid, i);
 
-			// When probe returns, the status object has the size and other
-		    // attributes of the incoming message. Get the message size
-		    MPI_Get_count(&status, MPI_BYTE, &bufferSize);
+			getMsgDictionary(&allChars, &msgDictRcv);
 
-			printf("\nProcess dest %d - process send %d: i'm here 3\n", pid, i);
-
-			// Allocate a buffer to hold the incoming numbers
-    		buffer = malloc(sizeof(BYTE) * bufferSize);
-
-			printf("\nProcess dest %d - process send %d: i'm here 4\n", pid, i);
-
-			// Now receive the message with the allocated buffer
-			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-			printf("\nProcess dest %d - process send %d: i'm here 5\n", pid, i);
-
-			printf("Process %d: dynamically received %d amount of data.\n", pid, bufferSize);
-
-			// get the message header
-			msg = (MsgHeader*) buffer;
-
-			printf("\nProcess dest %d - process send %d: i'm here 6\n", pid, i);
+			freeBuffer(msgDictRcv.characters);
+			freeBuffer(msgDictRcv.frequencies);
 			
-			if (msg->id == MSG_DICTIONARY) {
-				CharFreqDictionary dict = {.number_of_chars = 0, .charFreqs = NULL};
-				MsgDictionary *msgDict = (MsgDictionary*) buffer;
-				getMsgDictionary(&dict, msgDict);
-
-				print_dictionary(&dict);
-
-				merge_char_freqs(&allChars, &dict);
-
-				print_dictionary(&allChars);
-
-				printf("\nProcess dest %d - process send %d: i'm here 7\n", pid, i);
-			}
-			
-			free(buffer);
-
 			printf("////////////////////////////////////////////////////\n\n");
 		}
 
@@ -235,6 +224,11 @@ int main()
 
 		printf("\nProcess %d: i'm here 45\n", pid);
 	}
+
+	freeBuffer(msgDictSnd.characters);
+	freeBuffer(msgDictSnd.frequencies);
+
+	MPI_Type_free(&newType);
 
 	// 	// sort the LetterFreqDictionary only in the master process
 	// 	sort_freqs(allLetters);
@@ -308,11 +302,10 @@ int main()
 
 	// printf("\n");
 
-	if (allChars.charFreqs != NULL)
-		free(allChars.charFreqs);
+	freeBuffer(allChars.charFreqs);
+	freeBuffer(text);
 
-	if (text != NULL)
-		free(text);
+	MPI_Finalize();
 
 	return 0;
 }

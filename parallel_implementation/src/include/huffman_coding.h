@@ -24,19 +24,30 @@ enum Messages {
     // not used
 };
 
+enum MessageSize {
+    ZERO = 0,
+    ONE = 1,
+    TWO = 2,
+    THREE = 3,
+    FOUR = 4,
+    FIVE = 5
+};
+
 typedef struct MsgHeader
 {
-    int id;          // messaget type
-    int version;     // version of the message
-    int size;        // size of the message in bytes
+    int id;         // messaget type
+    int size;       // number of variable in message, header included
 } MsgHeader;
 
 typedef struct MsgDictionary
 {
     MsgHeader header;
-    int charsNr;            // messaget type
-    CharFreq *charFreqs;    // version
+    int charsNr;
+    char *characters;
+    int *frequencies;
 } MsgDictionary;
 
-extern void fillMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict);
+extern void fillMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDictionary, MPI_Datatype* newType);
 extern void getMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict);
+
+extern void freeBuffer(void* buffer);
