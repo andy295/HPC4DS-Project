@@ -10,11 +10,11 @@
 // #include "letter_encoding.c"
 
 #include "../utils/file_utils.h"
-#include "../utils/string_utils.h"
+// #include "../utils/string_utils.h"
 // #include utils/time_utils.c"
 // #include utils/print_utils.c"
 
-const char *fileName = "Project/src/text.txt";
+const char *fileName = "parallel_implementation/src/text.txt";
 
 enum Messages {
     // message number slave --> master
