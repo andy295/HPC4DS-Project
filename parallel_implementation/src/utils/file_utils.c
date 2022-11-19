@@ -1,15 +1,15 @@
 #include "file_utils.h"
 
-int get_file_size(char* fileName) {
-	FILE* fp = fopen(fileName, "r"); 
-	fseek(fp, 0, SEEK_END); 
-	long fSize = ftell(fp); 
-	fseek(fp, 0, SEEK_SET); 
+// int get_file_size(char* fileName) {
+// 	FILE* fp = fopen(fileName, "r"); 
+// 	fseek(fp, 0, SEEK_END); 
+// 	long fSize = ftell(fp); 
+// 	fseek(fp, 0, SEEK_SET); 
 
-	fclose(fp); 
+// 	fclose(fp); 
 
-	return fSize * 8; 
-}
+// 	return fSize * 8; 
+// }
 
 void printPos(int processId) {
 	char cwd[2048];
@@ -20,20 +20,21 @@ void printPos(int processId) {
    	}
 }
 
-long read_file(const char* fileName, char** fileDest, int processId) {
+long read_file(const char* fileName, char** fileDest, int processId, int proc_number) {
 	FILE* fp = fopen(fileName, "r"); 
 	if (fp != NULL) {
 		fseek(fp, 0, SEEK_END); 
 		long fSize = ftell(fp);
 
-		int residual = fSize % NUM_OF_PROCESSES; 
-		fSize = fSize / NUM_OF_PROCESSES;
+		int residual = fSize % proc_number; 
+		fSize = fSize / proc_number;
 		fseek(fp, processId * fSize, SEEK_SET);
 
 		// quick and dirty solution 
 		// but i don't have a better idea right now
-		if (processId == NUM_OF_PROCESSES - 1 && residual != 0)
+		if (processId == proc_number - 1 && residual != 0){
 			fSize += residual;
+		}
 
 		*fileDest = malloc(fSize + 1); 
 		fread((*fileDest), fSize, 1, fp);
@@ -49,6 +50,7 @@ long read_file(const char* fileName, char** fileDest, int processId) {
 		return fSize;
 	}
 
+	printf("Error opening file %s\n", fileName);
 	return 0; 
 }
 

@@ -170,50 +170,60 @@ int main()
 
 	int proc_number;
 	int pid; 
-	int i;
 
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
 	// get the processes' portion of text
 	char *text = NULL;
-	long total_text_length = read_file(fileName, &text, pid);
+	long total_text_length = read_file(SRC_FILE, &text, pid, proc_number);
 
 	// get characters frequencies for the processes' portion of text
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	get_chars_freqs(&allChars, text, total_text_length);
 
 	MPI_Datatype newType;
-	MsgDictionary msgDictSnd;
-	fillMsgDictionary(&allChars, &msgDictSnd, &newType);
+	MsgDictionary* msgDictSnd = malloc(sizeof(MsgDictionary));
+	fillMsgDictionary(&allChars, msgDictSnd, &newType);
+
+	// print the msg dictionary
+	// printf("Process %d: %d\t%d\t%c\t%d\n", pid, msgDictSnd->header.id, msgDictSnd->header.size, msgDictSnd->characters[msgDictSnd->charsNr-1], msgDictSnd->frequencies[msgDictSnd->charsNr-1]);
 
 	if (pid != 0) {
 		// send CharFreqDictionary to master process
 
 		// maybe we could use the send version that uses the mpi buffer 
 		// in this way we can empty the msgDict without risks 
+		printf("Process %d is sending %d characters to master process\n", pid, msgDictSnd->charsNr);
 		MPI_Send(&newType, 1, newType, 0, 0, MPI_COMM_WORLD);
+		printf("Process %d sent %d characters to master process\n", pid, msgDictSnd->charsNr);
+
 	} else {
 		// master process receives all the slaves processes
-	 	for (i = 1; i < NUM_OF_PROCESSES; i++) {
-			printf("////////////////////////////////////////////////////\n");
-
+		printf("num of processes: %d", proc_number);
+	 	for (int i = 1; i < proc_number; i++) {
 			printf("\nProcess dest %d - process send %d: i'm here 0\n", pid, i);
 
-			MPI_Status status;
-			MsgDictionary msgDictRcv;
+			// MPI_Status status;
+			MsgDictionary* msgDictRcv = malloc(sizeof(MsgDictionary));
+			msgDictRcv->characters = malloc(sizeof(char) * (msgDictSnd->charsNr+10));
+			msgDictRcv->frequencies = malloc(sizeof(int) * (msgDictSnd->charsNr+10));
 
 			printf("\nProcess dest %d - process send %d: i'm here 1\n", pid, i);
 
 			// Now receive the message with the allocated buffer
-			MPI_Recv(&msgDictRcv, 1, newType, i, 0, MPI_COMM_WORLD, &status);
+			MPI_Recv(msgDictRcv, 1, newType, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
 			printf("\nProcess dest %d - process send %d: i'm here 2\n", pid, i);
 
-			getMsgDictionary(&allChars, &msgDictRcv);
+			getMsgDictionary(&allChars, msgDictRcv);
 
-			freeBuffer(msgDictRcv.characters);
-			freeBuffer(msgDictRcv.frequencies);
+			printf("Process %d: %d, passed\n", pid, allChars.number_of_chars);
+
+			freeBuffer(msgDictRcv->characters);
+			freeBuffer(msgDictRcv->frequencies);
+
+			// free(msgDictRcv);
 			
 			printf("////////////////////////////////////////////////////\n\n");
 		}
@@ -225,8 +235,10 @@ int main()
 		printf("\nProcess %d: i'm here 45\n", pid);
 	}
 
-	freeBuffer(msgDictSnd.characters);
-	freeBuffer(msgDictSnd.frequencies);
+	// freeBuffer(msgDictSnd.characters);
+	// freeBuffer(msgDictSnd.frequencies);
+
+	free(msgDictSnd);
 
 	MPI_Type_free(&newType);
 

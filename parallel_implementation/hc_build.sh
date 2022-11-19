@@ -9,4 +9,4 @@
 
 module load mpich-3.2
 
-mpicc -g -Wall -o parallel_implementation/output/huffman_coding parallel_implementation/src/huffman_coding.c parallel_implementation/src/utils/file_utils.c parallel_implementation/src/char_freq.c
+mpicc -std=gnu99  -g -Wall -o parallel_implementation/output/huffman_coding parallel_implementation/src/huffman_coding.c parallel_implementation/src/utils/file_utils.c parallel_implementation/src/char_freq.c
