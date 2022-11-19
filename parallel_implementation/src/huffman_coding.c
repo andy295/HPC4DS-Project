@@ -169,7 +169,7 @@ int main()
 	MPI_Init(NULL, NULL);
 
 	int proc_number;
-	int pid;
+	int pid; 
 	int i;
 
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
