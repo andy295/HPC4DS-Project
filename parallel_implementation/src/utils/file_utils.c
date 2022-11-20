@@ -1,17 +1,17 @@
 #include "file_utils.h"
 
-// int get_file_size(char* fileName) {
-// 	FILE* fp = fopen(fileName, "r"); 
-// 	fseek(fp, 0, SEEK_END); 
-// 	long fSize = ftell(fp); 
-// 	fseek(fp, 0, SEEK_SET); 
+int get_file_size(char* fileName) {
+	FILE* fp = fopen(fileName, "r"); 
+	fseek(fp, 0, SEEK_END); 
+	long fSize = ftell(fp); 
+	fseek(fp, 0, SEEK_SET); 
 
-// 	fclose(fp); 
+	fclose(fp); 
 
-// 	return fSize * 8; 
-// }
+	return fSize * 8; 
+}
 
-void printPos(int processId) {
+void printWorkDir(int processId) {
 	char cwd[2048];
    	if (getcwd(cwd, sizeof(cwd)) != NULL) {
     	printf("Process %d current working dir: %s\n", processId, cwd);
@@ -42,7 +42,7 @@ long read_file(const char* fileName, char** fileDest, int processId, int proc_nu
 
 		(*fileDest)[fSize] = '\0';
 
-		#if VERBOSE == 2
+		#if VERBOSE <= 1
 			printf("process %d:\n%s\n", processId, *fileDest);
 			printf("total text length: %ld\n", fSize);
 		#endif

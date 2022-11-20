@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "huffman_coding.h": "c",
+        "message.h": "c"
+    }
+}

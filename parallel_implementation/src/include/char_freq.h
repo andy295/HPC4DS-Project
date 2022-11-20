@@ -1,8 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-
 #include "global_constants.h"
+
+enum Position {
+    FIRST = 1,
+    LAST
+};
 
 typedef struct CharFreq {
 	int frequency;
@@ -14,10 +15,12 @@ typedef struct CharFreqDictionary {
 	CharFreq *charFreqs; 
 } CharFreqDictionary;
 
-extern void get_chars_freqs(CharFreqDictionary* dict, char* text, int len);
 extern void init_char_freq_dictionary(CharFreqDictionary* dict, int size);
-// void append_to_freq(struct LetterFreqDictionary* dict, char letter, int freq);
+extern void copy_char_Freq(CharFreq *dest, CharFreq *src);
+
+extern void get_chars_freqs(CharFreqDictionary* dict, char text[], int len, int pid);
+extern void sort_freqs(CharFreqDictionary* res);
+extern void append_to_freq(CharFreqDictionary* dict, char character, int pos);
 // extern void append_to_freq_dict(struct LetterFreqDictionary* dict, char letter);
-// extern void sort_freqs(struct LetterFreqDictionary* res);
-extern void merge_char_freqs(CharFreqDictionary* allChars, CharFreqDictionary* charFreqs);
-extern void print_dictionary(CharFreqDictionary* dict);
+
+extern void print_dictionary(CharFreqDictionary* dict, int pid);

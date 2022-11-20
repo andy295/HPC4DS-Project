@@ -104,66 +104,6 @@ void freeBuffer(void* buffer) {
 	}
 }
 
-void fillMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDictionary, MPI_Datatype* newType) {
-	int i;
-	MPI_Aint idAddr, sizeAddr, charsNrAddr, charsAddr, freqsAddr;
-
-	msgDictionary->header.id = MSG_DICTIONARY;
-	msgDictionary->header.size = FIVE;
-
-	msgDictionary->charsNr = dict->number_of_chars;
-
-	msgDictionary->characters = malloc(sizeof(char) * dict->number_of_chars);
-	msgDictionary->frequencies = malloc(sizeof(int) * dict->number_of_chars);
-
-	// maybe we can use multithreading here 
-	for (i = 0; i < dict->number_of_chars; i++) {
-		msgDictionary->characters[i] = dict->charFreqs[i].character;
-		msgDictionary->frequencies[i] = dict->charFreqs[i].frequency;
-	}
-
-	int block_length[FIVE] = {1, 1, 1, dict->number_of_chars, dict->number_of_chars};
-	
-	MPI_Aint displacement[FIVE];
-	
-	MPI_Get_address(&msgDictionary->header.id, &idAddr);
-	MPI_Get_address(&msgDictionary->header.size, &sizeAddr);
-	MPI_Get_address(&msgDictionary->charsNr, &charsNrAddr);
-	MPI_Get_address(msgDictionary->characters, &charsAddr);
-	MPI_Get_address(msgDictionary->frequencies, &freqsAddr);
-
-	displacement[1] = sizeAddr - idAddr;
-	displacement[2] = charsNrAddr - idAddr;
-	displacement[3] = charsAddr - idAddr;
-	displacement[4] = freqsAddr - idAddr;
-	
-	MPI_Datatype types[FIVE] = {MPI_INT, MPI_INT, MPI_INT, MPI_CHAR, MPI_INT};
-
-	MPI_Type_create_struct(FIVE, block_length, displacement, types, newType);
-	MPI_Type_commit(newType);
-}
-
-void getMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict) {
-	int i;
-
-	if (dict->number_of_chars == 0) {
-		i = 0;
-
-		dict->number_of_chars = msgDict->charsNr;
-		dict->charFreqs = malloc(msgDict->charsNr * sizeof(CharFreq));
-	} else {
-		i = dict->number_of_chars;
-
-		dict->number_of_chars += msgDict->charsNr;
-		dict->charFreqs = realloc(dict->charFreqs, dict->number_of_chars * sizeof(CharFreq));
-	}
-
-	for (; i < msgDict->charsNr; i++) {
-		dict->charFreqs[i].character = msgDict->characters[i];
-		dict->charFreqs[i].frequency = msgDict->frequencies[i];
-	}
-}
-
 int main()
 {
 	MPI_Init(NULL, NULL);
@@ -174,17 +114,22 @@ int main()
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
+	int i;
+
 	// get the processes' portion of text
 	char *text = NULL;
 	long total_text_length = read_file(SRC_FILE, &text, pid, proc_number);
 
 	// get characters frequencies for the processes' portion of text
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
-	get_chars_freqs(&allChars, text, total_text_length);
+	get_chars_freqs(&allChars, text, total_text_length, pid);
 
-	MPI_Datatype newType;
-	MsgDictionary* msgDictSnd = malloc(sizeof(MsgDictionary));
-	fillMsgDictionary(&allChars, msgDictSnd, &newType);
+	MPI_Datatype dictType;
+	MsgDictionary msgDictSnd;
+	MsgDictionary msgDictRcv;
+
+	initMsgDictionary(&msgDictSnd.header);
+	setMsg(&allChars, (MsgGeneric*)&msgDictSnd, &dictType);
 
 	// print the msg dictionary
 	// printf("Process %d: %d\t%d\t%c\t%d\n", pid, msgDictSnd->header.id, msgDictSnd->header.size, msgDictSnd->characters[msgDictSnd->charsNr-1], msgDictSnd->frequencies[msgDictSnd->charsNr-1]);
@@ -194,59 +139,73 @@ int main()
 
 		// maybe we could use the send version that uses the mpi buffer 
 		// in this way we can empty the msgDict without risks 
-		printf("Process %d is sending %d characters to master process\n", pid, msgDictSnd->charsNr);
-		MPI_Send(&newType, 1, newType, 0, 0, MPI_COMM_WORLD);
-		printf("Process %d sent %d characters to master process\n", pid, msgDictSnd->charsNr);
+		printf("Process %d is sending %d characters to master process\n", pid, msgDictSnd.charsNr);
+		MPI_Send(&msgDictSnd, 1, dictType, 0, 0, MPI_COMM_WORLD);
+		printf("Process %d sent %d characters to master process\n", pid, msgDictSnd.charsNr);
 
 	} else {
 		// master process receives all the slaves processes
 		printf("num of processes: %d", proc_number);
-	 	for (int i = 1; i < proc_number; i++) {
+	 	for (i = 1; i < proc_number; i++) {
 			printf("\nProcess dest %d - process send %d: i'm here 0\n", pid, i);
 
-			// MPI_Status status;
-			MsgDictionary* msgDictRcv = malloc(sizeof(MsgDictionary));
-			msgDictRcv->characters = malloc(sizeof(char) * (msgDictSnd->charsNr+10));
-			msgDictRcv->frequencies = malloc(sizeof(int) * (msgDictSnd->charsNr+10));
+			MPI_Status status;
 
 			printf("\nProcess dest %d - process send %d: i'm here 1\n", pid, i);
 
 			// Now receive the message with the allocated buffer
-			MPI_Recv(msgDictRcv, 1, newType, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			MPI_Recv(&msgDictRcv, 1, dictType, i, 0, MPI_COMM_WORLD, &status);
 
 			printf("\nProcess dest %d - process send %d: i'm here 2\n", pid, i);
 
-			getMsgDictionary(&allChars, msgDictRcv);
+			getMsg(&allChars, (MsgGeneric*) &msgDictRcv);
 
 			printf("Process %d: %d, passed\n", pid, allChars.number_of_chars);
 
-			freeBuffer(msgDictRcv->characters);
-			freeBuffer(msgDictRcv->frequencies);
+			freeBuffer(msgDictRcv.characters);
+			freeBuffer(msgDictRcv.frequencies);
 
-			// free(msgDictRcv);
+			freeBuffer(msgDictSnd.characters);
+			freeBuffer(msgDictSnd.frequencies);
 			
 			printf("////////////////////////////////////////////////////\n\n");
 		}
+	}
 
-		#if VERBOSE == 1
-			print_dictionary(&allChars);
+	// not the most elegant solution for distinguish 
+	// between the processes, but it works
+	// we will modify it later
+	if (pid == 0) {
+		#ifdef VERBOSE <= 3
+			printf("Before sorting:\n");
+			print_dictionary(&allChars, pid);
+		#endif
+
+		// sort the LetterFreqDictionary only in the master process
+		sort_freqs(&allChars);
+
+		#ifdef VERBOSE <= 3
+			printf("After sorting:\n");
+			print_dictionary(&allChars, pid);
+		#endif
+
+		// append the sync character to the LetterFreqDictionary
+		append_to_freq(&allChars, '\0', FIRST);
+
+		#ifdef VERBOSE <= 3
+			printf("After appending:\n");
+			print_dictionary(&allChars, pid);
 		#endif
 
 		printf("\nProcess %d: i'm here 45\n", pid);
 	}
 
-	// freeBuffer(msgDictSnd.characters);
-	// freeBuffer(msgDictSnd.frequencies);
+	freeBuffer(msgDictSnd.characters);
+	freeBuffer(msgDictSnd.frequencies);
 
-	free(msgDictSnd);
+	MPI_Type_free(&dictType);
 
-	MPI_Type_free(&newType);
-
-	// 	// sort the LetterFreqDictionary only in the master process
-	// 	sort_freqs(allLetters);
-
-	// 	// append the sync character to the LetterFreqDictionary
-	// 	append_to_freq(allLetters, '$', 10000);
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// 	// create the Huffman tree
 	// 	struct TreeNode* root = create_huffman_tree(allLetters);
