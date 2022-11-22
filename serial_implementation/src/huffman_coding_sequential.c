@@ -169,7 +169,7 @@ int main() {
 	sort_freqs(res);
 	struct TreeNode* root = create_huffman_tree(res); 
 	struct LetterEncoding* encodings = get_encoding_from_tree(res, root); 
-	//encode_to_file(text, encodings, res->number_of_letters, count); 
+	encode_to_file(text, encodings, res->number_of_letters, count); 
 
 	int byteArrayFinalSize = 0; 
 	char* encoded_data = encode_to_byte_array(text, encodings, res->number_of_letters, count, &byteArrayFinalSize);

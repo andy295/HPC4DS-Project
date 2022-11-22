@@ -32,9 +32,8 @@ long read_file(const char* fileName, char** fileDest, int processId, int proc_nu
 
 		// quick and dirty solution 
 		// but i don't have a better idea right now
-		if (processId == proc_number - 1 && residual != 0){
+		if (processId == proc_number - 1 && residual != 0)
 			fSize += residual;
-		}
 
 		*fileDest = malloc(fSize + 1); 
 		fread((*fileDest), fSize, 1, fp);

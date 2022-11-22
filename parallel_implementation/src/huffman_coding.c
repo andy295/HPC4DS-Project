@@ -1,38 +1,5 @@
 #include "include/huffman_coding.h"
 
-// int find_encoding(char letter, struct TreeNode* root, char* dst, int depth){
-
-// 	int found = 0;
-// 	if (root->letter == letter){
-// 		dst[depth] = '\0';
-// 		return 1;
-// 	} else {
-
-// 		if (root->leftChild != NULL){
-// 			dst[depth] = '0';
-// 			found = find_encoding(letter, root->leftChild, dst, depth+1);
-// 		}
-
-// 		if (found == 0 && root->rightChild != NULL){
-// 			dst[depth] = '1';
-// 			found = find_encoding(letter, root->rightChild, dst, depth+1);
-// 		}
-// 	}
-
-// 	return found;
-// }
-
-// void get_encoding_from_tree(struct LetterFreqDictionary* allLetters, struct TreeNode* root, struct LetterEncoding* encodings){
-
-// 	for (int i = 0; i < allLetters->number_of_letters; i++){
-
-// 		encodings[i].letter = allLetters->letterFreqs[i].letter;
-// 		encodings[i].encoding = malloc(sizeof(char) * allLetters->number_of_letters);
-
-// 		find_encoding(allLetters->letterFreqs[i].letter, root, encodings[i].encoding, 0);
-// 	}
-// }
-
 // void encode_to_file(char* text, struct LetterEncoding* encodings, int unique_letters, int total_letters){
 
 // 	FILE *fp;
@@ -102,6 +69,38 @@ void freeBuffer(void* buffer) {
 	if (buffer != NULL) {
 		free(buffer);
 	}
+}
+
+void get_encoding_from_tree(CharFreqDictionary* dict, TreeNode* root, CharEncoding* encodings){
+
+	for (int i = 0; i < dict->number_of_chars; i++){
+
+		encodings[i].character = dict->charFreqs[i].character;
+		encodings[i].encoding = malloc(sizeof(char) * dict->number_of_chars);
+
+		find_encoding(dict->charFreqs[i].character, root, encodings[i].encoding, 0);
+	}
+}
+
+bool find_encoding(char character, TreeNode* root, char* dst, int depth) {
+
+	bool found = false;
+	if (root->character == character) {
+		dst[depth] = '\0';
+		return true;
+	} else {
+		if (root->leftChild != NULL) {
+			dst[depth] = '0';
+			found = find_encoding(character, root->leftChild, dst, depth+1);
+		}
+
+		if (found == 0 && root->rightChild != NULL){
+			dst[depth] = '1';
+			found = find_encoding(character, root->rightChild, dst, depth+1);
+		}
+	}
+
+	return found;
 }
 
 int main()
@@ -197,7 +196,12 @@ int main()
 			print_dictionary(&allChars, pid);
 		#endif
 
-		printf("\nProcess %d: i'm here 45\n", pid);
+		// create the Huffman tree
+		TreeNode* root = create_huffman_tree(&acp0);
+
+		// get the encodings for each character
+		CharEncoding* encodings = malloc(sizeof(CharEncoding) * acp0.number_of_chars);
+		get_encoding_from_tree(&acp0, root, encodings);
 	}
 
 	freeBuffer(msgDictSnd.characters);
@@ -206,13 +210,6 @@ int main()
 	MPI_Type_free(&dictType);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// 	// create the Huffman tree
-	// 	struct TreeNode* root = create_huffman_tree(allLetters);
-
-	// 	// get the encodings for each letter
-	// 	struct LetterEncoding* encodings = malloc(sizeof(struct LetterEncoding) * allLetters->number_of_letters);
-	// 	get_encoding_from_tree(allLetters, root, encodings);
 
 	// 	// send encoding table to all processes
 	// 	for (int i = 1; i < NUM_OF_PROCESSES; i++) {
@@ -274,6 +271,7 @@ int main()
 	// printf("\n");
 
 	freeBuffer(allChars.charFreqs);
+
 	freeBuffer(text);
 
 	MPI_Finalize();

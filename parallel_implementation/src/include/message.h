@@ -1,3 +1,5 @@
+#pragma once
+
 #include "global_constants.h"
 
 #include "char_freq.h"
@@ -22,7 +24,7 @@ enum MessageSize {
 typedef struct MsgHeader
 {
     int id; // messaget type
-    int size; // number of variable in message, header included
+    int size; // number of message's variables, header included
 } MsgHeader;
 
 typedef struct MsgGeneric
@@ -43,5 +45,5 @@ extern void initMsgDictionary(MsgHeader *header);
 extern void setMsg(void* dict, MsgGeneric* msg, MPI_Datatype *msgType);
 extern void getMsg(void* dict, MsgGeneric* msg);
 
-extern void buildMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDictionary, MPI_Datatype *msgType);
-extern void mergeCharFreqs(CharFreqDictionary*  dict, MsgDictionary* msg);
+void buildMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDictionary, MPI_Datatype *msgType);
+void mergeCharFreqs(CharFreqDictionary*  dict, MsgDictionary* msg);
