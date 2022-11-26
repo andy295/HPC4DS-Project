@@ -1,15 +1,20 @@
-Process 2 is sending 40 characters to master process
+process 3 has read 648 characters
+
 Process 3 is sending 40 characters to master process
-num of processes: 4
+process 2 has read 646 characters
+
+Process 2 is sending 40 characters to master process
+Process 2 sent 40 characters to master process
+process 1 has read 646 characters
+
+Process 1 is sending 42 characters to master process
+process 0 has read 646 characters
+
+num of processes: 4////////////////////////////////////////////////////
+
+
 Process dest 0 - process send 1: i'm here 0
 
 Process dest 0 - process send 1: i'm here 1
-Process 1 is sending 42 characters to master process
-
-===================================================================================
-=   BAD TERMINATION OF ONE OF YOUR APPLICATION PROCESSES
-=   PID 94888 RUNNING AT hpc-c06-node01.unitn.it
-=   EXIT CODE: 139
-=   CLEANING UP REMAINING PROCESSES
-=   YOU CAN IGNORE THE BELOW CLEANUP MESSAGES
-===================================================================================
+Process 1 sent 42 characters to master process
+Process 3 sent 40 characters to master process

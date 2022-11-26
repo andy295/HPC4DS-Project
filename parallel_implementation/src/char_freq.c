@@ -36,14 +36,12 @@ void print_dictionary(CharFreqDictionary* dict, int pid) {
 	int i;
 
 	int total_characters = 0;
-	bool title = true;
+	#if VERBOSE <= 2
+		printf("dictionary: \n");
+	#endif
 	for (i = 0; i < dict->number_of_chars; i++) {
 		
 		#if VERBOSE <= 2
-			if (title) {
-				printf("dictionary: \n");
-				title = false;
-			}
 
 			switch (dict->charFreqs[i].character)
 			{

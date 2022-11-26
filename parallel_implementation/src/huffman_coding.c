@@ -144,8 +144,11 @@ int main()
 
 	} else {
 		// master process receives all the slaves processes
-		printf("num of processes: %d", proc_number);
+		printf("num of processes: %d\n", proc_number);
 	 	for (i = 1; i < proc_number; i++) {
+
+			printf("////////////////////////////////////////////////////\n\n");
+
 			printf("\nProcess dest %d - process send %d: i'm here 0\n", pid, i);
 
 			MPI_Status status;
@@ -174,38 +177,38 @@ int main()
 	// not the most elegant solution for distinguish 
 	// between the processes, but it works
 	// we will modify it later
-	if (pid == 0) {
-		#ifdef VERBOSE <= 3
-			printf("Before sorting:\n");
-			print_dictionary(&allChars, pid);
-		#endif
+	// if (pid == 0) {
+	// 	#if VERBOSE <= 3
+	// 		printf("Before sorting:\n");
+	// 		print_dictionary(&allChars, pid);
+	// 	#endif
 
-		// sort the LetterFreqDictionary only in the master process
-		sort_freqs(&allChars);
+	// 	// sort the LetterFreqDictionary only in the master process
+	// 	sort_freqs(&allChars);
 
-		#ifdef VERBOSE <= 3
-			printf("After sorting:\n");
-			print_dictionary(&allChars, pid);
-		#endif
+	// 	#if VERBOSE <= 3
+	// 		printf("After sorting:\n");
+	// 		print_dictionary(&allChars, pid);
+	// 	#endif
 
-		// append the sync character to the LetterFreqDictionary
-		append_to_freq(&allChars, '\0', FIRST);
+	// 	// append the sync character to the LetterFreqDictionary
+	// 	append_to_freq(&allChars, '\0', FIRST);
 
-		#ifdef VERBOSE <= 3
-			printf("After appending:\n");
-			print_dictionary(&allChars, pid);
-		#endif
+	// 	#if VERBOSE <= 3
+	// 		printf("After appending:\n");
+	// 		print_dictionary(&allChars, pid);
+	// 	#endif
 
-		// create the Huffman tree
-		TreeNode* root = create_huffman_tree(&acp0);
+	// 	// // create the Huffman tree
+	// 	// TreeNode* root = create_huffman_tree(&acp0);
 
-		// get the encodings for each character
-		CharEncoding* encodings = malloc(sizeof(CharEncoding) * acp0.number_of_chars);
-		get_encoding_from_tree(&acp0, root, encodings);
-	}
+	// 	// // get the encodings for each character
+	// 	// CharEncoding* encodings = malloc(sizeof(CharEncoding) * acp0.number_of_chars);
+	// 	// get_encoding_from_tree(&acp0, root, encodings);
+	// }
 
-	freeBuffer(msgDictSnd.characters);
-	freeBuffer(msgDictSnd.frequencies);
+	// freeBuffer(msgDictSnd.characters);
+	// freeBuffer(msgDictSnd.frequencies);
 
 	MPI_Type_free(&dictType);
 
