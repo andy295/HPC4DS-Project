@@ -6,7 +6,7 @@ void copy_char_Freq(CharFreq *dest, CharFreq *src) {
 }
 
 // maybe we could improve the function by using the multythrading for loop
-void get_chars_freqs(CharFreqDictionary* dict, char text[], int len, int pid) {
+void getCharFreqsFromText(CharFreqDictionary* dict, char text[], int len, int pid) {
 	int i, j;
 	for (i = 0; i < len; i++) {
 		char character = text[i]; 
@@ -28,23 +28,16 @@ void get_chars_freqs(CharFreqDictionary* dict, char text[], int len, int pid) {
 			*p = (struct CharFreq) {.character = character, .frequency = 1};
 		}
 	}
-
-	print_dictionary(dict, pid);
 }
 
-void print_dictionary(CharFreqDictionary* dict, int pid) {
+void printCharFreqs(CharFreqDictionary* dict) {
 	int i;
 
 	int total_characters = 0;
-	bool title = true;
+	printf("Dictionary: \n");
 	for (i = 0; i < dict->number_of_chars; i++) {
 		
-		#if VERBOSE <= 2
-			if (title) {
-				printf("dictionary: \n");
-				title = false;
-			}
-
+		#if VERBOSE <= 3
 			switch (dict->charFreqs[i].character)
 			{
 			case '\n':
@@ -73,13 +66,6 @@ void print_dictionary(CharFreqDictionary* dict, int pid) {
 
 		total_characters += dict->charFreqs[i].frequency;
 	}
-
-	printf("process %d has read %d characters\n\n", pid, total_characters);
-}
-
-void init_char_freq_dictionary(CharFreqDictionary* dict, int size) {
-	dict->charFreqs = malloc(sizeof(CharFreq) * size); 
-	dict->number_of_chars = 0; 
 }
 
 // use a special character to indicate the end of the file
@@ -102,6 +88,25 @@ void append_to_freq(CharFreqDictionary* dict, char character, int pos) {
 		dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * (dict->number_of_chars + 1));
 		dict->charFreqs[dict->number_of_chars] = (struct CharFreq) {.character = character, .frequency = frequency};
 		++dict->number_of_chars;
+	}
+}
+
+void merge_char_freqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size) {
+	int i, j;
+	for (i = 0; i < size; i++) {
+		char character = charFreqs[i].character;
+		int frequency = charFreqs[i].frequency;
+		bool assigned = false;
+		for (j = 0; j < dict->number_of_chars && !assigned; j++) {
+			if (dict->charFreqs[j].character == character) {
+				dict->charFreqs[j].frequency += frequency;
+				assigned = true;
+			}
+		}
+
+		if (!assigned) {
+			append_to_freq(dict, character, LAST);
+		}
 	}
 }
 

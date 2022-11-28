@@ -34,10 +34,16 @@ void initMsgHeader(MsgHeader* header, int id, int size);
 extern void initMsgDictionary(MsgDictionary* msg);
 
 extern void setMsg(void* dict, MsgGeneric* msg);
-extern void getMsg(void* dict, MsgGeneric* msg);
+// extern void getMsg(void* dict, MsgGeneric* msg);
+
+extern void getCharFreqDicFromMsgDict(CharFreqDictionary* dict, MsgDictionary* msgDict);
+extern void getMsgDictFromByteBuffer(MsgDictionary* msgRcv, BYTE *buffer);
 
 void buildMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict);
 
 // one of them must be removed
 void mergeCharFreqs(CharFreqDictionary*  dict, MsgDictionary* msgDict);
-void getMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict);
+
+void printMessageHeader(MsgDictionary* msg); 
+
+BYTE* createMessageBufferFromDict(MsgDictionary* msg, int bufferSize);

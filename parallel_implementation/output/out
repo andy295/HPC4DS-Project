@@ -1,20 +1,144 @@
-process 3 has read 648 characters
 
-Process 3 is sending 40 characters to master process
-process 2 has read 646 characters
+Process 0: buffer size: 360
+Process 0: msgDictRcv->header.id: 1
+Process 0: msgDictRcv->header.size: 360
+Process 0: msgDictRcv->charsNr: 42
+Process 0: msgDictRcv->charFreqs: 0xe31710
+Dictionary: 
+	character: S	frequence: 2
+	character: e	frequence: 59
+	character: v	frequence: 3
+	character: r	frequence: 41
+	character: a	frequence: 36
+	character: l	frequence: 18
+	character: space	frequence: 89
+	character: y	frequence: 17
+	character: s	frequence: 26
+	character: g	frequence: 13
+	character: o	frequence: 40
+	character: \n	frequence: 35
+	character: I	frequence: 3
+	character: n	frequence: 40
+	character: f	frequence: 10
+	character: i	frequence: 32
+	character: t	frequence: 35
+	character: w	frequence: 9
+	character: F	frequence: 1
+	character: m	frequence: 13
+	character: h	frequence: 15
+	character: C	frequence: 1
+	character: u	frequence: 17
+	character: T	frequence: 3
+	character: c	frequence: 20
+	character: A	frequence: 9
+	character: B	frequence: 1
+	character: d	frequence: 22
+	character: b	frequence: 10
+	character: k	frequence: 2
+	character: p	frequence: 8
+	character: G	frequence: 1
+	character: L	frequence: 2
+	character: '	frequence: 3
+	character: J	frequence: 1
+	character: M	frequence: 2
+	character: W	frequence: 1
+	character: O	frequence: 2
+	character: D	frequence: 2
+	character: q	frequence: 1
+	character: H	frequence: 1
 
-Process 2 is sending 40 characters to master process
-Process 2 sent 40 characters to master process
-process 1 has read 646 characters
+Process 0: buffer size: 344
+Process 0: msgDictRcv->header.id: 1
+Process 0: msgDictRcv->header.size: 344
+Process 0: msgDictRcv->charsNr: 40
+Process 0: msgDictRcv->charFreqs: 0xe31880
+Dictionary: 
+	character: S	frequence: 2
+	character: e	frequence: 59
+	character: v	frequence: 3
+	character: r	frequence: 41
+	character: a	frequence: 36
+	character: l	frequence: 18
+	character: space	frequence: 89
+	character: y	frequence: 17
+	character: s	frequence: 26
+	character: g	frequence: 13
+	character: o	frequence: 40
+	character: \n	frequence: 35
+	character: I	frequence: 3
+	character: n	frequence: 40
+	character: f	frequence: 10
+	character: i	frequence: 32
+	character: t	frequence: 35
+	character: w	frequence: 9
+	character: F	frequence: 1
+	character: m	frequence: 13
+	character: h	frequence: 15
+	character: C	frequence: 1
+	character: u	frequence: 17
+	character: T	frequence: 3
+	character: c	frequence: 20
+	character: A	frequence: 9
+	character: B	frequence: 1
+	character: d	frequence: 22
+	character: b	frequence: 10
+	character: k	frequence: 2
+	character: p	frequence: 8
+	character: G	frequence: 1
+	character: L	frequence: 2
+	character: '	frequence: 3
+	character: J	frequence: 1
+	character: M	frequence: 2
+	character: W	frequence: 1
+	character: O	frequence: 2
+	character: D	frequence: 2
+	character: q	frequence: 1
+	character: H	frequence: 1
 
-Process 1 is sending 42 characters to master process
-process 0 has read 646 characters
-
-num of processes: 4////////////////////////////////////////////////////
-
-
-Process dest 0 - process send 1: i'm here 0
-
-Process dest 0 - process send 1: i'm here 1
-Process 1 sent 42 characters to master process
-Process 3 sent 40 characters to master process
+Process 0: buffer size: 344
+Process 0: msgDictRcv->header.id: 1
+Process 0: msgDictRcv->header.size: 344
+Process 0: msgDictRcv->charsNr: 40
+Process 0: msgDictRcv->charFreqs: 0xe315b0
+Dictionary: 
+	character: S	frequence: 2
+	character: e	frequence: 59
+	character: v	frequence: 3
+	character: r	frequence: 41
+	character: a	frequence: 36
+	character: l	frequence: 18
+	character: space	frequence: 89
+	character: y	frequence: 17
+	character: s	frequence: 26
+	character: g	frequence: 13
+	character: o	frequence: 40
+	character: \n	frequence: 35
+	character: I	frequence: 3
+	character: n	frequence: 40
+	character: f	frequence: 10
+	character: i	frequence: 32
+	character: t	frequence: 35
+	character: w	frequence: 9
+	character: F	frequence: 1
+	character: m	frequence: 13
+	character: h	frequence: 15
+	character: C	frequence: 1
+	character: u	frequence: 17
+	character: T	frequence: 3
+	character: c	frequence: 20
+	character: A	frequence: 9
+	character: B	frequence: 1
+	character: d	frequence: 22
+	character: b	frequence: 10
+	character: k	frequence: 2
+	character: p	frequence: 8
+	character: G	frequence: 1
+	character: L	frequence: 2
+	character: '	frequence: 3
+	character: J	frequence: 1
+	character: M	frequence: 2
+	character: W	frequence: 1
+	character: O	frequence: 2
+	character: D	frequence: 2
+	character: q	frequence: 1
+	character: H	frequence: 1
