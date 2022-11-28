@@ -66,14 +66,14 @@
 // }
 
 void freeBuffer(void* buffer) {
-	if (buffer != NULL) {
+	if (buffer != NULL)
 		free(buffer);
-	}
 }
 
 void get_encoding_from_tree(CharFreqDictionary* dict, TreeNode* root, CharEncoding* encodings){
+	int i;
 
-	for (int i = 0; i < dict->number_of_chars; i++){
+	for (i = 0; i < dict->number_of_chars; i++){
 
 		encodings[i].character = dict->charFreqs[i].character;
 		encodings[i].encoding = malloc(sizeof(char) * dict->number_of_chars);
@@ -109,67 +109,185 @@ int main()
 
 	int proc_number;
 	int pid; 
+	int i, j;
 
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
-
-	int i;
 
 	// get the processes' portion of text
 	char *text = NULL;
 	long total_text_length = read_file(SRC_FILE, &text, pid, proc_number);
 
+	if (VERBOSE <= 1)
+		printf("process %d: total_text_length: \t%ld\n", pid, total_text_length);
+
 	// get characters frequencies for the processes' portion of text
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	get_chars_freqs(&allChars, text, total_text_length, pid);
 
-	MPI_Datatype dictType;
-	MsgDictionary msgDictSnd;
-	MsgDictionary msgDictRcv;
-
-	initMsgDictionary(&msgDictSnd.header);
-	setMsg(&allChars, (MsgGeneric*)&msgDictSnd, &dictType);
-
-	// print the msg dictionary
-	// printf("Process %d: %d\t%d\t%c\t%d\n", pid, msgDictSnd->header.id, msgDictSnd->header.size, msgDictSnd->characters[msgDictSnd->charsNr-1], msgDictSnd->frequencies[msgDictSnd->charsNr-1]);
-
 	if (pid != 0) {
+
 		// send CharFreqDictionary to master process
+		MsgDictionary msgDictSnd;
+		initMsgDictionary(&msgDictSnd);
+		setMsg(&allChars, (MsgGeneric*)&msgDictSnd);
+
+		if (VERBOSE <= 2) {
+			// print some data about the msg dictionary
+			printf("/////////////// allChars ////////////////n\n");
+
+			printf("process %d: allChars.number_of_chars: \t%d\n", pid, allChars.number_of_chars);
+
+			printf("///////////// end allChars /////////////\n\n");
+
+			printf("////////////// msgDictSnd ///////////////n\n");
+
+			printf("process %d: msgDictSnd.header.id: \t%d\n", pid, msgDictSnd.header.id);
+			printf("process %d: msgDictSnd.header.size: \t%d\n", pid, msgDictSnd.header.size);
+			printf("process %d: msgDictSnd.charsNr: \t%d\n", pid, msgDictSnd.charsNr);
+
+			printf("//////////// end msgDictSnd ////////////\n\n");
+		}
+
+		// serialize the message
+		int bufferSize = sizeof (MsgDictionary) + sizeof(CharFreq) * msgDictSnd.charsNr;
+        if (bufferSize == msgDictSnd.header.size)
+			printf("process %d: same size %d\n", pid, bufferSize);
+		else {
+			printf("process %d: error: bufferSize %d != msgDictSnd.header.size %d\n", pid, bufferSize, msgDictSnd.header.size);
+			return 1;
+		}
+
+		BYTE *buffer = malloc(sizeof(BYTE) * bufferSize);
+        memcpy(buffer, &msgDictSnd.header, sizeof(MsgHeader));
+        memcpy(buffer + sizeof(MsgHeader), &msgDictSnd.charsNr, sizeof(int));
+        memcpy(buffer + sizeof(MsgHeader) + sizeof(int), msgDictSnd.charFreqs, sizeof(CharFreq) * msgDictSnd.charsNr);
+
+		// // deserialize the message
+		// BYTE *buffer2 = malloc(sizeof(BYTE) * bufferSize);
+        // memcpy(buffer2, buffer, sizeof(BYTE) * bufferSize);
+
+		// MsgDictionary msgRcv;
+		// initMsgDictionary(&msgRcv);
+
+ 		// // copy the data from the buffer to the message
+        // memcpy(&msgRcv.header, buffer2, sizeof(MsgHeader));
+        // memcpy(&msgRcv.charsNr, buffer2 + sizeof(MsgHeader), sizeof(int));
+
+        // msgRcv.charFreqs = malloc(sizeof(CharFreq) * msgRcv.charsNr);
+        // memcpy(msgRcv.charFreqs, buffer2 + sizeof(MsgHeader) + sizeof(int), sizeof(CharFreq) * msgRcv.charsNr);
+
+		// printf("Process %d: msgDictRcv->header.id: %d\n", pid, msgRcv.header.id);
+		// printf("Process %d: msgDictRcv->header.size: %d\n", pid, msgRcv.header.size);
+		// printf("Process %d: msgDictRcv->charsNr: %d\n", pid, msgRcv.charsNr);
+		// printf("Process %d: msgDictRcv->charFreqs: %p\n", pid, msgRcv.charFreqs);
 
 		// maybe we could use the send version that uses the mpi buffer 
-		// in this way we can empty the msgDict without risks 
+		// in this way we can empty the msgDict.charFreqs without risks
 		printf("Process %d is sending %d characters to master process\n", pid, msgDictSnd.charsNr);
-		MPI_Send(&msgDictSnd, 1, dictType, 0, 0, MPI_COMM_WORLD);
+		MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
 		printf("Process %d sent %d characters to master process\n", pid, msgDictSnd.charsNr);
 
+		freeBuffer(buffer);
+		freeBuffer(msgDictSnd.charFreqs);
 	} else {
-		// master process receives all the slaves processes
-		printf("num of processes: %d\n", proc_number);
+		// master process receives data from all the slaves processes
 	 	for (i = 1; i < proc_number; i++) {
+			printf("////////////////////////////////////////////////////\n");
 
-			printf("////////////////////////////////////////////////////\n\n");
-
-			printf("\nProcess dest %d - process send %d: i'm here 0\n", pid, i);
-
+			int bufferSize;
+			MsgGeneric *msgTmp;
+			BYTE *buffer;
 			MPI_Status status;
 
-			printf("\nProcess dest %d - process send %d: i'm here 1\n", pid, i);
+			// probe for an incoming message from process zero
+			MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
 
-			// Now receive the message with the allocated buffer
-			MPI_Recv(&msgDictRcv, 1, dictType, i, 0, MPI_COMM_WORLD, &status);
+			// when probe returns, the status object has the size and other
+		    // attributes of the incoming message
+			// get the message size
+		    MPI_Get_count(&status, MPI_BYTE, &bufferSize);
 
-			printf("\nProcess dest %d - process send %d: i'm here 2\n", pid, i);
+			printf("\nProcess %d: buffer size: %d\n", pid, bufferSize);
 
-			getMsg(&allChars, (MsgGeneric*) &msgDictRcv);
-
-			printf("Process %d: %d, passed\n", pid, allChars.number_of_chars);
-
-			freeBuffer(msgDictRcv.characters);
-			freeBuffer(msgDictRcv.frequencies);
-
-			freeBuffer(msgDictSnd.characters);
-			freeBuffer(msgDictSnd.frequencies);
+			// allocate a buffer to hold the incoming numbers
+    		buffer = malloc(sizeof(BYTE) * bufferSize);
 			
+			// now receive the message with the allocated buffer
+			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
+
+			printf("Process %d: data received.\n", pid);
+
+			// get the message header
+			// msgTmp = (MsgGeneric*) buffer;
+
+			// if (VERBOSE <= 2) {
+			// 	printf("Process %d: msgRcv->header.id: %d\n", pid, msgTmp->header.id);
+			// 	printf("Process %d: msgRcv->header.size: %d\n", pid, msgTmp->header.size);
+			// }
+
+			// deserialize the message
+			MsgDictionary msgRcv;
+			initMsgDictionary(&msgRcv);
+
+			// copy the data from the buffer to the message
+			memcpy(&msgRcv.header, buffer, sizeof(MsgHeader));
+			memcpy(&msgRcv.charsNr, buffer + sizeof(MsgHeader), sizeof(int));
+
+			msgRcv.charFreqs = malloc(sizeof(CharFreq) * msgRcv.charsNr);
+			memcpy(msgRcv.charFreqs, buffer + sizeof(MsgHeader) + sizeof(int), sizeof(CharFreq) * msgRcv.charsNr);
+
+			printf("Process %d: msgDictRcv->header.id: %d\n", pid, msgRcv.header.id);
+			printf("Process %d: msgDictRcv->header.size: %d\n", pid, msgRcv.header.size);
+			printf("Process %d: msgDictRcv->charsNr: %d\n", pid, msgRcv.charsNr);
+			printf("Process %d: msgDictRcv->charFreqs: %p\n", pid, msgRcv.charFreqs);
+
+			for (j = 0; j < msgRcv.charsNr; j++)
+				printf("Process %d: msgRcv.charFreqs[%d]:\tchar: %c\tfreq: %d\n",
+					pid,
+					j,	
+					msgRcv.charFreqs[j].character,
+					msgRcv.charFreqs[j].frequency);
+
+			//////////////////////////////////////////////////////////////////////////
+
+			// CharFreqDictionary tmpAllChars = {.number_of_chars = 0, .charFreqs = NULL};
+			// getMsg(&tmpAllChars, (MsgGeneric*)buffer);
+
+			// MsgDictionary* tmpMsg = (MsgDictionary*) buffer;
+
+			// printf("////////////// tmpAllChars //////////////\n\n");
+
+			// printf("process %d: tmpAllChars.number_of_chars: \t%d\n", pid, tmpAllChars.number_of_chars);
+
+			// printf("//////////// end tmpAllChars ////////////\n\n");
+
+			// printf("/////////////// tmpMsg ///////////////\n\n");
+
+			// printf("process %d: tmpMsg.header.id: \t%d\n", pid, tmpMsg->header.id);
+			// printf("process %d: tmpMsg.header.size: \t%d\n", pid, tmpMsg->header.size);
+			// printf("process %d: tmpMsg.charsNr: \t%d\n", pid, tmpMsg->charsNr);
+
+			// printf("///////////// end tmpMsg /////////////\n\n");
+
+			//////////////////////////////////////////////////////////////////////////////////////////////////
+
+			// CharFreq *tmp = (CharFreq*)buffer;
+
+			// for (i = 0; i < 10; i++)
+			// 	printf("charFreqs[%d]\tchar: %c\tfreq:%d\n", i, tmp[i].character, tmp[i].frequency);
+
+			// MsgDictionary *test = (MsgDictionary*) buffer;
+
+			// printf("Process %d: test->header.id: %d\n", pid, test->header.id);
+			// printf("Process %d: test->header.size: %d\n", pid, test->header.size);
+			// printf("Process %d: test->charsNr: %d\n", pid, test->charsNr);
+			// printf("Process %d: test->charFreqs: %p\n", pid, test->charFreqs);
+
+			// printf("Process %d: test->charFreqs[0]: \tchar: %c\tfreq:%d\n", pid, test->charFreqs[0].character, test->charFreqs[0].frequency);
+
+			freeBuffer(buffer);
+
 			printf("////////////////////////////////////////////////////\n\n");
 		}
 	}
@@ -206,11 +324,6 @@ int main()
 	// 	// CharEncoding* encodings = malloc(sizeof(CharEncoding) * acp0.number_of_chars);
 	// 	// get_encoding_from_tree(&acp0, root, encodings);
 	// }
-
-	// freeBuffer(msgDictSnd.characters);
-	// freeBuffer(msgDictSnd.frequencies);
-
-	MPI_Type_free(&dictType);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -274,7 +387,6 @@ int main()
 	// printf("\n");
 
 	freeBuffer(allChars.charFreqs);
-
 	freeBuffer(text);
 
 	MPI_Finalize();

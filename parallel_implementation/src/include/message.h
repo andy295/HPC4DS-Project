@@ -12,19 +12,10 @@ enum Messages {
     // not used
 };
 
-enum MessageSize {
-    ZERO = 0,
-    ONE = 1,
-    TWO = 2,
-    THREE = 3,
-    FOUR = 4,
-    FIVE = 5
-};
-
 typedef struct MsgHeader
 {
     int id; // messaget type
-    int size; // number of message's variables, header included
+    int size; // size of the message in bytes
 } MsgHeader;
 
 typedef struct MsgGeneric
@@ -36,14 +27,17 @@ typedef struct MsgDictionary
 {
     MsgHeader header;
     int charsNr;
-    char *characters;
-    int *frequencies;
+    CharFreq *charFreqs;
 } MsgDictionary;
 
-extern void initMsgDictionary(MsgHeader *header);
+void initMsgHeader(MsgHeader* header, int id, int size);
+extern void initMsgDictionary(MsgDictionary* msg);
 
-extern void setMsg(void* dict, MsgGeneric* msg, MPI_Datatype *msgType);
+extern void setMsg(void* dict, MsgGeneric* msg);
 extern void getMsg(void* dict, MsgGeneric* msg);
 
-void buildMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDictionary, MPI_Datatype *msgType);
-void mergeCharFreqs(CharFreqDictionary*  dict, MsgDictionary* msg);
+void buildMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict);
+
+// one of them must be removed
+void mergeCharFreqs(CharFreqDictionary*  dict, MsgDictionary* msgDict);
+void getMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict);

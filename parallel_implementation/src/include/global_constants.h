@@ -16,3 +16,5 @@
 // just for testing, we should identify a better value
 // max number of elements in the dictionary
 #define MAX_MSG_LEN 50
+
+typedef unsigned char BYTE;
