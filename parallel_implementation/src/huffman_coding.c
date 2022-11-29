@@ -120,19 +120,17 @@ int main() {
 
 	if (pid != 0) {
 		// send CharFreqDictionary to master process
-		MsgDictionary msgDictSnd;
-		initMsgDictionary(&msgDictSnd);
-		setMsg(&allChars, (MsgGeneric*)&msgDictSnd);
+		MsgDictionary* msgDictSnd = createMsgDictionaryFromFreqs(&allChars);
 		// printMessageHeader(&msgDictSnd);
 		// serialize the message
-		int bufferSize = sizeof (MsgDictionary) + sizeof(CharFreq) * msgDictSnd.charsNr;
-		BYTE *buffer = createMessageBufferFromDict(&msgDictSnd, bufferSize);
+		int bufferSize = sizeof (MsgDictionary) + sizeof(CharFreq) * msgDictSnd->charsNr;
+		BYTE *buffer = createMessageBufferFromDict(msgDictSnd, bufferSize);
 		// maybe we could use the send version that uses the mpi buffer 
 		// in this way we can empty the msgDict.charFreqs without risks
 		MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
 
 		freeBuffer(buffer);
-		freeBuffer(msgDictSnd.charFreqs);
+		freeBuffer(msgDictSnd->charFreqs);
 	} else {
 		// master process receives data from all the slaves processes
 	 	for (int i = 1; i < proc_number; i++) {
@@ -154,7 +152,7 @@ int main() {
 
 			// deserialize the message
 			MsgDictionary msgRcv;
-			getMsgDictFromByteBuffer(&msgRcv, buffer); 
+			createMsgDictFromByteBuffer(&msgRcv, buffer); 
 			// printMessageHeader(&msgRcv);
 			// add the received charFreqs to the dictionary
 			mergeCharFreqs(&allChars, msgRcv.charFreqs, msgRcv.charsNr);
