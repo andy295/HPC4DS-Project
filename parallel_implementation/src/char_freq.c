@@ -91,7 +91,7 @@ void append_to_freq(CharFreqDictionary* dict, char character, int pos) {
 	}
 }
 
-void merge_char_freqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size) {
+void mergeCharFreqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size) {
 	int i, j;
 	for (i = 0; i < size; i++) {
 		char character = charFreqs[i].character;
@@ -110,7 +110,7 @@ void merge_char_freqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size) {
 	}
 }
 
-void sort_freqs(CharFreqDictionary* res) {
+void sortFreqs(CharFreqDictionary* res) {
 	int i, j;
 
 	for (i = 0; i < res->number_of_chars; i++) {

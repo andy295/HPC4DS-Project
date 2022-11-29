@@ -119,14 +119,11 @@ int main() {
 	getCharFreqsFromText(&allChars, text, total_text_length, pid);
 
 	if (pid != 0) {
-
 		// send CharFreqDictionary to master process
 		MsgDictionary msgDictSnd;
 		initMsgDictionary(&msgDictSnd);
 		setMsg(&allChars, (MsgGeneric*)&msgDictSnd);
-
 		// printMessageHeader(&msgDictSnd);
-
 		// serialize the message
 		int bufferSize = sizeof (MsgDictionary) + sizeof(CharFreq) * msgDictSnd.charsNr;
 		BYTE *buffer = createMessageBufferFromDict(&msgDictSnd, bufferSize);
@@ -140,7 +137,6 @@ int main() {
 		// master process receives data from all the slaves processes
 	 	for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
-
 			// probe for an incoming message from process zero
 			MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
 
@@ -157,98 +153,20 @@ int main() {
 			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
 
 			// deserialize the message
-			// TODO: untested
 			MsgDictionary msgRcv;
 			getMsgDictFromByteBuffer(&msgRcv, buffer); 
-			printMessageHeader(&msgRcv);
-
+			// printMessageHeader(&msgRcv);
 			// add the received charFreqs to the dictionary
-			// mergeCharFreqs(&allChars, msgRcv.charFreqs, msgRcv.charsNr);
-
-			printCharFreqs(&allChars);
-
-			// for (j = 0; j < msgRcv.charsNr; j++)
-			// 	printf("Process %d: msgRcv.charFreqs[%d]:\tchar: %c\tfreq: %d\n",
-			// 		pid,
-			// 		j,	
-			// 		msgRcv.charFreqs[j].character,
-			// 		msgRcv.charFreqs[j].frequency);
-
-			//////////////////////////////////////////////////////////////////////////
-
-			// CharFreqDictionary tmpAllChars = {.number_of_chars = 0, .charFreqs = NULL};
-			// getMsg(&tmpAllChars, (MsgGeneric*)buffer);
-
-			// MsgDictionary* tmpMsg = (MsgDictionary*) buffer;
-
-			// printf("////////////// tmpAllChars //////////////\n\n");
-
-			// printf("process %d: tmpAllChars.number_of_chars: \t%d\n", pid, tmpAllChars.number_of_chars);
-
-			// printf("//////////// end tmpAllChars ////////////\n\n");
-
-			// printf("/////////////// tmpMsg ///////////////\n\n");
-
-			// printf("process %d: tmpMsg.header.id: \t%d\n", pid, tmpMsg->header.id);
-			// printf("process %d: tmpMsg.header.size: \t%d\n", pid, tmpMsg->header.size);
-			// printf("process %d: tmpMsg.charsNr: \t%d\n", pid, tmpMsg->charsNr);
-
-			// printf("///////////// end tmpMsg /////////////\n\n");
-
-			//////////////////////////////////////////////////////////////////////////////////////////////////
-
-			// CharFreq *tmp = (CharFreq*)buffer;
-
-			// for (i = 0; i < 10; i++)
-			// 	printf("charFreqs[%d]\tchar: %c\tfreq:%d\n", i, tmp[i].character, tmp[i].frequency);
-
-			// MsgDictionary *test = (MsgDictionary*) buffer;
-
-			// printf("Process %d: test->header.id: %d\n", pid, test->header.id);
-			// printf("Process %d: test->header.size: %d\n", pid, test->header.size);
-			// printf("Process %d: test->charsNr: %d\n", pid, test->charsNr);
-			// printf("Process %d: test->charFreqs: %p\n", pid, test->charFreqs);
-
-			// printf("Process %d: test->charFreqs[0]: \tchar: %c\tfreq:%d\n", pid, test->charFreqs[0].character, test->charFreqs[0].frequency);
+			mergeCharFreqs(&allChars, msgRcv.charFreqs, msgRcv.charsNr);
+			sortFreqs(&allChars);
 
 			freeBuffer(buffer);
+			freeBuffer(msgRcv.charFreqs);
 		}
+
+		printCharFreqs(&allChars);
+
 	}
-
-	// not the most elegant solution for distinguish 
-	// between the processes, but it works
-	// we will modify it later
-	// if (pid == 0) {
-	// 	#if VERBOSE <= 3
-	// 		printf("Before sorting:\n");
-	// 		print_dictionary(&allChars, pid);
-	// 	#endif
-
-	// 	// sort the LetterFreqDictionary only in the master process
-	// 	sort_freqs(&allChars);
-
-	// 	#if VERBOSE <= 3
-	// 		printf("After sorting:\n");
-	// 		print_dictionary(&allChars, pid);
-	// 	#endif
-
-	// 	// append the sync character to the LetterFreqDictionary
-	// 	append_to_freq(&allChars, '\0', FIRST);
-
-	// 	#if VERBOSE <= 3
-	// 		printf("After appending:\n");
-	// 		print_dictionary(&allChars, pid);
-	// 	#endif
-
-	// 	// // create the Huffman tree
-	// 	// TreeNode* root = create_huffman_tree(&acp0);
-
-	// 	// // get the encodings for each character
-	// 	// CharEncoding* encodings = malloc(sizeof(CharEncoding) * acp0.number_of_chars);
-	// 	// get_encoding_from_tree(&acp0, root, encodings);
-	// }
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// 	// send encoding table to all processes
 	// 	for (int i = 1; i < NUM_OF_PROCESSES; i++) {

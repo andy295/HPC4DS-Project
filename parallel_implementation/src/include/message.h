@@ -42,7 +42,7 @@ extern void getMsgDictFromByteBuffer(MsgDictionary* msgRcv, BYTE *buffer);
 void buildMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict);
 
 // one of them must be removed
-void mergeCharFreqs(CharFreqDictionary*  dict, MsgDictionary* msgDict);
+// void mergeCharFreqs(CharFreqDictionary*  dict, MsgDictionary* msgDict);
 
 void printMessageHeader(MsgDictionary* msg); 
 

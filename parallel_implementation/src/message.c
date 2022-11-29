@@ -72,7 +72,7 @@ void buildMsgDictionary(CharFreqDictionary* dict, MsgDictionary* msgDict) {
 // 	}
 // }
 
-void mergeCharFreqs(CharFreqDictionary* dict, MsgDictionary* msg) {
+// void mergeCharFreqs(CharFreqDictionary* dict, MsgDictionary* msg) {
 	// int i, j;
 	// for (i = 0; i < msg->charsNr; i++) {
 	// 	bool found = false; 
@@ -92,7 +92,7 @@ void mergeCharFreqs(CharFreqDictionary* dict, MsgDictionary* msg) {
 	// 		p->frequency = msg->frequencies[i];
 	// 	}
 	// }
-}
+// }
 
 void printMessageHeader(MsgDictionary* msg) {
 	#if VERBOSE <= 3
