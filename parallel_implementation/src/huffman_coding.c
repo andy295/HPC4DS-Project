@@ -110,11 +110,9 @@ int main() {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	// get the processes' portion of text
 	char *text = NULL;
 	long total_text_length = read_file(SRC_FILE, &text, pid, proc_number);
 
-	// get characters frequencies for the processes' portion of text
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	getCharFreqsFromText(&allChars, text, total_text_length, pid);
 
@@ -144,26 +142,22 @@ int main() {
 			int bufferSize;
 		    MPI_Get_count(&status, MPI_BYTE, &bufferSize);
 
-			// allocate a buffer to hold the incoming numbers
-    		BYTE *buffer = malloc(sizeof(BYTE) * bufferSize);
-			
 			// now receive the message with the allocated buffer
+    		BYTE *buffer = malloc(sizeof(BYTE) * bufferSize);
 			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
 
 			// deserialize the message
-			MsgDictionary msgRcv;
-			createMsgDictFromByteBuffer(&msgRcv, buffer); 
+			MsgDictionary* msgRcv = createMsgDictFromByteBuffer(buffer); 
 			// printMessageHeader(&msgRcv);
 			// add the received charFreqs to the dictionary
-			mergeCharFreqs(&allChars, msgRcv.charFreqs, msgRcv.charsNr);
-			sortFreqs(&allChars);
+			mergeCharFreqs(&allChars, msgRcv->charFreqs, msgRcv->charsNr);
+			sortCharFreqs(&allChars);
 
 			freeBuffer(buffer);
-			freeBuffer(msgRcv.charFreqs);
+			freeBuffer(msgRcv->charFreqs);
 		}
 
 		printCharFreqs(&allChars);
-
 	}
 
 	// 	// send encoding table to all processes

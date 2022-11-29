@@ -1,10 +1,5 @@
 #include "include/char_freq.h"
 
-void copy_char_Freq(CharFreq *dest, CharFreq *src) {
-	dest->character = src->character;
-	dest->frequency = src->frequency;
-}
-
 // maybe we could improve the function by using the multythrading for loop
 void getCharFreqsFromText(CharFreqDictionary* dict, char text[], int len, int pid) {
 	int i, j;
@@ -68,8 +63,7 @@ void printCharFreqs(CharFreqDictionary* dict) {
 	}
 }
 
-// use a special character to indicate the end of the file
-void append_to_freq(CharFreqDictionary* dict, char character, int pos) {
+void appendToCharFreqs(CharFreqDictionary* dict, char character, int pos) {
 	if (pos == FIRST) {
 		CharFreq *tmp = malloc(dict->number_of_chars * sizeof(CharFreq));
 		memcpy(tmp, dict->charFreqs, dict->number_of_chars * sizeof(CharFreq));
@@ -82,8 +76,7 @@ void append_to_freq(CharFreqDictionary* dict, char character, int pos) {
 
 		dict->charFreqs[0].character = character;
 		dict->charFreqs[0].frequency = 1;
-	}
-	else {
+	} else {
 		int frequency = dict->charFreqs[dict->number_of_chars - 1].frequency + 1;
 		dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * (dict->number_of_chars + 1));
 		dict->charFreqs[dict->number_of_chars] = (struct CharFreq) {.character = character, .frequency = frequency};
@@ -105,12 +98,12 @@ void mergeCharFreqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size) {
 		}
 
 		if (!assigned) {
-			append_to_freq(dict, character, LAST);
+			appendToCharFreqs(dict, character, LAST);
 		}
 	}
 }
 
-void sortFreqs(CharFreqDictionary* res) {
+void sortCharFreqs(CharFreqDictionary* res) {
 	int i, j;
 
 	for (i = 0; i < res->number_of_chars; i++) {

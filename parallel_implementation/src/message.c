@@ -51,7 +51,9 @@ BYTE* createMessageBufferFromDict(MsgDictionary* msgDictSnd, int bufferSize){
 	return buffer;
 }
 
-void createMsgDictFromByteBuffer(MsgDictionary* msgRcv, BYTE *buffer){
+MsgDictionary* createMsgDictFromByteBuffer(BYTE *buffer){
+	MsgDictionary* msgRcv = malloc(sizeof(MsgDictionary));
+
     initMsgHeader(&msgRcv->header, MSG_DICTIONARY, 0);
 	msgRcv->charsNr = 0;
 	msgRcv->charFreqs = NULL;
@@ -62,4 +64,6 @@ void createMsgDictFromByteBuffer(MsgDictionary* msgRcv, BYTE *buffer){
 
 	msgRcv->charFreqs = malloc(sizeof(CharFreq) * msgRcv->charsNr);
 	memcpy(msgRcv->charFreqs, buffer + sizeof(MsgHeader) + sizeof(int), sizeof(CharFreq) * msgRcv->charsNr);
+
+	return msgRcv;
 }

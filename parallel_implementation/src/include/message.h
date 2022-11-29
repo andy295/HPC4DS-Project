@@ -31,7 +31,7 @@ typedef struct MsgDictionary
 } MsgDictionary;
 
 extern MsgDictionary* createMsgDictionaryFromFreqs(CharFreqDictionary* allChars);
-extern void createMsgDictFromByteBuffer(MsgDictionary* msgRcv, BYTE *buffer);
+extern MsgDictionary* createMsgDictFromByteBuffer(BYTE *buffer);
 extern BYTE* createMessageBufferFromDict(MsgDictionary* msg, int bufferSize);
 
 void initMsgHeader(MsgHeader* header, int id, int size);
