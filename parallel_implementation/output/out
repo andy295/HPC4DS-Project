@@ -1,9 +1,7 @@
-
-Process 0: buffer size: 360
-Process 0: msgDictRcv->header.id: 1
-Process 0: msgDictRcv->header.size: 360
-Process 0: msgDictRcv->charsNr: 42
-Process 0: msgDictRcv->charFreqs: 0xe31710
+Message: msg->header.size: 360
+Message: msg->header.id: 1
+Message: msg->charsNr: 42
+Message: msg->charFreqs: 0x1ff95b0
 Dictionary: 
 	character: S	frequence: 2
 	character: e	frequence: 59
@@ -46,12 +44,10 @@ Dictionary:
 	character: D	frequence: 2
 	character: q	frequence: 1
 	character: H	frequence: 1
-
-Process 0: buffer size: 344
-Process 0: msgDictRcv->header.id: 1
-Process 0: msgDictRcv->header.size: 344
-Process 0: msgDictRcv->charsNr: 40
-Process 0: msgDictRcv->charFreqs: 0xe31880
+Message: msg->header.size: 344
+Message: msg->header.id: 1
+Message: msg->charsNr: 40
+Message: msg->charFreqs: 0x1ff9720
 Dictionary: 
 	character: S	frequence: 2
 	character: e	frequence: 59
@@ -94,12 +90,10 @@ Dictionary:
 	character: D	frequence: 2
 	character: q	frequence: 1
 	character: H	frequence: 1
-
-Process 0: buffer size: 344
-Process 0: msgDictRcv->header.id: 1
-Process 0: msgDictRcv->header.size: 344
-Process 0: msgDictRcv->charsNr: 40
-Process 0: msgDictRcv->charFreqs: 0xe315b0
+Message: msg->header.size: 344
+Message: msg->header.id: 1
+Message: msg->charsNr: 40
+Message: msg->charFreqs: 0x1ff9880
 Dictionary: 
 	character: S	frequence: 2
 	character: e	frequence: 59

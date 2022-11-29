@@ -71,9 +71,7 @@ void freeBuffer(void* buffer) {
 }
 
 void get_encoding_from_tree(CharFreqDictionary* dict, TreeNode* root, CharEncoding* encodings){
-	int i;
-
-	for (i = 0; i < dict->number_of_chars; i++){
+	for (int i = 0; i < dict->number_of_chars; i++){
 
 		encodings[i].character = dict->charFreqs[i].character;
 		encodings[i].encoding = malloc(sizeof(char) * dict->number_of_chars);
@@ -108,7 +106,6 @@ int main() {
 
 	int proc_number;
 	int pid; 
-	int i;
 
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
@@ -141,7 +138,7 @@ int main() {
 		freeBuffer(msgDictSnd.charFreqs);
 	} else {
 		// master process receives data from all the slaves processes
-	 	for (i = 1; i < proc_number; i++) {
+	 	for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
 
 			// probe for an incoming message from process zero
