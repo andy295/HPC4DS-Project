@@ -53,6 +53,28 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 	return 0; 
 }
 
+// void encodeToFile(char* text, CharEncoding* encodings, int unique_letters, int total_letters){
+	
+// 	FILE *fp;
+// 	fp = fopen(ENCODED_FILE, "wb");
+
+// 	int charIndex = 0; 
+// 	char c = 0;
+// 	for (int i = 0; i < total_letters; i++) {
+// 		for (int j = 0; j < unique_letters; j++) {
+// 			if (text[i] == encodings[j].letter) {
+// 				append_string_to_binary_file(encodings[j].encoding, fp, &charIndex, &c); 
+// 			}
+// 		}
+// 	}
+
+// 	// appends and writes custom end of file character
+// 	append_string_to_binary_file(encodings[unique_letters-1].encoding, fp, &charIndex, &c); 
+// 	fwrite(&c, sizeof(char), 1, fp);
+
+// 	fclose(fp);
+// }
+
 // void append_string_to_binary_file(char* string, FILE* fp, int* charIndex, char* currentChar) {
 // 	int strlength = strlen(string);
 // 	for (int k = 0; k < strlength; k++) {

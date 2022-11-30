@@ -70,36 +70,36 @@ void freeBuffer(void* buffer) {
 		free(buffer);
 }
 
-void get_encoding_from_tree(CharFreqDictionary* dict, TreeNode* root, CharEncoding* encodings){
-	for (int i = 0; i < dict->number_of_chars; i++){
+// void get_encoding_from_tree(CharFreqDictionary* dict, TreeNode* root, CharEncoding* encodings){
+// 	for (int i = 0; i < dict->number_of_chars; i++){
 
-		encodings[i].character = dict->charFreqs[i].character;
-		encodings[i].encoding = malloc(sizeof(char) * dict->number_of_chars);
+// 		encodings[i].character = dict->charFreqs[i].character;
+// 		encodings[i].encoding = malloc(sizeof(char) * dict->number_of_chars);
 
-		find_encoding(dict->charFreqs[i].character, root, encodings[i].encoding, 0);
-	}
-}
+// 		find_encoding(dict->charFreqs[i].character, root, encodings[i].encoding, 0);
+// 	}
+// }
 
-bool find_encoding(char character, TreeNode* root, char* dst, int depth) {
+// bool find_encoding(char character, TreeNode* root, char* dst, int depth) {
 
-	bool found = false;
-	if (root->character == character) {
-		dst[depth] = '\0';
-		return true;
-	} else {
-		if (root->leftChild != NULL) {
-			dst[depth] = '0';
-			found = find_encoding(character, root->leftChild, dst, depth+1);
-		}
+// 	bool found = false;
+// 	if (root->character == character) {
+// 		dst[depth] = '\0';
+// 		return true;
+// 	} else {
+// 		if (root->leftChild != NULL) {
+// 			dst[depth] = '0';
+// 			found = find_encoding(character, root->leftChild, dst, depth+1);
+// 		}
 
-		if (found == 0 && root->rightChild != NULL){
-			dst[depth] = '1';
-			found = find_encoding(character, root->rightChild, dst, depth+1);
-		}
-	}
+// 		if (found == 0 && root->rightChild != NULL){
+// 			dst[depth] = '1';
+// 			found = find_encoding(character, root->rightChild, dst, depth+1);
+// 		}
+// 	}
 
-	return found;
-}
+// 	return found;
+// }
 
 int main() {
 	MPI_Init(NULL, NULL);
@@ -153,7 +153,12 @@ int main() {
 
 			// LinkedListTreeNodeItem* start = create_linked_list(&allChars);
 			TreeNode* root = createHuffmanTree(&allChars); 
-			printHuffmanTree(root, 0);
+			// printHuffmanTree(root, 0);
+
+			CharEncoding* encodings = getEncodingFromTree(&allChars, root); 
+			printEncodings(encodings, allChars.number_of_chars);
+			// encode_to_file(text, encodings, res->number_of_letters, count); 
+
 		}
 
 		// printCharFreqs(&allChars);
