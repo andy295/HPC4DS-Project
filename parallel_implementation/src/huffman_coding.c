@@ -117,10 +117,10 @@ int main() {
 	getCharFreqsFromText(&allChars, text, total_text_length, pid);
 
 	if (pid != 0) {
-		MsgDictionary* msgDictSnd = createMsgDictionaryFromFreqs(&allChars);
+		MsgCharFreqDictionary* msgDictSnd = createMsgCharFreqDictionaryFromFreqs(&allChars);
 		// printMessageHeader(&msgDictSnd);
-		int bufferSize = sizeof (MsgDictionary) + sizeof(CharFreq) * msgDictSnd->charsNr;
-		BYTE *buffer = createMessageBufferFromDict(msgDictSnd, bufferSize);
+		int bufferSize = sizeof (MsgCharFreqDictionary) + sizeof(CharFreq) * msgDictSnd->charsNr;
+		BYTE *buffer = createMessageBufferFromMsgCharFreqDictionary(msgDictSnd, bufferSize);
 		// maybe we could use the send version that uses the mpi buffer 
 		// in this way we can empty the msgDict.charFreqs without risks
 		MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
@@ -143,7 +143,7 @@ int main() {
 			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
 
 			// deserialize the message
-			MsgDictionary* msgRcv = createMsgDictFromByteBuffer(buffer); 
+			MsgCharFreqDictionary* msgRcv = createMsgCharFreqDictionaryFromByteBuffer(buffer); 
 			// printMessageHeader(&msgRcv);
 			mergeCharFreqs(&allChars, msgRcv->charFreqs, msgRcv->charsNr);
 			sortCharFreqs(&allChars);
@@ -158,6 +158,10 @@ int main() {
 			CharEncoding* encodings = getEncodingFromTree(&allChars, root); 
 			printEncodings(encodings, allChars.number_of_chars);
 			// encode_to_file(text, encodings, res->number_of_letters, count); 
+
+			// send encoding table to each process and each one encodes its portion of the text
+
+
 
 		}
 

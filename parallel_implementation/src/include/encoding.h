@@ -1,7 +1,10 @@
 
+#pragma once
+
 #include "global_constants.h"
 #include "char_freq.h"
 #include "huffman_tree.h"
+
 #include "../utils/print_utils.h"
 
 typedef struct CharEncoding {
