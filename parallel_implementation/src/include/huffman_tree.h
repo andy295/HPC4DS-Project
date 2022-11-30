@@ -20,10 +20,10 @@ typedef struct LinkedListTreeNodeItem {
 	struct LinkedListTreeNodeItem *next; 
 } LinkedListTreeNodeItem;
 
-LinkedListTreeNodeItem* new_node(char character, int frequency);
-LinkedListTreeNodeItem* get_min_freq(LinkedListTreeNodeItem *start);
-LinkedListTreeNodeItem* ordered_append_to_freq(LinkedListTreeNodeItem *start, LinkedListTreeNodeItem *item);
-LinkedListTreeNodeItem* create_linked_list(CharFreqDictionary *dict);
+LinkedListTreeNodeItem* newNode(char character, int frequency);
+LinkedListTreeNodeItem* getMinFreq(LinkedListTreeNodeItem *start);
+LinkedListTreeNodeItem* orderedAppendToFreq(LinkedListTreeNodeItem *start, LinkedListTreeNodeItem *item);
+LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary *dict);
 
 extern TreeNode* createHuffmanTree(CharFreqDictionary *dict);
 extern void printHuffmanTree(TreeNode* root, int depth);
