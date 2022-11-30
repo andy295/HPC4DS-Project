@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../include/global_constants.h"
 
 extern int getFileSize(char* fileName);

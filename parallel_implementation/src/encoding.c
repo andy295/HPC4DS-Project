@@ -1,4 +1,3 @@
-
 #include "include/encoding.h"
 
 bool findEncodingFromTree(char letter, TreeNode* root, char* dst, int depth){

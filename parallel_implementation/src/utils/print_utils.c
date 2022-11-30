@@ -1,4 +1,3 @@
-
 #include "print_utils.h"
 
 void printFormattedChar(char c) {
