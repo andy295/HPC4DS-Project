@@ -1,6 +1,9 @@
 #pragma once
 
 #include "global_constants.h"
+#include "../utils/print_utils.h"
+
+#include <stdlib.h>
 
 enum Position {
     FIRST = 1,

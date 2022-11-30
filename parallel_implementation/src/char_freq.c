@@ -30,30 +30,9 @@ void printCharFreqs(CharFreqDictionary* dict) {
 	for (int i = 0; i < dict->number_of_chars; i++) {
 		
 		#if VERBOSE <= 3
-			switch (dict->charFreqs[i].character)
-			{
-			case '\n':
-				printf("\tcharacter: \\n\tfrequence: %d\n",
-					dict->charFreqs[i].frequency);
-				break;
-			case '\0':
-				printf("\tcharacter: \\0\tfrequence: %d\n",
-					dict->charFreqs[i].frequency);
-				break;
-			case '\t':
-				printf("\tcharacter: \\t\tfrequence: %d\n",
-					dict->charFreqs[i].frequency);
-				break;
-			case ' ':
-				printf("\tcharacter: space\tfrequence: %d\n",
-					dict->charFreqs[i].frequency);
-				break;		
-			default:
-				printf("\tcharacter: %c\tfrequence: %d\n",
-					dict->charFreqs[i].character,
-					dict->charFreqs[i].frequency);
-				break;
-			}
+			printf("\tcharacter: "); 
+			printFormattedChar(dict->charFreqs[i].character);
+			printf("\tfrequence: %d\n", dict->charFreqs[i].frequency); 
 		#endif
 		// total_characters += dict->charFreqs[i].frequency;
 	}

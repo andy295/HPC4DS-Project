@@ -3,18 +3,21 @@
 #include "global_constants.h"
 
 #include "char_freq.h"
+#include "../utils/print_utils.h"
 
-typedef struct TreeNode_tag {
+#include <stdlib.h>
+
+typedef struct TreeNode {
 	int frequency; 
 	char character; 
 
-	struct TreeNode_tag *leftChild; 
-	struct TreeNode_tag *rightChild; 
+	struct TreeNode *leftChild; 
+	struct TreeNode *rightChild; 
 } TreeNode; 
 
-typedef struct LinkedListTreeNodeItem_tag {
+typedef struct LinkedListTreeNodeItem {
 	TreeNode *item; 
-	struct LinkedListTreeNodeItem_tag *next; 
+	struct LinkedListTreeNodeItem *next; 
 } LinkedListTreeNodeItem;
 
 LinkedListTreeNodeItem* new_node(char character, int frequency);
@@ -22,4 +25,5 @@ LinkedListTreeNodeItem* get_min_freq(LinkedListTreeNodeItem *start);
 LinkedListTreeNodeItem* ordered_append_to_freq(LinkedListTreeNodeItem *start, LinkedListTreeNodeItem *item);
 LinkedListTreeNodeItem* create_linked_list(CharFreqDictionary *dict);
 
-extern TreeNode* create_huffman_tree(CharFreqDictionary *dict);
+extern TreeNode* createHuffmanTree(CharFreqDictionary *dict);
+extern void printHuffmanTree(TreeNode* root, int depth);

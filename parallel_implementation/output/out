@@ -1,54 +1,293 @@
-Dictionary: 
-	character: F	frequence: 1
-	character: q	frequence: 1
-	character: B	frequence: 2
-	character: H	frequence: 2
-	character: G	frequence: 3
-	character: J	frequence: 3
-	character: M	frequence: 3
-	character: C	frequence: 4
-	character: O	frequence: 4
-	character: W	frequence: 4
-	character: D	frequence: 4
-	character: L	frequence: 5
-	character: E	frequence: 5
-	character: -	frequence: 5
-	character: N	frequence: 6
-	character: Y	frequence: 7
-	character: S	frequence: 7
-	character: K	frequence: 7
-	character: k	frequence: 9
-	character: ?	frequence: 10
-	character: A	frequence: 12
-	character: T	frequence: 19
-	character: '	frequence: 19
-	character: p	frequence: 21
-	character: v	frequence: 26
-	character: b	frequence: 31
-	character: I	frequence: 35
-	character: f	frequence: 37
-	character: w	frequence: 42
-	character: g	frequence: 44
-	character: c	frequence: 48
-	character: y	frequence: 51
-	character: m	frequence: 56
-	character: u	frequence: 58
-	character: d	frequence: 89
-	character: l	frequence: 92
-	character: h	frequence: 95
-	character: s	frequence: 109
-	character: r	frequence: 115
-	character: n	frequence: 127
-	character: i	frequence: 127
-	character: o	frequence: 139
-	character: a	frequence: 139
-	character: \n	frequence: 141
-	character: t	frequence: 179
-	character: e	frequence: 264
-	character: j	frequence: 285
-	character: x	frequence: 286
-	character: P	frequence: 287
-	character: "	frequence: 288
-	character: ,	frequence: 289
-	character: !	frequence: 290
-	character: space	frequence: 386
+$: 1313
+ $: 569
+  $: 266
+   e: 127
+   $: 139
+    i: 69
+    a: 70
+  $: 303
+   $: 141
+    $: 70
+     c: 34
+     $: 36
+      b: 18
+      f: 18
+    \n: 71
+   $: 162
+    $: 79
+     $: 37
+      $: 18
+       A: 9
+       v: 9
+      w: 19
+     h: 42
+    t: 83
+ $: 744
+  $: 319
+   space: 183
+   $: 136
+    r: 67
+    o: 69
+  $: 425
+   $: 189
+    $: 88
+     d: 44
+     $: 44
+      $: 20
+       $: 9
+        $: 4
+         $: 2
+          F: 1
+          C: 1
+         $: 2
+          G: 1
+          q: 1
+        k: 5
+       $: 11
+        -: 5
+        ': 6
+      $: 24
+       $: 12
+        K: 6
+        $: 6
+         L: 3
+         M: 3
+       $: 12
+        $: 6
+         W: 3
+         O: 3
+        $: 6
+         D: 3
+         E: 3
+    $: 101
+     l: 49
+     $: 52
+      g: 26
+      m: 26
+   $: 236
+    $: 111
+     $: 55
+      $: 26
+       p: 13
+       I: 13
+      u: 29
+     s: 56
+    $: 125
+     $: 60
+      y: 30
+      $: 30
+       $: 14
+        T: 7
+        ?: 7
+       $: 16
+        $: 8
+         S: 4
+         Y: 4
+        $: 8
+         $: 4
+          B: 2
+          J: 2
+         $: 4
+          H: 2
+          N: 2
+     n: 65
+$: 2243
+ $: 948
+  $: 412
+   $: 201
+    o: 99
+    i: 102
+   $: 211
+    a: 103
+    \n: 108
+  $: 536
+   $: 256
+    $: 123
+     $: 58
+      I: 29
+      $: 29
+       $: 14
+        k: 7
+        K: 7
+       $: 15
+        $: 7
+         $: 3
+          q: 1
+          B: 2
+         N: 4
+        $: 8
+         W: 4
+         L: 4
+     l: 65
+    t: 133
+   $: 280
+    $: 134
+     $: 66
+      w: 31
+      g: 35
+     h: 68
+    $: 146
+     d: 72
+     $: 74
+      $: 36
+       p: 18
+       $: 18
+        $: 8
+         D: 4
+         $: 4
+          H: 2
+          $: 2
+           F: 1
+           G: 1
+        T: 10
+      m: 38
+ $: 1295
+  $: 569
+   space: 284
+   j: 285
+  $: 726
+   $: 334
+    $: 158
+     $: 77
+      c: 38
+      u: 39
+     $: 81
+      $: 40
+       v: 20
+       $: 20
+        ?: 10
+        $: 10
+         E: 5
+         Y: 5
+      y: 41
+    $: 176
+     s: 85
+     r: 91
+   $: 392
+    $: 192
+     n: 96
+     $: 96
+      $: 46
+       $: 22
+        A: 11
+        $: 11
+         -: 5
+         S: 6
+       b: 24
+      $: 50
+       $: 24
+        ': 12
+        $: 12
+         $: 6
+          J: 3
+          C: 3
+         $: 6
+          M: 3
+          O: 3
+       f: 26
+    e: 200
+$: 4318
+ $: 1839
+  $: 775
+   $: 337
+    $: 158
+     $: 75
+      f: 37
+      $: 38
+       T: 19
+       ': 19
+     $: 83
+      $: 41
+       $: 20
+        ?: 10
+        $: 10
+         E: 5
+         -: 5
+       p: 21
+      w: 42
+    t: 179
+   $: 438
+    $: 209
+     $: 100
+      $: 49
+       $: 23
+        $: 11
+         $: 5
+          $: 2
+           F: 1
+           q: 1
+          G: 3
+         N: 6
+        A: 12
+       v: 26
+      y: 51
+     s: 109
+    $: 229
+     $: 114
+      m: 56
+      u: 58
+     r: 115
+  $: 1064
+   $: 518
+    $: 254
+     n: 127
+     i: 127
+    e: 264
+   $: 546
+    $: 266
+     $: 127
+      $: 58
+       $: 27
+        $: 13
+         $: 6
+          J: 3
+          M: 3
+         Y: 7
+        $: 14
+         S: 7
+         K: 7
+       b: 31
+      $: 69
+       $: 34
+        $: 16
+         $: 8
+          C: 4
+          O: 4
+         $: 8
+          W: 4
+          D: 4
+        $: 18
+         k: 9
+         $: 9
+          $: 4
+           B: 2
+           H: 2
+          L: 5
+       I: 35
+     o: 139
+    $: 280
+     a: 139
+     \n: 141
+ $: 2479
+  $: 1146
+   $: 571
+    j: 285
+    x: 286
+   $: 575
+    P: 287
+    ": 288
+  $: 1333
+   $: 579
+    ,: 289
+    !: 290
+   $: 754
+    $: 368
+     $: 181
+      d: 89
+      l: 92
+     $: 187
+      $: 92
+       g: 44
+       c: 48
+      h: 95
+    space: 386

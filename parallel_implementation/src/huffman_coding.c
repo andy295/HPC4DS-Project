@@ -145,75 +145,19 @@ int main() {
 			// deserialize the message
 			MsgDictionary* msgRcv = createMsgDictFromByteBuffer(buffer); 
 			// printMessageHeader(&msgRcv);
-			// add the received charFreqs to the dictionary
 			mergeCharFreqs(&allChars, msgRcv->charFreqs, msgRcv->charsNr);
 			sortCharFreqs(&allChars);
 
 			freeBuffer(buffer);
 			freeBuffer(msgRcv->charFreqs);
+
+			// LinkedListTreeNodeItem* start = create_linked_list(&allChars);
+			TreeNode* root = createHuffmanTree(&allChars); 
+			printHuffmanTree(root, 0);
 		}
 
-		printCharFreqs(&allChars);
+		// printCharFreqs(&allChars);
 	}
-
-	// 	// send encoding table to all processes
-	// 	for (int i = 1; i < NUM_OF_PROCESSES; i++) {
-	// 		MPI_Send(encodings, sizeof(struct LetterEncoding) * allLetters->number_of_letters, MPI_BYTE, i, 0, MPI_COMM_WORLD);
-	// 	}
-	// }
-
-	// // all processes receive the encoding table
-	// if (pid != 0) {
-	// 	struct LetterEncoding* encodings = malloc(sizeof(struct LetterEncoding) * allLetters->number_of_letters);
-	// 	MPI_Recv(encodings, sizeof(struct LetterEncoding) * allLetters->number_of_letters, MPI_BYTE, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-	// 	// noi abbiamo fatto solo encode to file, ma servirebbe un encode to byte array,
-	// 	// che poi viene mandato al master process, che lo scrive su file (questa riga di commento è stata scritta da copilot)
-
-	// 	// encode the processes' portion of text to buffer
-	// 	char* buffer = encode_to_buffer(subtext, encodings, allLetters->number_of_letters);
-
-	// 	// add to buffer sync character
-	// 	buffer = strcat(buffer, encodings[allLetters->number_of_letters-1].encoding); //TODO: check if this is correct
-
-	// 	// send the buffer to the master process
-	// 	MPI_Send(buffer, strlen(buffer), MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-	// }
-
-	// // master process receives all buffers
-	// if (pid == 0) {
-	// 	FILE *fp;
-	// 	fp = fopen(ENCODED_FILE, "wb");
-
-	// 	// master writes his own buffer to file
-	// 	fwrite(buffer, sizeof(char), strlen(buffer), fp);
-
-	// 	for (int i = 1; i < NUM_OF_PROCESSES; i++) {
-	// 		// receive buffer
-	// 		char* buffer = malloc(sizeof(char) * total_text_length);
-	// 		MPI_Recv(buffer, total_text_length, MPI_BYTE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-	// 		// write buffer to file
-	// 		fwrite(buffer, sizeof(char), strlen(buffer), fp);
-	// 	}
-
-	// 	fclose(fp);
-	// }
-
-	// DECODING
-	// decode_from_file(root);
-
-	// if (VERBOSE){
-	// 	struct timespec end = get_time();
-	// 	printf("\nDecoding time: %f seconds\n", get_execution_time(start, end));
-	// }
-
-	// printf("\nCompression stats: \n");
-	// printf("Original file size: %d bits\n", get_file_size("text.txt"));
-	// printf("Compressed file size: %d bits\n", get_file_size("output"));
-	// printf("Compression rate: %.2f%%\n", (1 - (double)get_file_size("output") / (double)get_file_size("text.txt")) * 100);
-
-	// printf("\n");
 
 	freeBuffer(allChars.charFreqs);
 	freeBuffer(text);

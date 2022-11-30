@@ -63,7 +63,7 @@ LinkedListTreeNodeItem* create_linked_list(CharFreqDictionary* dict) {
 	return start; 
 }
 
-TreeNode* create_huffman_tree(CharFreqDictionary* dict) {
+TreeNode* createHuffmanTree(CharFreqDictionary* dict) {
 	LinkedListTreeNodeItem* start = create_linked_list(dict); 
 
 	do {
@@ -89,4 +89,19 @@ TreeNode* create_huffman_tree(CharFreqDictionary* dict) {
 	} while(start->next != NULL); 
 
 	return start->item; 
+}
+
+void printHuffmanTree(TreeNode* root, int depth) {
+	if (root == NULL)
+		return; 
+
+	for (int i = 0; i < depth; i++){
+		printf(" ");
+	}
+
+	printFormattedChar(root->character); 
+	printf(": %d\n", root->frequency);
+
+	printHuffmanTree(root->leftChild, depth+1);	
+	printHuffmanTree(root->rightChild, depth+1);
 }
