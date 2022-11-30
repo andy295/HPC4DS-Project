@@ -111,16 +111,14 @@ int main() {
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
 	char *text = NULL;
-	long total_text_length = read_file(SRC_FILE, &text, pid, proc_number);
+	long total_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	getCharFreqsFromText(&allChars, text, total_text_length, pid);
 
 	if (pid != 0) {
-		// send CharFreqDictionary to master process
 		MsgDictionary* msgDictSnd = createMsgDictionaryFromFreqs(&allChars);
 		// printMessageHeader(&msgDictSnd);
-		// serialize the message
 		int bufferSize = sizeof (MsgDictionary) + sizeof(CharFreq) * msgDictSnd->charsNr;
 		BYTE *buffer = createMessageBufferFromDict(msgDictSnd, bufferSize);
 		// maybe we could use the send version that uses the mpi buffer 
@@ -130,10 +128,8 @@ int main() {
 		freeBuffer(buffer);
 		freeBuffer(msgDictSnd->charFreqs);
 	} else {
-		// master process receives data from all the slaves processes
-	 	for (int i = 1; i < proc_number; i++) {
+		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
-			// probe for an incoming message from process zero
 			MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
 
 			// when probe returns, the status object has the size and other

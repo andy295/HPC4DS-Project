@@ -2,11 +2,10 @@
 
 // maybe we could improve the function by using the multythrading for loop
 void getCharFreqsFromText(CharFreqDictionary* dict, char text[], int len, int pid) {
-	int i, j;
-	for (i = 0; i < len; i++) {
+	for (int i = 0; i < len; i++) {
 		char character = text[i]; 
 		bool assigned = false; 
-		for (j = 0; j < dict->number_of_chars && !assigned; j++) {
+		for (int j = 0; j < dict->number_of_chars && !assigned; j++) {
 
             CharFreq *p = &dict->charFreqs[j];
 			if (p->character == character) {
@@ -26,11 +25,9 @@ void getCharFreqsFromText(CharFreqDictionary* dict, char text[], int len, int pi
 }
 
 void printCharFreqs(CharFreqDictionary* dict) {
-	int i;
-
-	int total_characters = 0;
+	// int total_characters = 0;
 	printf("Dictionary: \n");
-	for (i = 0; i < dict->number_of_chars; i++) {
+	for (int i = 0; i < dict->number_of_chars; i++) {
 		
 		#if VERBOSE <= 3
 			switch (dict->charFreqs[i].character)
@@ -58,8 +55,7 @@ void printCharFreqs(CharFreqDictionary* dict) {
 				break;
 			}
 		#endif
-
-		total_characters += dict->charFreqs[i].frequency;
+		// total_characters += dict->charFreqs[i].frequency;
 	}
 }
 

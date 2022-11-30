@@ -1,6 +1,6 @@
 #include "file_utils.h"
 
-int get_file_size(char* fileName) {
+int getFileSize(char* fileName) {
 	FILE* fp = fopen(fileName, "r"); 
 	fseek(fp, 0, SEEK_END); 
 	long fSize = ftell(fp); 
@@ -20,7 +20,7 @@ void printWorkDir(int processId) {
    	}
 }
 
-long read_file(const char* fileName, char** fileDest, int processId, int proc_number) {
+long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number) {
 	FILE* fp = fopen(fileName, "r"); 
 	if (fp != NULL) {
 		fseek(fp, 0, SEEK_END); 

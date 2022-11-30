@@ -167,6 +167,9 @@ int main() {
 	// ENCODING
 	struct LetterFreqDictionary* res = get_letter_freqs(text, count);
 	sort_freqs(res);
+
+	printCharFreqs(res);
+
 	struct TreeNode* root = create_huffman_tree(res); 
 	struct LetterEncoding* encodings = get_encoding_from_tree(res, root); 
 	encode_to_file(text, encodings, res->number_of_letters, count); 
