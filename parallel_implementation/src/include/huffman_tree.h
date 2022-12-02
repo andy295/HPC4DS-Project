@@ -3,9 +3,8 @@
 #include "global_constants.h"
 
 #include "char_freq.h"
-#include "../utils/print_utils.h"
 
-#include <stdlib.h>
+#include "../utils/print_utils.h"
 
 typedef struct TreeNode {
 	int frequency; 
@@ -26,4 +25,8 @@ LinkedListTreeNodeItem* orderedAppendToFreq(LinkedListTreeNodeItem *start, Linke
 LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary *dict);
 
 extern TreeNode* createHuffmanTree(CharFreqDictionary *dict);
+
 extern void printHuffmanTree(TreeNode* root, int depth);
+void print(TreeNode* root, int depth);
+void print2D(TreeNode* root);
+void print2DUtil(TreeNode* root, int space);

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "../include/global_constants.h"
 
 extern void printFormattedChar(char c);

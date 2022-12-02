@@ -86,22 +86,60 @@ TreeNode* createHuffmanTree(CharFreqDictionary* dict) {
 		else
 			start = orderedAppendToFreq(start, top); 
 
-	} while(start->next != NULL); 
+	} while (start->next != NULL); 
 
 	return start->item; 
 }
 
 void printHuffmanTree(TreeNode* root, int depth) {
+	if (TREE_PRINT_TYPE == 0)
+		print(root, depth);
+	else
+		print2D(root);
+}
+
+void print(TreeNode* root, int depth) {
 	if (root == NULL)
 		return; 
 
-	for (int i = 0; i < depth; i++){
+	for (int i = 0; i < depth; i++)
 		printf(" ");
-	}
 
 	printFormattedChar(root->character); 
 	printf(": %d\n", root->frequency);
 
 	printHuffmanTree(root->leftChild, depth+1);	
 	printHuffmanTree(root->rightChild, depth+1);
+}
+
+// Wrapper over print2DUtil()
+void print2D(TreeNode* root)
+{
+	// Pass initial space count as 0
+	print2DUtil(root, 0);
+}
+
+// Function to print binary tree in 2D
+// It does reverse inorder traversal
+void print2DUtil(TreeNode* root, int space)
+{
+	// Base case
+	if (root == NULL)
+		return;
+
+	// Increase distance between levels
+	space += COUNT;
+
+	// Process right child first
+	print2DUtil(root->rightChild, space);
+
+	// Print current node after space
+	// count
+	printf("\n");
+	for (int i = COUNT; i < space; i++)
+		printf(" ");
+	printf("%c - %d\n", root->character, root->frequency);
+
+	// Process left child
+	print2DUtil(root->leftChild, space);
 }

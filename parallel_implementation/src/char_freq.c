@@ -24,17 +24,22 @@ void getCharFreqsFromText(CharFreqDictionary* dict, char text[], int len, int pi
 	}
 }
 
-void printCharFreqs(CharFreqDictionary* dict) {
-	// int total_characters = 0;
-	printf("Dictionary: \n");
-	for (int i = 0; i < dict->number_of_chars; i++) {
-		
-		#if VERBOSE <= 3
-			printf("\tcharacter: "); 
-			printFormattedChar(dict->charFreqs[i].character);
-			printf("\tfrequence: %d\n", dict->charFreqs[i].frequency); 
-		#endif
-		// total_characters += dict->charFreqs[i].frequency;
+void sortCharFreqs(CharFreqDictionary* res) {
+	int i, j;
+
+	for (i = 0; i < res->number_of_chars; i++) {
+		CharFreq minCharFreq = res->charFreqs[i];
+		int indexOfMin = i;  
+		for (j = i; j < res->number_of_chars; j++){
+			if (minCharFreq.frequency > res->charFreqs[j].frequency) {
+				minCharFreq = res->charFreqs[j]; 
+				indexOfMin = j; 
+			}
+		}
+
+		CharFreq temp = res->charFreqs[i]; 
+		res->charFreqs[i] = minCharFreq;
+		res->charFreqs[indexOfMin] = temp;
 	}
 }
 
@@ -53,7 +58,7 @@ void appendToCharFreqs(CharFreqDictionary* dict, char character, int pos) {
 		dict->charFreqs[0].frequency = 1;
 	} else {
 		int frequency = dict->charFreqs[dict->number_of_chars - 1].frequency + 1;
-		dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * (dict->number_of_chars + 1));
+		dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * (dict->number_of_chars+1));
 		dict->charFreqs[dict->number_of_chars] = (struct CharFreq) {.character = character, .frequency = frequency};
 		++dict->number_of_chars;
 	}
@@ -72,27 +77,16 @@ void mergeCharFreqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size) {
 			}
 		}
 
-		if (!assigned) {
+		if (!assigned)
 			appendToCharFreqs(dict, character, LAST);
-		}
 	}
 }
 
-void sortCharFreqs(CharFreqDictionary* res) {
-	int i, j;
-
-	for (i = 0; i < res->number_of_chars; i++) {
-		CharFreq minCharFreq = res->charFreqs[i];
-		int indexOfMin = i;  
-		for (j = i; j < res->number_of_chars; j++){
-			if (minCharFreq.frequency > res->charFreqs[j].frequency) {
-				minCharFreq = res->charFreqs[j]; 
-				indexOfMin = j; 
-			}
-		}
-
-		CharFreq temp = res->charFreqs[i]; 
-		res->charFreqs[i] = minCharFreq;
-		res->charFreqs[indexOfMin] = temp;
+void printCharFreqs(CharFreqDictionary* dict) {
+	printf("Dictionary: \n");
+	for (int i = 0; i < dict->number_of_chars; i++) {
+			printf("\tcharacter: "); 
+			printFormattedChar(dict->charFreqs[i].character);
+			printf("\tfrequence: %d\n", dict->charFreqs[i].frequency); 
 	}
 }

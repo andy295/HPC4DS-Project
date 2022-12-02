@@ -1,9 +1,8 @@
 #pragma once
 
 #include "global_constants.h"
-#include "../utils/print_utils.h"
 
-#include <stdlib.h>
+#include "../utils/print_utils.h"
 
 enum Position {
     FIRST = 1,
@@ -13,7 +12,7 @@ enum Position {
 typedef struct CharFreq {
 	int frequency;
 	char character; 
-} CharFreq; 
+} CharFreq;
 
 typedef struct CharFreqDictionary {
 	int number_of_chars; 

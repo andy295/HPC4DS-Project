@@ -1,6 +1,7 @@
 #pragma once
 
 #include "global_constants.h"
+
 #include "char_freq.h"
 #include "huffman_tree.h"
 
@@ -11,7 +12,7 @@ typedef struct CharEncoding {
 	char* encoding; 
 } CharEncoding; 
 
-CharEncoding* getEncodingFromTree(CharFreqDictionary* allLetters, TreeNode* root); 
+CharEncoding* getEncodingFromTree(CharFreqDictionary* dict, TreeNode* root); 
 
-extern bool findEncodingFromTree(char letter, TreeNode* root, char* dst, int depth);
+extern bool findEncodingFromTree(char character, TreeNode* root, char* dst, int depth);
 extern void printEncodings(CharEncoding* encodings, int size);
