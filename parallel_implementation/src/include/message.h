@@ -7,10 +7,13 @@
 
 enum Messages {
     // message number slave --> master
-    MSG_DICTIONARY = 1
+    MSG_DICTIONARY = 0,
+    MSG_ENCODING = 1
+};
 
-    // message number master --> slave
-    // not used
+enum Child {
+    LEFT = 0,
+    RIGHT = 1
 };
 
 typedef struct MsgHeader {
@@ -18,9 +21,6 @@ typedef struct MsgHeader {
     int size; // size of the message in bytes
 } MsgHeader;
 
-// TODO: per andrea, iniziando a fare la parte di passaggio degli encoding, 
-// 	 potrebbe avere senso usare i generics, ma non so se vale la pena perderci tempo
-// 	 io non saprei come fare, se vuoi metterti tu, altrimenti facciamo senza
 typedef struct MsgGeneric {
     MsgHeader header;
 } MsgGeneric;
@@ -31,24 +31,45 @@ typedef struct MsgCharFreqDictionary {
     CharFreq *charFreqs;
 } MsgCharFreqDictionary;
 
+typedef struct TreeNodeShort {
+    char character; 
+    unsigned char children;
+} TreeNodeShort;
+
 typedef struct MsgEncodingDictionary {
     MsgHeader header;
-    int encodingNr;
-    CharEncoding *charEncodings;
+    unsigned int charNr;
+    TreeNodeShort *treeNodes;
 } MsgEncodingDictionary;
 
+extern BYTE* getMessage(void* data, int msgType, int *bufferSize);
+extern void setMessage(void *data, BYTE *msg);
 
-// --- MsgCharFreqDictionary functions ---
-extern MsgCharFreqDictionary* createMsgCharFreqDictionaryFromFreqs(CharFreqDictionary* allChars);
-extern MsgCharFreqDictionary* createMsgCharFreqDictionaryFromByteBuffer(BYTE *buffer);
-extern BYTE* createMessageBufferFromMsgCharFreqDictionary(MsgCharFreqDictionary* msg, int bufferSize);
-void buildMsgCharFreqDictionary(CharFreqDictionary* dict, MsgCharFreqDictionary* msgDict);
+BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary* dict, int *bufferSize);
+void deserializeMsgCharFreqDictionary(CharFreqDictionary* dict, BYTE *msg);
 
-// --- MsgEncodingDictionary creation functions ---
-extern MsgEncodingDictionary* createMsgEncodingDictionaryFromFreqs(CharEncoding* allEncodings, int size);
-extern MsgEncodingDictionary* createMsgEncodingDictionaryFromByteBuffer(BYTE *buffer);
-extern BYTE* createMessageBufferFromMsgEncodingDictionary(MsgEncodingDictionary* msg, int bufferSize);
+BYTE* serializeMsgEncodingDictionary(TreeNode *root, int *bufferSize);
+void addNode(TreeNode *node, BYTE* msg, int *idx);
+// void deserializeMsgEncodingDictionary(TreeNode *root);
 
+void printCharFreqDictionary(CharFreqDictionary* dict);
 
-void initMsgHeader(MsgHeader* header, int id, int size);
-void printMessageHeader(MsgCharFreqDictionary* msg); 
+// one of them must be removed
+// void mergeCharFreqs(CharFreqDictionary*  dict, MsgCharFreqDictionary* msgDict);
+// void getMsgDictionary(CharFreqDictionary* dict, MsgCharFreqDictionary* msgDict);
+
+// // --- MsgCharFreqDictionary functions ---
+// extern MsgCharFreqDictionary* createMsgCharFreqDictionaryFromFreqs(CharFreqDictionary* allChars);
+// extern MsgCharFreqDictionary* createMsgCharFreqDictionaryFromByteBuffer(BYTE *buffer);
+// extern BYTE* createMessageBufferFromMsgCharFreqDictionary(MsgCharFreqDictionary* msg, int bufferSize);
+// void buildMsgCharFreqDictionary(CharFreqDictionary* dict, MsgCharFreqDictionary* msgDict);
+
+// // --- MsgEncodingDictionary creation functions ---
+// extern MsgEncodingDictionary* createMsgEncodingDictionaryFromFreqs(CharEncoding* allEncodings, int size);
+// extern MsgEncodingDictionary* createMsgEncodingDictionaryFromByteBuffer(BYTE *buffer);
+// extern BYTE* createMessageBufferFromMsgEncodingDictionary(MsgEncodingDictionary* msg, int bufferSize);
+
+// void initMsgHeader(MsgHeader* header, int id, int size);
+
+// extern void createMsgEncoding(TreeNode *root);
+// void printMessageHeader(MsgCharFreqDictionary* msg); 

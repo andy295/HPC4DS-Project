@@ -63,8 +63,9 @@ LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary* dict) {
 	return start; 
 }
 
-TreeNode* createHuffmanTree(CharFreqDictionary* dict) {
+TreeNode* createHuffmanTree(CharFreqDictionary* dict, int *size) {
 	LinkedListTreeNodeItem* start = createLinkedList(dict); 
+	*size = 0;
 
 	do {
 		TreeNode* left = getMinFreq(start)->item; 
@@ -86,6 +87,7 @@ TreeNode* createHuffmanTree(CharFreqDictionary* dict) {
 		else
 			start = orderedAppendToFreq(start, top); 
 
+		++(*size);
 	} while (start->next != NULL); 
 
 	return start->item; 

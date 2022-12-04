@@ -70,37 +70,6 @@ void freeBuffer(void* buffer) {
 		free(buffer);
 }
 
-// void get_encoding_from_tree(CharFreqDictionary* dict, TreeNode* root, CharEncoding* encodings){
-// 	for (int i = 0; i < dict->number_of_chars; i++){
-
-// 		encodings[i].character = dict->charFreqs[i].character;
-// 		encodings[i].encoding = malloc(sizeof(char) * dict->number_of_chars);
-
-// 		find_encoding(dict->charFreqs[i].character, root, encodings[i].encoding, 0);
-// 	}
-// }
-
-// bool find_encoding(char character, TreeNode* root, char* dst, int depth) {
-
-// 	bool found = false;
-// 	if (root->character == character) {
-// 		dst[depth] = '\0';
-// 		return true;
-// 	} else {
-// 		if (root->leftChild != NULL) {
-// 			dst[depth] = '0';
-// 			found = find_encoding(character, root->leftChild, dst, depth+1);
-// 		}
-
-// 		if (found == 0 && root->rightChild != NULL){
-// 			dst[depth] = '1';
-// 			found = find_encoding(character, root->rightChild, dst, depth+1);
-// 		}
-// 	}
-
-// 	return found;
-// }
-
 int main() {
 	MPI_Init(NULL, NULL);
 
@@ -117,16 +86,17 @@ int main() {
 	getCharFreqsFromText(&allChars, text, total_text_length, pid);
 
 	if (pid != 0) {
-		MsgCharFreqDictionary* msgDictSnd = createMsgCharFreqDictionaryFromFreqs(&allChars);
-		// printMessageHeader(&msgDictSnd);
-		int bufferSize = sizeof (MsgCharFreqDictionary) + sizeof(CharFreq) * msgDictSnd->charsNr;
-		BYTE *buffer = createMessageBufferFromMsgCharFreqDictionary(msgDictSnd, bufferSize);
-		// maybe we could use the send version that uses the mpi buffer 
-		// in this way we can empty the msgDict.charFreqs without risks
-		MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+		int bufferSize = 0;
+		BYTE *buffer = getMessage(&allChars, MSG_DICTIONARY, &bufferSize);
+		if (buffer != NULL)
+			// maybe we could use the send version that uses the mpi buffer 
+			// in this way we can empty the msgDict.charFreqs without risks
+			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+		else {
+			// eventually print an error message
+		}
 
 		freeBuffer(buffer);
-		freeBuffer(msgDictSnd->charFreqs);
 	} else {
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
@@ -142,30 +112,30 @@ int main() {
     		BYTE *buffer = malloc(sizeof(BYTE) * bufferSize);
 			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
 
-			// deserialize the message
-			MsgCharFreqDictionary* msgRcv = createMsgCharFreqDictionaryFromByteBuffer(buffer); 
-			// printMessageHeader(&msgRcv);
-			mergeCharFreqs(&allChars, msgRcv->charFreqs, msgRcv->charsNr);
-			sortCharFreqs(&allChars);
+			CharFreqDictionary rcvChars = {.number_of_chars = 0, .charFreqs = NULL};
+			setMessage(&rcvChars, buffer);
+
+			// mergeCharFreqs(&allChars, msgRcv->charFreqs, msgRcv->charsNr);
+			// sortCharFreqs(&allChars);
 
 			freeBuffer(buffer);
-			freeBuffer(msgRcv->charFreqs);
+		}
 
 			// LinkedListTreeNodeItem* start = create_linked_list(&allChars);
-			TreeNode* root = createHuffmanTree(&allChars); 
-			// printHuffmanTree(root, 0);
+			int size;
+			TreeNode* root = createHuffmanTree(&allChars, &size); 
+			// printTree(root, 0);
 
-			CharEncoding* encodings = getEncodingFromTree(&allChars, root); 
-			printEncodings(encodings, allChars.number_of_chars);
+			int bufferSize = size;
+			getMessage(root, MSG_ENCODING, &bufferSize);
+
+			// CharEncoding* encodings = getEncodingFromTree(&allChars, root); 
+			// printEncodings(encodings, allChars.number_of_chars);
 			// encode_to_file(text, encodings, res->number_of_letters, count); 
 
 			// send encoding table to each process and each one encodes its portion of the text
 
-
-
-		}
-
-		// printCharFreqs(&allChars);
+			// printCharFreqs(&allChars);
 	}
 
 	freeBuffer(allChars.charFreqs);

@@ -24,7 +24,7 @@ LinkedListTreeNodeItem* getMinFreq(LinkedListTreeNodeItem *start);
 LinkedListTreeNodeItem* orderedAppendToFreq(LinkedListTreeNodeItem *start, LinkedListTreeNodeItem *item);
 LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary *dict);
 
-extern TreeNode* createHuffmanTree(CharFreqDictionary *dict);
+extern TreeNode* createHuffmanTree(CharFreqDictionary* dict, int *size);
 
 extern void printHuffmanTree(TreeNode* root, int depth);
 void print(TreeNode* root, int depth);
