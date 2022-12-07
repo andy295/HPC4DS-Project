@@ -43,10 +43,10 @@ typedef struct MsgEncodingDictionary {
 } MsgEncodingDictionary;
 
 extern BYTE* getMessage(void* data, int msgType, int *bufferSize);
-extern void setMessage(void *data, BYTE *msg);
+extern void setMessage(void *data, BYTE *buffer);
 
 BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary* dict, int *bufferSize);
-void deserializeMsgCharFreqDictionary(CharFreqDictionary* dict, BYTE *msg);
+void deserializeMsgCharFreqDictionary(CharFreqDictionary* dict, BYTE *buffer);
 
 BYTE* serializeMsgEncodingDictionary(TreeNode *root, int *bufferSize);
 void addNode(TreeNode *node, BYTE* msg, int *idx);

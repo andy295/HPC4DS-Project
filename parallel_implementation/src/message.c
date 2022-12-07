@@ -19,22 +19,12 @@ BYTE* getMessage(void* data, int msgType, int *bufferSize) {
 }
 
 BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary* dict, int *bufferSize) {
-	*bufferSize = (sizeof (int) * 3) + (sizeof(CharFreq) * dict->number_of_chars);
+	*bufferSize = sizeof(MsgCharFreqDictionary) + (sizeof(CharFreq) * dict->number_of_chars);
 	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
 
-	int offset = 0;
-	MsgHeader header = {MSG_DICTIONARY, (*bufferSize)};
-    memcpy(buffer + (offset * sizeof(int)), &header.id, sizeof(int));
-	++offset;
-    
-	memcpy(buffer + (offset * sizeof(int)), &header.size, sizeof(int));
-	++offset;
-
-	memcpy(buffer + (offset * sizeof(int)), &dict->number_of_chars, sizeof(int));
-	++offset;
-
-	memcpy(buffer + (offset * sizeof(int)), dict->charFreqs, sizeof(CharFreq) * dict->number_of_chars);
-	++offset;
+	MsgCharFreqDictionary msg = {.header.id = MSG_DICTIONARY, .header.size = *bufferSize, .charsNr = dict->number_of_chars, .charFreqs = NULL};
+	memcpy(buffer, &msg, sizeof(MsgCharFreqDictionary));
+	memcpy(buffer + sizeof(MsgCharFreqDictionary), dict->charFreqs, sizeof(CharFreq) * dict->number_of_chars);
 
 	return buffer;
 }
@@ -82,29 +72,33 @@ void addNode(TreeNode *node, BYTE *msg, int *idx) {
 	memcpy(msg + (sizeof(int) * 3) + (pos * sizeof(TreeNodeShort)) , &msgNode, sizeof(TreeNodeShort));
 }
 
-void setMessage(void *data, BYTE *msg) {
-	MsgGeneric *p = (MsgGeneric*)msg;
+void setMessage(void *data, BYTE *buffer) {
+	MsgGeneric *p = (MsgGeneric*)buffer;
 	int msgId = p->header.id;
 	switch (msgId)
 	{
 	case MSG_DICTIONARY:
-		deserializeMsgCharFreqDictionary((CharFreqDictionary*)data, msg);
+		deserializeMsgCharFreqDictionary((CharFreqDictionary*)data, buffer);
 		break;
+
+	case MSG_ENCODING:
+		// deserializeMsgEncodingDictionary((TreeNode*)data);
+		break;
+
 	default:
 		printf("Error: unknown message type: %d\n", msgId);
 		break;
 	}
 }
 
-void deserializeMsgCharFreqDictionary(CharFreqDictionary* dict, BYTE *msg) {
-	BYTE *s = msg + (sizeof(int) * 2);
-	memcpy(&dict->number_of_chars, (int *)s, sizeof(int));
- 	printf("\nSize of message: %d\n", dict->number_of_chars);
+void deserializeMsgCharFreqDictionary(CharFreqDictionary* dict, BYTE *buffer) {
+	MsgCharFreqDictionary msg;
+	memcpy(&msg, buffer, sizeof(MsgCharFreqDictionary));
 
-	BYTE *p = msg + (sizeof(int) * 3);
-	dict->charFreqs = (CharFreq*)malloc(sizeof(CharFreq) * dict->number_of_chars);
-	memcpy(dict->charFreqs, p, sizeof(CharFreq) * dict->number_of_chars);
-
+	dict->number_of_chars = msg.charsNr;
+	dict->charFreqs = malloc(sizeof(CharFreq) * dict->number_of_chars);
+	memcpy(dict->charFreqs, buffer + sizeof(MsgCharFreqDictionary), sizeof(CharFreq) * dict->number_of_chars);
+	
 	#if VERBOSE <= 2
 		printf("\nReceived dictionary with %d chars:\n", dict->number_of_chars);
 		printCharFreqDictionary(dict);
