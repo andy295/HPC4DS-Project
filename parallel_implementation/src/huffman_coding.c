@@ -32,10 +32,6 @@ int main() {
 		}
 
 		freeBuffer(buffer);
-
-		// reinit the dictionary
-		allChars.number_of_chars = 0;
-		freeBuffer(allChars.charFreqs);
 	} else {
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
@@ -61,9 +57,15 @@ int main() {
 
 		sortCharFreqs(&allChars);
 
+		// creates the huffman tree
+		LinkedListTreeNodeItem* root = createHuffmanTree(&allChars);
+		CharEncodingDictionary encodingsDict = {.number_of_chars = allChars.number_of_chars, .charEncoding = NULL};
+		getEncodingFromTree(&encodingsDict, &allChars, root->item);
+		// printEncodings(&encodingsDict);
+
 		// send the complete sorted dictionary to each process
 		int bufferSize = 0;
-		BYTE *buffer = getMessage(&allChars, MSG_DICTIONARY, &bufferSize);
+		BYTE *buffer = getMessage(&encodingsDict, MSG_ENCODING, &bufferSize);
 		if (buffer != NULL)
 			for (int i = 1; i < proc_number; i++)
 				MPI_Send(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD);
@@ -89,17 +91,13 @@ int main() {
 			BYTE *buffer = malloc(sizeof(BYTE) * bufferSize);
 			MPI_Recv(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &status);
 
-			setMessage(&allChars, buffer);
+			CharEncodingDictionary rcvEncodingsDict = {.number_of_chars = 0, .charEncoding = NULL};
+			setMessage(&rcvEncodingsDict, buffer);
 
 			freeBuffer(buffer);
 		}
 	}
 
-	// creates the huffman tree
-	LinkedListTreeNodeItem* root = createHuffmanTree(&allChars);
-
-	// CharEncoding* encodings = getEncodingFromTree(&allChars, root); 
-	// printEncodings(encodings, allChars.number_of_chars);
 	// encode_to_file(text, encodings, res->number_of_letters, count); 
 
 	// send encoding table to each process and each one encodes its portion of the text

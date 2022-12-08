@@ -1,41 +1,45 @@
 #include "include/encoding.h"
 
-bool findEncodingFromTree(char character, TreeNode* root, char* dst, int depth) {
-	bool found = false; 
+bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, unsigned int depth) {
+	bool found = false;
 	if (root->character == character) {
-		dst[depth] = '\0';
-		return 1;  
+		dst->encoding = realloc(dst->encoding, sizeof(char) * (depth+1));
+		dst->encoding[depth] = '\0';
+		dst->length = depth;
+		return true;  
 	} else {
 		if (root->leftChild != NULL) {
-			dst[depth] = '0'; 
+			dst->encoding = realloc(dst->encoding, sizeof(char) * (depth+1));
+			dst->encoding[depth] = '0'; 
 			found = findEncodingFromTree(character, root->leftChild, dst, depth+1); 
 		}
 
 		if (found == 0 && root->rightChild != NULL) {
-			dst[depth] = '1'; 
+			if (root->leftChild == NULL)
+				dst->encoding = realloc(dst->encoding, sizeof(char) * (depth+1));
+		
+			dst->encoding[depth] = '1';
 			found = findEncodingFromTree(character, root->rightChild, dst, depth+1); 
 		}
 	}
 
-	return found; 
+	return found;
 }
 
-CharEncoding* getEncodingFromTree(CharFreqDictionary* dict, TreeNode* root) {
-	CharEncoding* encodings = malloc(sizeof(struct CharEncoding) * dict->number_of_chars);
+void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionary *charFreqDict, TreeNode *root) {
+	encodingDict->charEncoding = malloc(sizeof(CharEncoding) * encodingDict->number_of_chars);
 
-	for (int i = 0; i < dict->number_of_chars; i++) {
-		encodings[i].character = dict->charFreqs[i].character;  
-		encodings[i].encoding = malloc(sizeof(char) * dict->number_of_chars); 
-
-		findEncodingFromTree(dict->charFreqs[i].character, root, encodings[i].encoding, 0); 
+	for (int i = 0; i < encodingDict->number_of_chars; i++) {
+		encodingDict->charEncoding[i].character = charFreqDict->charFreqs[i].character;  
+		encodingDict->charEncoding[i].length = 0;
+		encodingDict->charEncoding[i].encoding = malloc(sizeof(char));
+		findEncodingFromTree(charFreqDict->charFreqs[i].character, root, &encodingDict->charEncoding[i], encodingDict->charEncoding[i].length); 
 	}
-
-	return encodings;
 }
 
-void printEncodings(CharEncoding* encodings, int size) {
-	for (int i = 0; i < size; i++) {
-		printFormattedChar(encodings[i].character);
-		printf(": %s\n", encodings[i].encoding);
+void printEncodings(CharEncodingDictionary* dict) {
+	for (int i = 0; i < dict->number_of_chars; i++) {
+		printFormattedChar(dict->charEncoding[i].character);
+		printf(": %s\n\tlength: %d\n", dict->charEncoding[i].encoding, dict->charEncoding[i].length);
 	}
 }
