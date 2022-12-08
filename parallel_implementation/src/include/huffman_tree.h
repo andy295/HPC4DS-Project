@@ -6,12 +6,6 @@
 
 #include "../utils/print_utils.h"
 
-// typedef struct ArrayNode {
-// 	int frequency; 
-// 	char character; 
-// 	unsigned char children;
-// } ArrayNode; 
-
 typedef struct TreeNode {
 	int frequency; 
 	char character; 
