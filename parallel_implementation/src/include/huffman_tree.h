@@ -6,6 +6,12 @@
 
 #include "../utils/print_utils.h"
 
+// typedef struct ArrayNode {
+// 	int frequency; 
+// 	char character; 
+// 	unsigned char children;
+// } ArrayNode; 
+
 typedef struct TreeNode {
 	int frequency; 
 	char character; 
@@ -16,6 +22,7 @@ typedef struct TreeNode {
 
 typedef struct LinkedListTreeNodeItem {
 	TreeNode *item; 
+
 	struct LinkedListTreeNodeItem *next; 
 } LinkedListTreeNodeItem;
 
@@ -24,7 +31,7 @@ LinkedListTreeNodeItem* getMinFreq(LinkedListTreeNodeItem *start);
 LinkedListTreeNodeItem* orderedAppendToFreq(LinkedListTreeNodeItem *start, LinkedListTreeNodeItem *item);
 LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary *dict);
 
-extern TreeNode* createHuffmanTree(CharFreqDictionary* dict, int *size);
+extern LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary* dict);
 
 extern void printHuffmanTree(TreeNode* root, int depth);
 void print(TreeNode* root, int depth);

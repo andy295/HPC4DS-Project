@@ -90,3 +90,46 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 // 			*charIndex += 1;
 // 	}
 // }
+
+// void decode_from_file(struct TreeNode* root){
+
+// 	FILE *fp2;
+// 	fp2 = fopen(ENCODED_FILE, "rb");
+
+// 	char c;
+// 	char lastContinuousChar = 0;
+
+// 	struct TreeNode* intermediateNode = root;
+
+// 	int endReached = 0;
+// 	while (fread(&c, sizeof(char), 1, fp2)) {
+
+// 		if (endReached == 1) {
+// 			break;
+// 		}
+
+// 		for (int i = 0; i < 8; i++) {
+// 			if (intermediateNode->letter != '$') {
+
+// 				if (intermediateNode->letter == '#'){
+// 					endReached = 1;
+// 					break;
+// 				}
+
+// 				if (VERBOSE){
+// 					printf("%c", intermediateNode->letter);
+// 				}
+
+// 				intermediateNode = root;
+// 			}
+
+// 			if (c & (1 << i)) {
+// 				intermediateNode = intermediateNode->rightChild;
+// 			} else {
+// 				intermediateNode = intermediateNode->leftChild;
+// 			}
+// 		}
+// 	}
+
+// 	fclose(fp2);
+// }

@@ -82,6 +82,29 @@ void mergeCharFreqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size) {
 	}
 }
 
+// test if there is one faster than the other
+// void mergeCharFreqs(CharFreqDictionary* dict, MsgDictionary* msg) {
+// 	// int i, j;
+// 	// for (i = 0; i < msg->charsNr; i++) {
+// 	// 	bool found = false; 
+// 	// 	for (j = 0; j < dict->number_of_chars && !found; j++) {
+// 	// 		if (dict->charFreqs[j].character == msg->characters[i]) {
+// 	// 			dict->charFreqs[j].frequency += msg->frequencies[i]; 
+// 	// 			found = true; 
+// 	// 		}
+// 	// 	}
+
+// 	// 	if (!found) {
+// 	// 		++dict->number_of_chars; 
+//     //         dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * dict->number_of_chars);
+
+//     //         CharFreq *p = &dict->charFreqs[dict->number_of_chars - 1];
+// 	// 		p->character = msg->characters[i];
+// 	// 		p->frequency = msg->frequencies[i];
+// 	// 	}
+// 	// }
+// }
+
 void printCharFreqs(CharFreqDictionary* dict) {
 	printf("Dictionary: \n");
 	for (int i = 0; i < dict->number_of_chars; i++) {
