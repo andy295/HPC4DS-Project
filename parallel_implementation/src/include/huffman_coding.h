@@ -12,3 +12,4 @@
 // #include "../utils/print_utils.c"
 
 void freeBuffer(void* buffer);
+BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag);
