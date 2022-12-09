@@ -5,6 +5,20 @@ void freeBuffer(void* buffer) {
 		free(buffer);
 }
 
+BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag) {
+	MPI_Probe(pid, tag, MPI_COMM_WORLD, &status);
+
+	// when probe returns, the status object has the size and other
+	// attributes of the incoming message
+	// get the message size
+	MPI_Get_count(&status, MPI_BYTE, &bufferSize);
+
+	// now receive the message with the allocated buffer
+	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
+
+	return buffer;
+}
+
 int main() {
 	MPI_Init(NULL, NULL);
 
@@ -35,16 +49,9 @@ int main() {
 	} else {
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
-			MPI_Probe(i, 0, MPI_COMM_WORLD, &status);
+			int bufferSize = 0;
 
-			// when probe returns, the status object has the size and other
-		    // attributes of the incoming message
-			// get the message size
-			int bufferSize;
-		    MPI_Get_count(&status, MPI_BYTE, &bufferSize);
-
-			// now receive the message with the allocated buffer
-    		BYTE *buffer = malloc(sizeof(BYTE) * bufferSize);
+			BYTE *buffer = prepareForReceive(&status, &bufferSize, i, 0);
 			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
 
 			CharFreqDictionary rcvChars = {.number_of_chars = 0, .charFreqs = NULL};
@@ -59,11 +66,12 @@ int main() {
 
 		// creates the huffman tree
 		LinkedListTreeNodeItem* root = createHuffmanTree(&allChars);
+
 		CharEncodingDictionary encodingsDict = {.number_of_chars = allChars.number_of_chars, .charEncoding = NULL};
 		getEncodingFromTree(&encodingsDict, &allChars, root->item);
-		// printEncodings(&encodingsDict);
 
-		// send the complete sorted dictionary to each process
+		// send the complete encoding table to each process
+		// and each one encodes its portion of the text
 		int bufferSize = 0;
 		BYTE *buffer = getMessage(&encodingsDict, MSG_ENCODING, &bufferSize);
 		if (buffer != NULL)
@@ -79,16 +87,9 @@ int main() {
 	if (pid != 0) {
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
-			MPI_Probe(0, 0, MPI_COMM_WORLD, &status);
+			int bufferSize = 0;
 
-			// when probe returns, the status object has the size and other
-			// attributes of the incoming message
-			// get the message size
-			int bufferSize;
-			MPI_Get_count(&status, MPI_BYTE, &bufferSize);
-
-			// now receive the message with the allocated buffer
-			BYTE *buffer = malloc(sizeof(BYTE) * bufferSize);
+			BYTE *buffer = prepareForReceive(&status, &bufferSize, 0, 0);
 			MPI_Recv(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &status);
 
 			CharEncodingDictionary rcvEncodingsDict = {.number_of_chars = 0, .charEncoding = NULL};
@@ -99,10 +100,6 @@ int main() {
 	}
 
 	// encode_to_file(text, encodings, res->number_of_letters, count); 
-
-	// send encoding table to each process and each one encodes its portion of the text
-
-	// printCharFreqs(&allChars);	
 
 	freeBuffer(allChars.charFreqs);
 	freeBuffer(text);
