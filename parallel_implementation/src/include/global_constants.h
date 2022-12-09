@@ -10,12 +10,14 @@
 
 #define VERBOSE 3
 #define MAX_UNIQUE_LETTERS 100
+#define COUNT 3
+#define TREE_PRINT_TYPE 0
+#define TREE_PRINT_TYPE 0
+#define BIT_8 8 // number of bits in a byte
+
 #define ENCODED_FILE "HPC4DS-Project/parallel_implementation/output/encoded_file"
 #define SRC_FILE "HPC4DS-Project/parallel_implementation/text.txt"
 #define LOG_FILE "HPC4DS-Project/parallel_implementation/output/data.csv"
-
-#define COUNT 3
-#define TREE_PRINT_TYPE 0
 
 // they accept only char because it is 8 bits long
 #define IsBit(v, n)      (bool)((v >> n) & 1U)

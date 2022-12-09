@@ -65,7 +65,8 @@ int main() {
 		}
 
 		sortCharFreqs(&allChars);
-
+		appendToCharFreqs(&allChars, '\0', FIRST);
+		
 		// creates the huffman tree
 		LinkedListTreeNodeItem* root = createHuffmanTree(&allChars);
 

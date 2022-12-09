@@ -1,7 +1,7 @@
 #include "include/char_freq.h"
 
 // maybe we could improve the function by using the multythrading for loop
-void getCharFreqsFromText(CharFreqDictionary* dict, char text[], int len, int pid) {
+void getCharFreqsFromText(CharFreqDictionary* dict, char text[], long len, int pid) {
 	for (int i = 0; i < len; i++) {
 		char character = text[i]; 
 		bool assigned = false; 
