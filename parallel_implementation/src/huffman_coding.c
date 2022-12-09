@@ -87,7 +87,7 @@ int main() {
 
 		takeTime();
 		printTime("Time elapsed");
-		saveTime("HPC4DS-Project/parallel_implementation/output/data.csv", "Time elapsed");
+		saveTime(LOG_FILE, "Time elapsed");
 	}
 
 	if (pid != 0) {
