@@ -45,6 +45,7 @@ int main() {
 			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
 		else {
 			// eventually print an error message
+			printf("Error while sending all character frequencies to the master process\n");
 		}
 
 		freeBuffer(buffer);
@@ -78,10 +79,12 @@ int main() {
 		int bufferSize = 0;
 		BYTE *buffer = getMessage(&encodingsDict, MSG_ENCODING, &bufferSize);
 		if (buffer != NULL)
-			for (int i = 1; i < proc_number; i++)
+			for (int i = 1; i < proc_number; i++){
 				MPI_Send(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD);
+			}
 		else {
 			// eventually print an error message
+			printf("Error while sending encoding dictionary to the other processes\n");
 		}
 
 		freeBuffer(buffer);
@@ -101,6 +104,8 @@ int main() {
 
 			CharEncodingDictionary rcvEncodingsDict = {.number_of_chars = 0, .charEncoding = NULL};
 			setMessage(&rcvEncodingsDict, buffer);
+
+			printEncodings(&rcvEncodingsDict);
 
 			freeBuffer(buffer);
 		}

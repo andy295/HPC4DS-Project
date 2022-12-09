@@ -1,5 +1,6 @@
 #include "file_utils.h"
 
+
 int getFileSize(char* fileName) {
 	FILE* fp = fopen(fileName, "r"); 
 	fseek(fp, 0, SEEK_END); 

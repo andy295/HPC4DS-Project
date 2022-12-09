@@ -26,8 +26,8 @@
 
 typedef unsigned char BYTE;
 
-const char ENDTEXT = '\0';
-const char TREENODE = '$';
+#define ENDTEXT '\0'
+#define TREENODE '$'
 
 // enable only if we need
 // if at the end of the project we don't use it, we can remove all of them

@@ -40,6 +40,6 @@ void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionar
 void printEncodings(CharEncodingDictionary* dict) {
 	for (int i = 0; i < dict->number_of_chars; i++) {
 		printFormattedChar(dict->charEncoding[i].character);
-		printf(": %s\n\tlength: %d\n", dict->charEncoding[i].encoding, dict->charEncoding[i].length);
+		printf(": %s\t\nlength: %d\n", dict->charEncoding[i].encoding, dict->charEncoding[i].length);
 	}
 }
