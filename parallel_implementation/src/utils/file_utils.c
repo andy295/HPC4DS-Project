@@ -39,7 +39,7 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 		fread((*fileDest), fSize, 1, fp);
 		fclose(fp); 
 
-		(*fileDest)[fSize] = '\0';
+		(*fileDest)[fSize] = ENDTEXT;
 
 		#if VERBOSE <= 1
 			printf("process %d:\n%s\n", processId, *fileDest);
