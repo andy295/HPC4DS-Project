@@ -107,6 +107,15 @@ int main() {
 		printTime("Time elapsed");
 		saveTime(LOG_FILE, "Time elapsed");
 
+		int byteSizeOfTree; 
+		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
+		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree);
+
+		printf("Encoded tree size: %d bytes\n", byteSizeOfTree);
+		
+		BYTE endblock = ENDBLOCK; 
+		writeBufferToFile(ENCODED_FILE, &endblock, sizeof(BYTE));
+
 		int byteArrayIndex = 0;
 		BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, total_text_length, &byteArrayIndex);
 		writeBufferToFile(ENCODED_FILE, encodedText, byteArrayIndex);

@@ -28,6 +28,7 @@ typedef unsigned char BYTE;
 
 #define ENDTEXT '\0'
 #define TREENODE '$'
+#define ENDBLOCK '#'
 
 // enable only if we need
 // if at the end of the project we don't use it, we can remove all of them

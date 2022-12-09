@@ -142,3 +142,46 @@ void print2DUtil(TreeNode* root, int space)
 	// Process left child
 	print2DUtil(root->leftChild, space);
 }
+
+
+typedef struct {
+	BYTE character;
+	BYTE leftChild;
+	BYTE rightChild;
+} TreeArrayItem;
+
+
+int countTreeNodes(TreeNode* root) {
+	if (root == NULL)
+		return 0;
+	return 1 + countTreeNodes(root->leftChild) + countTreeNodes(root->rightChild);
+}
+
+void encodeTree(TreeNode* root, BYTE* treeArray, int index) {
+	if (root == NULL)
+		return;
+
+	TreeArrayItem* item = (TreeArrayItem*) &treeArray[index];
+	item->character = root->character;
+	item->leftChild = root->leftChild != NULL;
+	item->rightChild = root->rightChild != NULL;
+
+	// each node is 3 bytes, so we need to increment by 3 bytes
+	encodeTree(root->leftChild, treeArray, index + 3*sizeof(BYTE));
+	encodeTree(root->rightChild, treeArray, index + 3*sizeof(BYTE));
+}
+
+BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree) {
+	// tree in array form is
+	// 0: character
+	// 1: left child bool
+	// 2: right child bool
+
+	int treeSize = countTreeNodes(root);
+	BYTE* treeArray = malloc(sizeof(TreeArrayItem) * treeSize);
+	*byteSizeOfTree = sizeof(TreeArrayItem) * treeSize;
+
+	encodeTree(root, treeArray, 0);
+
+	return treeArray;
+}
