@@ -14,6 +14,8 @@ int main() {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
+	takeTime();
+
 	char *text = NULL;
 	long total_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
 
@@ -74,6 +76,10 @@ int main() {
 		}
 
 		freeBuffer(buffer);
+
+		takeTime();
+		printTime("Time elapsed");
+		saveTime("HPC4DS-Project/parallel_implementation/output/data.csv", "Time elapsed");
 	}
 
 	if (pid != 0) {

@@ -8,7 +8,7 @@
 #include "encoding.h"
 
 #include "../utils/file_utils.h"
-// #include "../utils/time_utils.c"
+#include "../utils/time_utils.h"
 // #include "../utils/print_utils.c"
 
 void freeBuffer(void* buffer);
