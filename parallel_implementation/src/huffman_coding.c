@@ -19,6 +19,20 @@ BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag) {
 	return buffer;
 }
 
+// function to write byte buffer to file
+void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize) {
+	FILE *file = fopen(filename, "wb");
+	if (file == NULL) {
+		printf("Error while opening file %s\n", filename);
+		return;
+	}
+
+	fwrite(buffer, sizeof(BYTE), bufferSize, file);
+	fclose(file);
+}
+
+
+
 int main() {
 	MPI_Init(NULL, NULL);
 
@@ -92,6 +106,11 @@ int main() {
 		takeTime();
 		printTime("Time elapsed");
 		saveTime(LOG_FILE, "Time elapsed");
+
+		int byteArrayIndex = 0;
+		BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, total_text_length, &byteArrayIndex);
+		writeBufferToFile(ENCODED_FILE, encodedText, byteArrayIndex);
+
 	}
 
 	if (pid != 0) {
@@ -105,13 +124,43 @@ int main() {
 			CharEncodingDictionary rcvEncodingsDict = {.number_of_chars = 0, .charEncoding = NULL};
 			setMessage(&rcvEncodingsDict, buffer);
 
-			printEncodings(&rcvEncodingsDict);
+			//printEncodings(&rcvEncodingsDict);
+
+			freeBuffer(buffer);
+
+			int byteArrayIndex = 0;
+			BYTE* encodedText = encodeStringToByteArray(text, &rcvEncodingsDict, total_text_length, &byteArrayIndex);
+
+			printf("Process %d\n", pid); 
+			printf("Encoded text length: %d\n", byteArrayIndex);
+			//printf("Encoded text: %s", encodedText);
+
+			// send to master process the encoded text
+			MPI_Send(encodedText, byteArrayIndex, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+
+			freeBuffer(encodedText);
+
+		}
+	}
+	// encode_to_file(text, encodings, res->number_of_letters, count); 
+
+	if (pid == 0){
+		for (int i = 1; i < proc_number; i++) {
+			MPI_Status status;
+			int bufferSize = 0;
+
+			BYTE *buffer = prepareForReceive(&status, &bufferSize, i, 0);
+			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
+
+			writeBufferToFile(ENCODED_FILE, buffer, bufferSize);
 
 			freeBuffer(buffer);
 		}
-	}
 
-	// encode_to_file(text, encodings, res->number_of_letters, count); 
+		int filesize = getFileSize(ENCODED_FILE);
+		printf("Encoded file size: %d\n", filesize);
+		printf("Original file size: %d\n", getFileSize(SRC_FILE));
+	}
 
 	freeBuffer(allChars.charFreqs);
 	freeBuffer(text);

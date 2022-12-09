@@ -22,3 +22,6 @@ extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDi
 
 extern bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, unsigned int depth);
 extern void printEncodings(CharEncodingDictionary* dict);
+
+void appendStringToByteArray(char* string, BYTE* byte_array, int* byteArrayIndex, int* charIndex, char* currentChar); 
+extern BYTE* encodeStringToByteArray(char* text, CharEncodingDictionary* encodingDict, int total_letters, int* byteArrayIndex); 

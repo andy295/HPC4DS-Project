@@ -43,3 +43,43 @@ void printEncodings(CharEncodingDictionary* dict) {
 		printf(": %s\t\nlength: %d\n", dict->charEncoding[i].encoding, dict->charEncoding[i].length);
 	}
 }
+
+
+
+void appendStringToByteArray(char* string, BYTE* byte_array, int* byteArrayIndex, int* charIndex, char* currentChar){
+	int stringLength = strlen(string); 
+	for (int k = 0; k < stringLength; k++){
+		
+		if (string[k] == '1'){
+			*currentChar |= 1 << *charIndex;
+		}
+
+		if (*charIndex == 7){
+			byte_array[*byteArrayIndex] = *currentChar; 
+			*byteArrayIndex = *byteArrayIndex + 1;
+			*charIndex = 0; 
+			*currentChar = 0; 
+		} else {
+			*charIndex += 1; 
+		} 
+	}
+}
+
+BYTE* encodeStringToByteArray(char* text, CharEncodingDictionary* encodingDict, int total_letters, int* byteArrayIndex){
+	int charIndex = 0; 
+	char c = 0;
+	BYTE* encoded_text = malloc(sizeof(BYTE) * total_letters); 
+
+	for (int i = 0; i < total_letters; i++) {
+		for (int j = 0; j < encodingDict->number_of_chars; j++) {
+			if (text[i] == encodingDict->charEncoding[j].character) {
+				appendStringToByteArray(encodingDict->charEncoding[j].encoding, encoded_text, byteArrayIndex, &charIndex, &c); 
+			}
+		}
+	}
+
+	// appends and writes custom end of file character
+	appendStringToByteArray(encodingDict->charEncoding[encodingDict->number_of_chars-1].encoding, encoded_text, byteArrayIndex, &charIndex, &c); 
+
+	return encoded_text; 
+}
