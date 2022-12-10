@@ -32,7 +32,7 @@ LinkedListTreeNodeItem* orderedAppendToFreq(LinkedListTreeNodeItem* start, Linke
 		return item; 
 	}
 
-	while(start->next != NULL) {
+	while (start->next != NULL) {
 		if (item->item->frequency < start->item->frequency) {
 			prev->next = item; 
 			item->next = start; 
@@ -142,14 +142,6 @@ void print2DUtil(TreeNode* root, int space)
 	// Process left child
 	print2DUtil(root->leftChild, space);
 }
-
-
-typedef struct {
-	BYTE character;
-	BYTE leftChild;
-	BYTE rightChild;
-} TreeArrayItem;
-
 
 int countTreeNodes(TreeNode* root) {
 	if (root == NULL)

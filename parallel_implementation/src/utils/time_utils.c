@@ -1,4 +1,3 @@
-
 #include "time_utils.h"
 
 double TimeUtils_lastTimeStamp = 0;
@@ -6,24 +5,23 @@ double TimeUtils_lastElapsedTime = 0;
 int TimeUtils_indexOfFile = -1;
 char* TimeUtils_lastFilename;
 
-void takeTime(){
+void takeTime() {
     double end = MPI_Wtime();
     TimeUtils_lastElapsedTime = end - TimeUtils_lastTimeStamp;
     TimeUtils_lastTimeStamp = end;
 }
 
-void printTime(char* label){
+void printTime(char* label) {
     printf("%s: %f\n", label, TimeUtils_lastElapsedTime);
 }
 
-double getTime(){
+double getTime() {
     return TimeUtils_lastElapsedTime;
 }
 
-void setTime(double time){
+void setTime(double time) {
     TimeUtils_lastElapsedTime = time;
 }
-
 
 // function to get number of lines in a file
 int getNumberOfLines(FILE *fp) {
@@ -31,14 +29,13 @@ int getNumberOfLines(FILE *fp) {
     char * line = NULL;
     size_t len = 0;
 
-    while (getline(&line, &len, fp) != -1) {
+    while (getline(&line, &len, fp) != -1)
         lines++;
-    }
 
     return lines;
 }
 
-void saveTime(char* filename, char* label){
+void saveTime(char* filename, char* label) {
     if (TimeUtils_lastFilename != filename) {
         TimeUtils_indexOfFile = -1;
         TimeUtils_lastFilename = filename;
@@ -58,9 +55,8 @@ void saveTime(char* filename, char* label){
     }
 
     // read index of last row from file
-    if (TimeUtils_indexOfFile == -1){
+    if (TimeUtils_indexOfFile == -1)
         TimeUtils_indexOfFile = getNumberOfLines(fp);
-    }
 
     // write to csv file
     fprintf(fp, "%d,%s,%f\n", TimeUtils_indexOfFile, label, TimeUtils_lastElapsedTime);

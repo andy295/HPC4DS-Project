@@ -20,16 +20,24 @@ typedef struct LinkedListTreeNodeItem {
 	struct LinkedListTreeNodeItem *next; 
 } LinkedListTreeNodeItem;
 
+typedef struct {
+	BYTE character;
+	BYTE leftChild;
+	BYTE rightChild;
+} TreeArrayItem;
+
 LinkedListTreeNodeItem* newNode(char character, int frequency);
 LinkedListTreeNodeItem* getMinFreq(LinkedListTreeNodeItem *start);
 LinkedListTreeNodeItem* orderedAppendToFreq(LinkedListTreeNodeItem *start, LinkedListTreeNodeItem *item);
 LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary *dict);
 
-extern LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary* dict);
+int countTreeNodes(TreeNode* root);
+void encodeTree(TreeNode* root, TreeArrayItem* treeArray, int* globalIndex);
 
-extern void printHuffmanTree(TreeNode* root, int depth);
 void print(TreeNode* root, int depth);
 void print2D(TreeNode* root);
 void print2DUtil(TreeNode* root, int space);
 
+extern LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary* dict);
 extern BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree);
+extern void printHuffmanTree(TreeNode* root, int depth);

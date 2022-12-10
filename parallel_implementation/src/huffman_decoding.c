@@ -1,6 +1,4 @@
-
 #include "include/huffman_decoding.h"
-
 
 TreeNode* readTreeFromFile(FILE* fp) {
 	TreeNode* node = malloc(sizeof(TreeNode));
@@ -23,7 +21,6 @@ TreeNode* readTreeFromFile(FILE* fp) {
 	return node;
 }
 
-
 int main() {
 	MPI_Init(NULL, NULL);
 
@@ -43,10 +40,8 @@ int main() {
 	if (pid != 0) {
 
 	} else {
-		
 
 	}
-
 
 	MPI_Finalize();
 

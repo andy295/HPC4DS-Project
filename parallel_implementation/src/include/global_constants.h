@@ -14,6 +14,9 @@
 #define TREE_PRINT_TYPE 0
 #define TREE_PRINT_TYPE 0
 #define BIT_8 8 // number of bits in a byte
+#define ENDTEXT '\0'
+#define TREENODE '$'
+#define ENDBLOCK '#'
 
 #define ENCODED_FILE "HPC4DS-Project/parallel_implementation/output/encoded_file"
 #define SRC_FILE "HPC4DS-Project/parallel_implementation/text.txt"
@@ -25,10 +28,6 @@
 #define ClrBit(v, n)     (v &= ~(1UL << n))
 
 typedef unsigned char BYTE;
-
-#define ENDTEXT '\0'
-#define TREENODE '$'
-#define ENDBLOCK '#'
 
 // enable only if we need
 // if at the end of the project we don't use it, we can remove all of them
