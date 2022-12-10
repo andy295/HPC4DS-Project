@@ -1,6 +1,5 @@
 #include "file_utils.h"
 
-
 int getFileSize(char* fileName) {
 	FILE* fp = fopen(fileName, "r"); 
 	fseek(fp, 0, SEEK_END); 
@@ -16,9 +15,8 @@ void printWorkDir(int processId) {
 	char cwd[2048];
    	if (getcwd(cwd, sizeof(cwd)) != NULL) {
     	printf("Process %d current working dir: %s\n", processId, cwd);
-   	} else {
+   	} else
 		perror("getcwd() error");
-   	}
 }
 
 long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number) {
@@ -52,6 +50,18 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 
 	printf("Error opening file %s\n", fileName);
 	return 0; 
+}
+
+// function to write byte buffer to file
+void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize) {
+	FILE *file = fopen(filename, "ab+");
+	if (file == NULL) {
+		printf("Error while opening file %s\n", filename);
+		return;
+	}
+
+	fwrite(buffer, sizeof(BYTE), bufferSize, file);
+	fclose(file);
 }
 
 // void encodeToFile(char* text, CharEncoding* encodings, int unique_letters, int total_letters){
