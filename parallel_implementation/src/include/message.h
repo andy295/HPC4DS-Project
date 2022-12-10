@@ -8,7 +8,8 @@
 enum Messages {
     // message number slave --> master
     MSG_DICTIONARY = 0,
-    MSG_ENCODING = 1,
+    MSG_ENCODING_DICTIONARY = 1,
+    MSG_ENCODING_TEXT = 2, // maybe we don't need it, and we can remove it
 };
 
 typedef struct MsgHeader {
@@ -32,11 +33,20 @@ typedef struct MsgCharEncodingDictionary {
     CharEncoding *charEncoding;
 } MsgCharEncodingDictionary;
 
-extern BYTE* getMessage(void *data, int msgType, int *bufferSize);
-extern void setMessage(void *data, BYTE *buffer);
+typedef struct MsgEncodingText { // maybe we don't need it, and we can remove it
+    MsgHeader header;
+    int BitsNr;
+    BYTE *text;
+} MsgEncodingText;
 
 BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary *dict, int *bufferSize);
 void deserializeMsgCharFreqDictionary(CharFreqDictionary *dict, BYTE *buffer);
 
 BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, int *bufferSize);
 void deserializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, BYTE *buffer);
+
+BYTE *serializeMsgEncodingText(EncodingText *data, int *bufferSize); // maybe we don't need it, and we can remove it
+void deserializeMsgEncodingText(EncodingText *data, BYTE *buffer); // maybe we don't need it, and we can remove it
+
+extern BYTE* getMessage(void *data, int msgType, int *bufferSize);
+extern void setMessage(void *data, BYTE *buffer);

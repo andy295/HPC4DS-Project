@@ -7,8 +7,12 @@ BYTE* getMessage(void* data, int msgType, int *bufferSize) {
 		return serializeMsgCharFreqDictionary((CharFreqDictionary*)data, bufferSize);
 		break;
 
-	case MSG_ENCODING:
+	case MSG_ENCODING_DICTIONARY:
 		return serializeMsgCharEncodingDictionary((CharEncodingDictionary*)data, bufferSize);
+		break;
+
+	case MSG_ENCODING_TEXT:
+		return serializeMsgEncodingText((EncodingText*)data, bufferSize);
 		break;
 	
 	default:
@@ -33,7 +37,7 @@ BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, int *buff
 	*bufferSize = sizeof(MsgCharEncodingDictionary);
 	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
 
-	MsgCharEncodingDictionary msg = {.header.id = MSG_ENCODING, .header.size = *bufferSize, .charsNr = dict->number_of_chars, .charEncoding = NULL};
+	MsgCharEncodingDictionary msg = {.header.id = MSG_ENCODING_DICTIONARY, .header.size = *bufferSize, .charsNr = dict->number_of_chars, .charEncoding = NULL};
 	memcpy(buffer, &msg, sizeof(MsgCharEncodingDictionary));
 
 	int totalStrLen = 0;
@@ -53,6 +57,21 @@ BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, int *buff
 	return buffer;
 }
 
+BYTE *serializeMsgEncodingText(EncodingText *data, int *bufferSize) {
+	int bytesNr = data->number_of_bits / 8;
+	if (data->number_of_bits % 8 != 0)
+		++bytesNr;
+	
+	*bufferSize = sizeof(MsgEncodingText) + (sizeof(BYTE) * bytesNr);
+	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
+
+	MsgEncodingText msg = {.header.id = MSG_ENCODING_TEXT, .header.size = *bufferSize, .BitsNr = data->number_of_bits, .text = NULL};
+	memcpy(buffer, &msg, sizeof(MsgEncodingText));
+	memcpy(buffer + sizeof(MsgEncodingText), data->text, sizeof(BYTE) * bytesNr);
+
+	return buffer;
+}
+
 void setMessage(void *data, BYTE *buffer) {
 	MsgGeneric *p = (MsgGeneric*)buffer;
 	int msgId = p->header.id;
@@ -62,8 +81,12 @@ void setMessage(void *data, BYTE *buffer) {
 		deserializeMsgCharFreqDictionary((CharFreqDictionary*)data, buffer);
 		break;
 
-	case MSG_ENCODING:
+	case MSG_ENCODING_DICTIONARY:
 		deserializeMsgCharEncodingDictionary((CharEncodingDictionary*)data, buffer);
+		break;
+
+	case MSG_ENCODING_TEXT:
+		deserializeMsgEncodingText((EncodingText*)data, buffer);
 		break;
 
 	default:
@@ -110,4 +133,18 @@ void deserializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, BYTE *bu
 		printf("\nReceived encoding dictionary with %d chars:\n", dict->number_of_chars);
 		printEncodings(dict);
 	#endif
+}
+
+void deserializeMsgEncodingText(EncodingText *data, BYTE *buffer) {
+	MsgEncodingText msg;
+	memcpy(&msg, buffer, sizeof(MsgEncodingText));
+
+	data->number_of_bits = msg.BitsNr;
+
+	int bytesNr = data->number_of_bits / 8;
+	if (data->number_of_bits % 8 != 0)
+		++bytesNr;
+	
+	data->text = malloc(sizeof(BYTE) * bytesNr);
+	memcpy(data->text, buffer + sizeof(MsgEncodingText), sizeof(BYTE) * bytesNr);
 }
