@@ -157,18 +157,21 @@ int countTreeNodes(TreeNode* root) {
 	return 1 + countTreeNodes(root->leftChild) + countTreeNodes(root->rightChild);
 }
 
-void encodeTree(TreeNode* root, BYTE* treeArray, int index) {
+void encodeTree(TreeNode* root, TreeArrayItem* treeArray, int* globalIndex) {
 	if (root == NULL)
 		return;
 
-	TreeArrayItem* item = (TreeArrayItem*) &treeArray[index];
-	item->character = root->character;
-	item->leftChild = root->leftChild != NULL;
-	item->rightChild = root->rightChild != NULL;
+	treeArray[*globalIndex].character = root->character;
+	treeArray[*globalIndex].leftChild = root->leftChild != NULL;
+	treeArray[*globalIndex].rightChild = root->rightChild != NULL;
 
 	// each node is 3 bytes, so we need to increment by 3 bytes
-	encodeTree(root->leftChild, treeArray, index + 3*sizeof(BYTE));
-	encodeTree(root->rightChild, treeArray, index + 3*sizeof(BYTE));
+	if (root->leftChild != NULL)
+		*globalIndex += 1;
+	encodeTree(root->leftChild, treeArray, globalIndex);
+	if (root->rightChild != NULL)
+		*globalIndex += 1;
+	encodeTree(root->rightChild, treeArray, globalIndex);
 }
 
 BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree) {
@@ -178,10 +181,11 @@ BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree) {
 	// 2: right child bool
 
 	int treeSize = countTreeNodes(root);
-	BYTE* treeArray = malloc(sizeof(TreeArrayItem) * treeSize);
+	TreeArrayItem* treeArray = malloc(sizeof(TreeArrayItem) * treeSize);
 	*byteSizeOfTree = sizeof(TreeArrayItem) * treeSize;
 
-	encodeTree(root, treeArray, 0);
+	int globalIndex = 0;
+	encodeTree(root, treeArray, &globalIndex);
 
-	return treeArray;
+	return (BYTE*)treeArray;
 }

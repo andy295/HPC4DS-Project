@@ -21,7 +21,7 @@ BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag) {
 
 // function to write byte buffer to file
 void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize) {
-	FILE *file = fopen(filename, "wb");
+	FILE *file = fopen(filename, "ab+");
 	if (file == NULL) {
 		printf("Error while opening file %s\n", filename);
 		return;
@@ -109,9 +109,12 @@ int main() {
 
 		int byteSizeOfTree; 
 		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
+		//printf("Encoded tree size: %d bytes\n", byteSizeOfTree);
+		//for (int i = 0; i < byteSizeOfTree; i++) {
+		//	printf("%d ", encodedTree[i]);
+		//}
+		
 		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree);
-
-		printf("Encoded tree size: %d bytes\n", byteSizeOfTree);
 		
 		BYTE endblock = ENDBLOCK; 
 		writeBufferToFile(ENCODED_FILE, &endblock, sizeof(BYTE));

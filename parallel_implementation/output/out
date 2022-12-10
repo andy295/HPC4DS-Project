@@ -1,10 +1,8 @@
-Time elapsed: 0.011254
-Process 2
-Encoded text length: 362
-Process 1
-Encoded text length: 366
-Process 3
-Encoded text length: 369
-Encoded tree size: 321 bytes
-Encoded file size: 2952
-Original file size: 20688
+Process 0: 
+`: 10
+Process 2: 
+`: 10
+Process 1: 
+Process 3: 
+`: 10
+`: 10
