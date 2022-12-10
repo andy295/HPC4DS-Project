@@ -9,7 +9,7 @@
 
 typedef struct CharEncoding {
 	char character; 
-	unsigned int length;
+	int length;
 	char* encoding; 
 } CharEncoding;
 
@@ -18,10 +18,20 @@ typedef struct CharEncodingDictionary {
 	CharEncoding *charEncoding; 
 } CharEncodingDictionary;
 
-extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionary *charFreqDict, TreeNode *root); 
+typedef struct EncodingText {
+	int number_of_bits;
+	BYTE *text;
+} EncodingText;
 
-extern bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, unsigned int depth);
+bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int depth);
+void appendStringToByteArray(char* string, BYTE* byte_array, int* byteArrayIndex, int* charIndex, char* currentChar); 
+
+extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionary *charFreqDict, TreeNode *root); 
+extern BYTE* encodeStringToByteArray(char* text, CharEncodingDictionary* encodingDict, int total_letters, int* byteArrayIndex);
 extern void printEncodings(CharEncodingDictionary* dict);
 
-void appendStringToByteArray(char* string, BYTE* byte_array, int* byteArrayIndex, int* charIndex, char* currentChar); 
-extern BYTE* encodeStringToByteArray(char* text, CharEncodingDictionary* encodingDict, int total_letters, int* byteArrayIndex); 
+int getNewBufferSize(int length, int totalLen); // maybe we don't need it, and we can remove it
+void addEncodedChar(EncodingText *encodedText, CharEncoding *encoding); // maybe we don't need it, and we can remove it
+void encodeChar(EncodingText *encodedText, CharEncodingDictionary *dict, char c); // maybe we don't need it, and we can remove it
+extern void encodeText(EncodingText *encodedText, CharEncodingDictionary *dict, char text[], long length); // maybe we don't need it, and we can remove it
+extern void decodeText(EncodingText *encodedText, CharEncodingDictionary *dict, char text[]); // maybe we don't need it, and we can remove it
