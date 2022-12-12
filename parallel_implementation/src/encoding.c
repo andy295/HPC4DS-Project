@@ -41,17 +41,18 @@ void appendStringToByteArray(char* string, BYTE* byte_array, int* byteArrayIndex
 	int stringLength = strlen(string); 
 	for (int k = 0; k < stringLength; k++) {
 		
-		if (string[k] == '1')
+		if (string[k] == '1'){
 			*currentChar |= 1 << *charIndex;
-
+		}
+		
 		if (*charIndex == 7){
 			byte_array[*byteArrayIndex] = *currentChar; 
 			*byteArrayIndex = *byteArrayIndex + 1;
 			*charIndex = 0; 
 			*currentChar = 0; 
-		}
-		else
+		} else{
 			*charIndex += 1;
+		}
 	}
 }
 

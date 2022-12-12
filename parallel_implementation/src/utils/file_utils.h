@@ -4,7 +4,7 @@
 
 extern int getFileSize(char* fileName);
 extern long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number);
-extern void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize);
+extern void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize, bool clearFile);
 
 extern void printWorkDir(int processId);
 

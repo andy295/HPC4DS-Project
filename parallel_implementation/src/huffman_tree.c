@@ -181,3 +181,7 @@ BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree) {
 
 	return (BYTE*)treeArray;
 }
+
+int getByteSizeOfTree(TreeNode* root) {
+	return sizeof(TreeArrayItem) * countTreeNodes(root);
+}

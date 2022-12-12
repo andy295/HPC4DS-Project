@@ -8,7 +8,7 @@ int getFileSize(char* fileName) {
 
 	fclose(fp); 
 
-	return fSize * 8; 
+	return fSize; 
 }
 
 void printWorkDir(int processId) {
@@ -53,8 +53,14 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 }
 
 // function to write byte buffer to file
-void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize) {
-	FILE *file = fopen(filename, "ab+");
+void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize, bool clearFile) {
+
+	FILE *file; 
+	// if clearFile is true, then we clear the file before writing, 
+	// we don't want to append to previous execution
+	if (clearFile) file = fopen(filename, "wb"); 
+	else file = fopen(filename, "ab+");
+
 	if (file == NULL) {
 		printf("Error while opening file %s\n", filename);
 		return;

@@ -32,6 +32,7 @@ int main() {
 
 	char *text = NULL;
 	long total_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
+	printf("Process %d: %ld characters read in bytes \n", pid, total_text_length);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	getCharFreqsFromText(&allChars, text, total_text_length, pid);
@@ -98,14 +99,19 @@ int main() {
 		//	printf("%d ", encodedTree[i]);
 		//}
 		
-		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree);
-		
-		BYTE endblock = ENDBLOCK; 
-		writeBufferToFile(ENCODED_FILE, &endblock, sizeof(BYTE));
+		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, true);
+		printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
+
+		// BYTE endblock = ENDBLOCK; 
+		// writeBufferToFile(ENCODED_FILE, &endblock, sizeof(BYTE));
 
 		int byteArrayIndex = 0;
 		BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, total_text_length, &byteArrayIndex);
-		writeBufferToFile(ENCODED_FILE, encodedText, byteArrayIndex);
+		writeBufferToFile(ENCODED_FILE, encodedText, byteArrayIndex, false);
+
+		printf("Process %d\n", pid); 
+		printf("Encoded text length: %d\n", byteArrayIndex);
+
 	}
 
 	if (pid != 0) {
@@ -146,13 +152,12 @@ int main() {
 			BYTE *buffer = prepareForReceive(&status, &bufferSize, i, 0);
 			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
 
-			writeBufferToFile(ENCODED_FILE, buffer, bufferSize);
+			writeBufferToFile(ENCODED_FILE, buffer, bufferSize, false);
 
 			freeBuffer(buffer);
 		}
 
-		int filesize = getFileSize(ENCODED_FILE);
-		printf("Encoded file size: %d\n", filesize);
+		printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));
 	}
 

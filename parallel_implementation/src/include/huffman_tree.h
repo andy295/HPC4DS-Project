@@ -41,3 +41,4 @@ void print2DUtil(TreeNode* root, int space);
 extern LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary* dict);
 extern BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree);
 extern void printHuffmanTree(TreeNode* root, int depth);
+extern int getByteSizeOfTree(TreeNode* root); 

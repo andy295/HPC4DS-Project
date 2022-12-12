@@ -1,8 +1,16 @@
-Process 0: 
-`: 10
-Process 2: 
-`: 10
-Process 1: 
-Process 3: 
-`: 10
-`: 10
+Process 0: 14318 characters read in bytes 
+Process 2: 14318 characters read in bytes 
+Process 3: 14318 characters read in bytes 
+Process 1: 14318 characters read in bytes 
+Time elapsed: 0.009412
+Process 3
+Encoded text length: 330
+Process 1
+Encoded text length: 335
+Process 2
+Encoded text length: 333
+Encoded tree size: 423
+Process 0
+Encoded text length: 339
+Encoded file size: 1760
+Original file size: 57272
