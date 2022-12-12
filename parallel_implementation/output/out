@@ -1,16 +1,145 @@
-Process 0: 14318 characters read in bytes 
-Process 2: 14318 characters read in bytes 
-Process 3: 14318 characters read in bytes 
-Process 1: 14318 characters read in bytes 
-Time elapsed: 0.009412
-Process 3
-Encoded text length: 330
-Process 1
-Encoded text length: 335
-Process 2
-Encoded text length: 333
-Encoded tree size: 423
-Process 0
-Encoded text length: 339
-Encoded file size: 1760
-Original file size: 57272
+Process 2: 
+Process 0: 
+$: 10
+ $: 10
+  $: 10
+   e: 10
+   $: 10
+    $: 10
+     $: 10
+      g: 10
+      $: 10
+       $: 10
+        ;: 10
+        $: 10
+         Process 1: 
+$: 10
+          L: 10
+          T: 10
+         $: 10
+          $: 10
+           !: 10
+           $: 10
+            [: 10
+            ]: 10
+          ¯: 10
+       $: 10
+        $: 10
+         ¹: 10
+         ²: 10
+        $: 10
+         $: 10
+          $: 10
+           F: 10
+           $: 10
+            U: 10
+            R: 10
+          Q: 10
+         E: 10
+     u: 10
+    n: 10
+  $: 10
+   $: 10
+    $: 10
+     m: 10
+     $: 10
+      Ã: 10
+      $: 10
+       Â: 10
+       q: 10
+    r: 10
+   $: 10
+    $: 10
+     s: 10
+     $: 10
+      p: 10
+      $: 10
+       $: 10
+        $: 10
+         $: 10
+          I: 10
+          $: 10
+           V: 10
+           S: 10
+         $: 10
+          A: 10
+          $: 10
+           $: 10
+            $: 10
+             B: 10
+             $: 10
+              â: 10
+              €: 10
+            $: 10
+             Z: 10
+             $: 10
+              ”: 10
+              $: 10
+               \0: 10
+               ³: 10
+           N: 10
+        b: 10
+       $: 10
+        $: 10
+         :: 10
+         »: 10
+        $: 10
+         «: 10
+         $: 10
+          ©: 10
+          C: 10
+    $: 10
+     l: 10
+     t: 10
+ $: 10
+  $: 10
+   $: 10
+    $: 10
+     d: 10
+     $: 10
+      v: 10
+      h: 10
+    $: 10
+     $: 10
+      $: 10
+       $: 10
+        z: 10
+        $: 10
+         $: 10
+          M: 10
+          $: 10
+           $: 10
+            ": 10
+            ¼: 10
+           $: 10
+            X: 10
+            G: 10
+         $: 10
+          P: 10
+          ?: 10
+       .: 10
+      ': 10
+     $: 10
+      ,: 10
+      $: 10
+       $: 10
+        $: 10
+         ¨: 10
+         $: 10
+          O: 10
+          D: 10
+        $: 10
+         ¬: 10
+          : 10
+       f: 10
+   $: 10
+    o: 10
+    $: 10
+     \n: 10
+     c: 10
+  $: 10
+   $: 10
+    i: 10
+    a: 10
+   space: 10
+Process 3: 

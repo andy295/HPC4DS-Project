@@ -9,12 +9,11 @@ TreeNode* readTreeFromFile(FILE* fp) {
 
 	char left = fgetc(fp);
 	char right = fgetc(fp);
-
-	if (left == '1') {
+	if (left) {
 		node->leftChild = readTreeFromFile(fp);
 	} 
 	
-	if (right == '1') {
+	if (right) {
 		node->rightChild = readTreeFromFile(fp);
 	}
 
@@ -35,12 +34,11 @@ int main() {
 
 	TreeNode* root = readTreeFromFile(fp2);
 	printf("Process %d: \n", pid);
-	printHuffmanTree(root, 0);
 
 	if (pid != 0) {
 
 	} else {
-
+		printHuffmanTree(root, 0);
 	}
 
 	MPI_Finalize();
