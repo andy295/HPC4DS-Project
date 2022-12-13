@@ -66,14 +66,20 @@ int main() {
 			
 			freeBuffer(buffer);
 		}
+		printf("Received all character frequencies\n"); 
 
 		sortCharFreqs(&allChars);
 		appendToCharFreqs(&allChars, ENDTEXT, FIRST);
+
+		printf("Sorted all character frequencies\n");
 		
 		// creates the huffman tree
 		LinkedListTreeNodeItem* root = createHuffmanTree(&allChars);
-
+		printf("Created the huffman tree\n");
 		getEncodingFromTree(&encodingsDict, &allChars, root->item);
+		printf("Created the encoding dictionary\n");
+
+		printHuffmanTree(root->item, 0);
 
 		// send the complete encoding table to each process
 		// and each one encodes its portion of the text
@@ -94,11 +100,7 @@ int main() {
 
 		int byteSizeOfTree; 
 		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
-		//printf("Encoded tree size: %d bytes\n", byteSizeOfTree);
-		//for (int i = 0; i < byteSizeOfTree; i++) {
-		//	printf("%d ", encodedTree[i]);
-		//}
-		
+
 		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, true);
 		printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
 
@@ -109,9 +111,17 @@ int main() {
 		BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, total_text_length, &byteArrayIndex);
 		writeBufferToFile(ENCODED_FILE, encodedText, byteArrayIndex, false);
 
+		printEncodings(&encodingsDict);
+
 		printf("Process %d\n", pid); 
 		printf("Encoded text length: %d\n", byteArrayIndex);
 
+		for (int i = 0; i < byteArrayIndex; i++) {
+			printf("%d ", encodedText[i]);
+		}
+
+		// problem is that the entire buffer is full of 1s
+		// because encodings are wrong, just "", "1" and "11"
 	}
 
 	if (pid != 0) {

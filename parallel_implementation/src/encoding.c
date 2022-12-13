@@ -10,7 +10,7 @@ bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int
 	} else {
 		if (root->leftChild != NULL) {
 			dst->encoding = realloc(dst->encoding, sizeof(char) * (depth+1));
-			dst->encoding[depth] = ENDTEXT; 
+			dst->encoding[depth] = '0'; 
 			found = findEncodingFromTree(character, root->leftChild, dst, depth+1); 
 		}
 

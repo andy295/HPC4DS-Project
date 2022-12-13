@@ -1,5 +1,46 @@
 #include "include/huffman_decoding.h"
 
+void decode_from_file(struct TreeNode* root){
+
+	FILE *fp2;
+	fp2 = fopen(ENCODED_FILE, "rb");
+
+	char c;
+	struct TreeNode* intermediateNode = root;
+
+	int endReached = 0;
+	while (fread(&c, sizeof(char), 1, fp2)) {
+
+		if (endReached == 1) {
+			break;
+		}
+
+		for (int i = 0; i < 8; i++) {
+			if (intermediateNode->character != '$') {
+
+				if (intermediateNode->character == '#'){
+					endReached = 1;
+					break;
+				}
+
+				printf("%c", intermediateNode->character);
+			
+
+				intermediateNode = root;
+			}
+
+			if (c & (1 << i)) {
+				intermediateNode = intermediateNode->rightChild;
+			} else {
+				intermediateNode = intermediateNode->leftChild;
+			}
+		}
+	}
+
+	fclose(fp2);
+}
+
+
 TreeNode* readTreeFromFile(FILE* fp) {
 	TreeNode* node = malloc(sizeof(TreeNode));
 	node->character = fgetc(fp);
@@ -33,12 +74,13 @@ int main() {
 	fp2 = fopen(ENCODED_FILE, "rb");
 
 	TreeNode* root = readTreeFromFile(fp2);
-	printf("Process %d: \n", pid);
 
 	if (pid != 0) {
 
 	} else {
 		printHuffmanTree(root, 0);
+
+		decode_from_file(root);
 	}
 
 	MPI_Finalize();
