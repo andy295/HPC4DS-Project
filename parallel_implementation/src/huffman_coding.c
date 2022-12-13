@@ -79,7 +79,7 @@ int main() {
 		getEncodingFromTree(&encodingsDict, &allChars, root->item);
 		printf("Created the encoding dictionary\n");
 
-		//printHuffmanTree(root->item, 0);
+		//printEncodings(&encodingsDict);
 
 		// send the complete encoding table to each process
 		// and each one encodes its portion of the text
@@ -112,17 +112,7 @@ int main() {
 		writeBufferToFile(ENCODED_FILE, encodedText, byteArrayIndex, false);
 
 		//printEncodings(&encodingsDict);
-
-		printf("Process %d\n", pid); 
-		printf("Encoded text length: %d\n", byteArrayIndex);
-
-		for (int i = 0; i < byteArrayIndex; i++) {
-			printf("%d ", encodedText[i]);
-		}
-		printf("\n");
-
-		// problem is that the entire buffer is full of 1s
-		// because encodings are wrong, just "", "1" and "11"
+		
 	}
 
 	if (pid != 0) {
@@ -141,10 +131,6 @@ int main() {
 
 			int byteArrayIndex = 0;
 			BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, processes_text_length, &byteArrayIndex);
-
-			printf("Process %d\n", pid); 
-			printf("Encoded text length: %d\n", byteArrayIndex);
-			//printf("Encoded text: %s", encodedText);
 
 			// send to master process the encoded text
 			MPI_Send(encodedText, byteArrayIndex, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
