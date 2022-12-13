@@ -31,11 +31,11 @@ int main() {
 	takeTime();
 
 	char *text = NULL;
-	long total_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
-	printf("Process %d: %ld characters read in bytes \n", pid, total_text_length);
+	long processes_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
+	printf("Process %d: %ld characters read in bytes \n", pid, processes_text_length);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
-	getCharFreqsFromText(&allChars, text, total_text_length, pid);
+	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
 
 	CharEncodingDictionary encodingsDict = {.number_of_chars = allChars.number_of_chars, .charEncoding = NULL};
 
@@ -79,7 +79,7 @@ int main() {
 		getEncodingFromTree(&encodingsDict, &allChars, root->item);
 		printf("Created the encoding dictionary\n");
 
-		printHuffmanTree(root->item, 0);
+		//printHuffmanTree(root->item, 0);
 
 		// send the complete encoding table to each process
 		// and each one encodes its portion of the text
@@ -108,10 +108,10 @@ int main() {
 		// writeBufferToFile(ENCODED_FILE, &endblock, sizeof(BYTE));
 
 		int byteArrayIndex = 0;
-		BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, total_text_length, &byteArrayIndex);
+		BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, processes_text_length, &byteArrayIndex);
 		writeBufferToFile(ENCODED_FILE, encodedText, byteArrayIndex, false);
 
-		printEncodings(&encodingsDict);
+		//printEncodings(&encodingsDict);
 
 		printf("Process %d\n", pid); 
 		printf("Encoded text length: %d\n", byteArrayIndex);
@@ -119,6 +119,7 @@ int main() {
 		for (int i = 0; i < byteArrayIndex; i++) {
 			printf("%d ", encodedText[i]);
 		}
+		printf("\n");
 
 		// problem is that the entire buffer is full of 1s
 		// because encodings are wrong, just "", "1" and "11"
@@ -139,7 +140,7 @@ int main() {
 			freeBuffer(buffer);
 
 			int byteArrayIndex = 0;
-			BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, total_text_length, &byteArrayIndex);
+			BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, processes_text_length, &byteArrayIndex);
 
 			printf("Process %d\n", pid); 
 			printf("Encoded text length: %d\n", byteArrayIndex);

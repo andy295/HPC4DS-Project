@@ -6,21 +6,20 @@
 
 #include "../utils/print_utils.h"
 
-typedef struct TreeNode {
+typedef struct TreeNode_t {
 	int frequency; 
 	char character; 
 
-	struct TreeNode *leftChild; 
-	struct TreeNode *rightChild; 
+	struct TreeNode_t *leftChild; 
+	struct TreeNode_t *rightChild; 
 } TreeNode; 
 
-typedef struct LinkedListTreeNodeItem {
+typedef struct LinkedListTreeNodeItem_t {
 	TreeNode *item; 
-
-	struct LinkedListTreeNodeItem *next; 
+	struct LinkedListTreeNodeItem_t *next; 
 } LinkedListTreeNodeItem;
 
-typedef struct {
+typedef struct TreeArrayItem_t {
 	BYTE character;
 	BYTE leftChild;
 	BYTE rightChild;

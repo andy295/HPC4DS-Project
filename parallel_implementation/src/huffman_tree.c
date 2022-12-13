@@ -55,7 +55,7 @@ LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary* dict) {
 	LinkedListTreeNodeItem* old; 
 	old = start; 
 	for (int i = 1; i < dict->number_of_chars; i++)	{
-		LinkedListTreeNodeItem* temp = newNode(dict->charFreqs[i].character, dict->charFreqs[i].frequency); 
+		LinkedListTreeNodeItem* temp = newNode(dict->charFreqs[i].character, dict->charFreqs[i].frequency);
 		old->next = temp; 
 		old = temp; 
 	}

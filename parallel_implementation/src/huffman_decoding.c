@@ -1,12 +1,17 @@
 #include "include/huffman_decoding.h"
 
-void decode_from_file(struct TreeNode* root){
+void decode_from_file(TreeNode* root){
 
 	FILE *fp2;
 	fp2 = fopen(ENCODED_FILE, "rb");
 
+	int nodes = countTreeNodes(root);
+	int treesize = nodes * 3;
+	// skip reading the tree 
+	fseek(fp2, treesize, SEEK_SET);
+
 	char c;
-	struct TreeNode* intermediateNode = root;
+	TreeNode* intermediateNode = root;
 
 	int endReached = 0;
 	while (fread(&c, sizeof(char), 1, fp2)) {
