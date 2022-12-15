@@ -1,12 +1,16 @@
-Process 0: 846 characters read in bytes 
-Process 2: 846 characters read in bytes 
-Process 1: 846 characters read in bytes 
-Process 3: 846 characters read in bytes 
-Received all character frequencies
-Sorted all character frequencies
-Created the huffman tree
-Created the encoding dictionary
-Encoded tree size: 166
-Encoded file size: 1960
-Original file size: 3384
-Time elapsed: 0.108710
+Number of blocks: 3, chars per block: 1
+Block 0: 1
+Block 1: 1
+Block 2: 1
+Number of blocks: 3, chars per block: 1
+Block 0: 1
+Block 1: 1
+Block 2: 1
+Number of blocks: 3, chars per block: 1
+Block 0: 1
+Block 1: 1
+Block 2: 1
+Number of blocks: 3, chars per block: 1
+Block 0: 1
+Block 1: 1
+Block 2: 1

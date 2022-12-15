@@ -100,6 +100,11 @@ int main() {
 		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, true);
 		printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
 
+		short dummyHeader[5] = {3, 1, 1, 1, 1};
+		writeBufferToFile(ENCODED_FILE, (BYTE*)dummyHeader, 5*sizeof(short), false);
+		int byteSizeOfHeader = 5*sizeof(short);
+		printf("Header size: %d\n", byteSizeOfHeader);
+
 		int byteArrayIndex = 0;
 		BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, processes_text_length, &byteArrayIndex);
 		writeBufferToFile(ENCODED_FILE, encodedText, byteArrayIndex, false);
