@@ -30,8 +30,3 @@ extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDi
 extern BYTE* encodeStringToByteArray(char* text, CharEncodingDictionary* encodingDict, int total_letters, int* byteArrayIndex);
 extern void printEncodings(CharEncodingDictionary* dict);
 
-int getNewBufferSize(int length, int totalLen); // maybe we don't need it, and we can remove it
-void addEncodedChar(EncodingText *encodedText, CharEncoding *encoding); // maybe we don't need it, and we can remove it
-void encodeChar(EncodingText *encodedText, CharEncodingDictionary *dict, char c); // maybe we don't need it, and we can remove it
-extern void encodeText(EncodingText *encodedText, CharEncodingDictionary *dict, char text[], long length); // maybe we don't need it, and we can remove it
-extern void decodeText(EncodingText *encodedText, CharEncodingDictionary *dict, char text[]); // maybe we don't need it, and we can remove it
