@@ -1,92 +1,12 @@
-$: 10
- $: 10
-  $: 10
-   i: 10
-   $: 10
-    r: 10
-    l: 10
-  $: 10
-   $: 10
-    $: 10
-     $: 10
-      g: 10
-      v: 10
-     c: 10
-    u: 10
-   $: 10
-    a: 10
-    s: 10
- $: 10
-  $: 10
-   $: 10
-    $: 10
-     $: 10
-      $: 10
-       $: 10
-        f: 10
-        $: 10
-         D: 10
-         N: 10
-       $: 10
-        $: 10
-         A: 10
-         U: 10
-        $: 10
-         Q: 10
-         $: 10
-          H: 10
-          C: 10
-      $: 10
-       $: 10
-        h: 10
-        $: 10
-         E: 10
-         \n: 10
-       q: 10
-     m: 10
-    t: 10
-   space: 10
-  $: 10
-   $: 10
-    $: 10
-     p: 10
-     d: 10
-    n: 10
-   $: 10
-    $: 10
-     o: 10
-     $: 10
-      .: 10
-      $: 10
-       b: 10
-       $: 10
-        $: 10
-         S: 10
-         $: 10
-          P: 10
-          $: 10
-           ,: 10
-           F: 10
-        $: 10
-         $: 10
-          $: 10
-           $: 10
-            \0: 10
-            B: 10
-           $: 10
-            V: 10
-            T: 10
-          L: 10
-         $: 10
-          M: 10
-          I: 10
-    e: 10
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Eros donec ac odio tempor orci dapibus ultrices in. Blandit massa enim nec dui nunc mattis. Mattis nunc sed blandit libero volutpat sed cras ornare. In cursus turpis massa tincidunt dui ut. In iaculis nunc sed augue. Magna fringilla urna porttitor rhoncus dolor purus. Eu lobortis elementum nibh tellus molestie nunc non blandit. Vel eros donec ac odio tempor. Condimentum mattis pellentesque id nibh tortor id aliquet lectus proin. Non odio euismod lacinia at.
-
-Lectus sit amet est placerat. Pellentesque eu tincidunt tortor aliquam. Fermentum leo vel orci porta. Tristique magna sit amet purus gravida quis. Egestas maecenas pharetra convallis posuere morbi leo. Mattis ullamcorper velit sed ullamcorper morbi tincidunt  pu are. Hendrerit dolor magna eget est lorem ipsum dolor sit amet. Nisl nunc mi ipsum faucibus vitae aliquet nec ullamcorper sit. Magna sit amet purus gravida quis. Arcu bibendum at varius vel pharetra vel turpis nunc. Dignissim convallis aenean et tortor at risus viverra adipiscing. Iaculis urna id volutpat lacus laoreet non curabitur gravida. Facilisis gravida neque convallis a cras semper auctor neque vitae. Ullamcorper eget nulla facilisi etiam dignissim diam. Aliquet porttitor lacus luctus accumsan tortor. In mollis nunc sed id semper risus in hendrerit gravida. Donec pretium vulputate sapien nec sagittis aliquam. Neque laoreet suspendisse interdum consectetur libero id faucibus nisl tincidunt.
-
-Ut aliquam purus sit amet. Amet nisl purus in mollis nunc sed id semper. Lacus vel facilisis volutpat est velit egestas. Lectus vestibul um mattis ullamcorper velit sed ullamcorper morbi tincidunt. Quis enim lobortis scelerisque fermentum dui. Urna duis convallis convallis tellus id. Quis lectus nulla at volutpat diam ut venenatis tellus. Molestie a iaculis at erat pellentesque adipiscing commodo. Massa eget egestas purus viverra. Id nibh tortor id aliquet lectus proin. Pellentesque elit eget gravida cum sociis natoque penatibus et. Lectus arcu bibendum at varius vel pharetra.
-
-Nisi porta lorem mollis aliquam. Urna duis convallis convallis tellus id. Et ultrices neque ornare aenean euismod elementum nisi. Aliquam vestibulum morbi blandit cursus risus at ultrices. Congue mauris rhoncus aenean vel. Eget nunc lobortis mattis aliquam faucibus purus in massa tempor. Consectetur adipiscing elit duis tristique sollicitudin nibh sit amet. Hac habitasse platea dictumst vestibultalcgtd cus est pellentesque elit ullamcorper. Pharetra vel turpis nunc eget lorem. Diam sollicitudin tempor id eu nisl. Aenean et tortor at risus. Purus sit amet volutpat consequat mauris nunc congue nisi vitae. Aliquet nec ullamcorper sit amet risus. Nulla pharetra diam sit amet nisl suscipit adipiscing. Eget egestas purus viverra accumsan in.
-
-Nullam eget felis eget nunc lobortis mattis. Eget nullam non nisi est. In fermentum posuere urna nec tincidunt praesent semper feugiat nibh. Nisi porta lorem mollis aliquam ut porttitor. Est pellentesque elit ullamcorper dignissim. Quisque sagittis purus sit amet volutpat consequat. Arcu bibendum at varius vel pharetra vel turpis. Scelerisque felis imperdiet proin fermentum leo. Dui accumsan sit amet nulla facilisi morbi tempus iaculis. Congue nisi vitae suscipit tellus mauris a diam maecenas
+Process 0: 846 characters read in bytes 
+Process 2: 846 characters read in bytes 
+Process 1: 846 characters read in bytes 
+Process 3: 846 characters read in bytes 
+Received all character frequencies
+Sorted all character frequencies
+Created the huffman tree
+Created the encoding dictionary
+Encoded tree size: 166
+Encoded file size: 1960
+Original file size: 3384
+Time elapsed: 0.108710

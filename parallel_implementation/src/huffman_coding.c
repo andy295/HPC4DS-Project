@@ -100,9 +100,6 @@ int main() {
 		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, true);
 		printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
 
-		// BYTE endblock = ENDBLOCK; 
-		// writeBufferToFile(ENCODED_FILE, &endblock, sizeof(BYTE));
-
 		int byteArrayIndex = 0;
 		BYTE* encodedText = encodeStringToByteArray(text, &encodingsDict, processes_text_length, &byteArrayIndex);
 		writeBufferToFile(ENCODED_FILE, encodedText, byteArrayIndex, false);

@@ -23,6 +23,7 @@ typedef struct EncodingText {
 	BYTE *text;
 } EncodingText;
 
+
 bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int depth);
 void appendStringToByteArray(char* string, BYTE* byte_array, int* byteArrayIndex, int* charIndex, char* currentChar); 
 
