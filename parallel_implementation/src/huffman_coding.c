@@ -94,10 +94,6 @@ int main() {
 
 		freeBuffer(buffer);
 
-		takeTime();
-		printTime("Time elapsed");
-		saveTime(LOG_FILE, "Time elapsed");
-
 		int byteSizeOfTree; 
 		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
 
@@ -157,6 +153,10 @@ int main() {
 		printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));
 	}
+
+	takeTime();
+	printTime("Time elapsed");
+	saveTime(LOG_FILE, "Time elapsed");
 
 	freeBuffer(allChars.charFreqs);
 	freeBuffer(text);

@@ -65,12 +65,11 @@ void appendToCharFreqs(CharFreqDictionary* dict, char character, int pos) {
 }
 
 void mergeCharFreqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size) {
-	int i, j;
-	for (i = 0; i < size; i++) {
+	for (int i = 0; i < size; i++) {
 		char character = charFreqs[i].character;
 		int frequency = charFreqs[i].frequency;
 		bool assigned = false;
-		for (j = 0; j < dict->number_of_chars && !assigned; j++) {
+		for (int j = 0; j < dict->number_of_chars && !assigned; j++) {
 			if (dict->charFreqs[j].character == character) {
 				dict->charFreqs[j].frequency += frequency;
 				assigned = true;
