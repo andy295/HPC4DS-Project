@@ -58,14 +58,14 @@ TreeNode* readTreeFromFile(FILE* fp) {
 
 typedef struct EncodedFileHeader {
 	short number_of_blocks;
-	short chars_per_block; 
+	//short chars_per_block; 
 	short *block_lengths;
 } EncodedFileHeader;
 
 EncodedFileHeader* readHeaderFromFile(FILE* fp) {
 	EncodedFileHeader* header = malloc(sizeof(EncodedFileHeader));
 	fread(&header->number_of_blocks, sizeof(short), 1, fp);
-	fread(&header->chars_per_block, sizeof(short), 1, fp);
+	//fread(&header->chars_per_block, sizeof(short), 1, fp);
 
 	header->block_lengths = malloc(sizeof(short) * header->number_of_blocks);
 	fread(header->block_lengths, sizeof(short), header->number_of_blocks, fp);
@@ -94,12 +94,26 @@ int main() {
 	fseek(fp2, 0, SEEK_SET);
 	fseek(fp2, treeByteSize, SEEK_SET);
 	EncodedFileHeader *header = readHeaderFromFile(fp2);
-	printf("Number of blocks: %d, chars per block: %d\n", header->number_of_blocks, header->chars_per_block);
-	for (int i = 0; i < header->number_of_blocks; i++) {
-		printf("Block %d: %d\n", i, header->block_lengths[i]);
-	}
-
 	int headerByteSize = 2*sizeof(short) + header->number_of_blocks * sizeof(short);
+
+	int idealBlocksPerProcess = header->number_of_blocks / proc_number;
+	if (pid == proc_number - 1) {
+		idealBlocksPerProcess += header->number_of_blocks % proc_number;
+	}
+	printf("Process %d: %d blocks\n", pid, idealBlocksPerProcess);
+
+	int bitsToProcess = 0;
+	for (int i = 0; i < idealBlocksPerProcess; i++) {
+		bitsToProcess += header->block_lengths[pid * idealBlocksPerProcess + i];
+	}
+	int bitsToSkip = 0;
+	for (int i = 0; i < pid * idealBlocksPerProcess; i++) {
+		bitsToSkip += header->block_lengths[i];
+	}
+	int startBit = treeByteSize*8 + headerByteSize*8 + bitsToSkip; 
+	int endBit = treeByteSize*8 + headerByteSize*8 + bitsToSkip + bitsToProcess;
+
+	printf("Process %d: %d - %d\n", pid, startBit, endBit);
 
 	//fseek(fp2, 0, SEEK_SET);
 	//fseek(fp2, treeByteSize + headerByteSize, SEEK_SET);

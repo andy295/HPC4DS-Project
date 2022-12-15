@@ -1,16 +1,8 @@
-Number of blocks: 3, chars per block: 1
-Block 0: 1
-Block 1: 1
-Block 2: 1
-Number of blocks: 3, chars per block: 1
-Block 0: 1
-Block 1: 1
-Block 2: 1
-Number of blocks: 3, chars per block: 1
-Block 0: 1
-Block 1: 1
-Block 2: 1
-Number of blocks: 3, chars per block: 1
-Block 0: 1
-Block 1: 1
-Block 2: 1
+Process 1: 1 blocks
+Process 1: 1436 - 1459
+Process 3: 1 blocks
+Process 3: 1504 - 1560
+Process 2: 1 blocks
+Process 2: 1459 - 1504
+Process 0: 1 blocks
+Process 0: 1424 - 1436
