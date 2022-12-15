@@ -154,26 +154,26 @@ void encodeTree(TreeNode* root, TreeArrayItem* treeArray, int* globalIndex) {
 		return;
 
 	treeArray[*globalIndex].character = root->character;
-	treeArray[*globalIndex].leftChild = root->leftChild != NULL;
-	treeArray[*globalIndex].rightChild = root->rightChild != NULL;
 
-	// each node is 3 bytes, so we need to increment by 3 bytes
+	if (root->leftChild != NULL)
+		SetBit(treeArray[*globalIndex].children, LEFT);
+	
+	if (root->rightChild != NULL)
+		SetBit(treeArray[*globalIndex].children, RIGHT);
+
 	if (root->leftChild != NULL)
 		*globalIndex += 1;
 	encodeTree(root->leftChild, treeArray, globalIndex);
+
 	if (root->rightChild != NULL)
 		*globalIndex += 1;
 	encodeTree(root->rightChild, treeArray, globalIndex);
 }
 
 BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree) {
-	// tree in array form is
-	// 0: character
-	// 1: left child bool
-	// 2: right child bool
 
 	int treeSize = countTreeNodes(root);
-	TreeArrayItem* treeArray = malloc(sizeof(TreeArrayItem) * treeSize);
+	TreeArrayItem* treeArray = calloc(treeSize, sizeof(TreeArrayItem));
 	*byteSizeOfTree = sizeof(TreeArrayItem) * treeSize;
 
 	int globalIndex = 0;

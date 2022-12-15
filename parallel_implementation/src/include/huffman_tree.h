@@ -6,6 +6,13 @@
 
 #include "../utils/print_utils.h"
 
+enum Childern {
+    LEFT = 0,
+    RIGHT = 1,
+
+	MAX_CHILDREN = 8
+};
+
 typedef struct TreeNode_t {
 	int frequency; 
 	char character; 
@@ -21,8 +28,7 @@ typedef struct LinkedListTreeNodeItem_t {
 
 typedef struct TreeArrayItem_t {
 	BYTE character;
-	BYTE leftChild;
-	BYTE rightChild;
+	BYTE children;
 } TreeArrayItem;
 
 LinkedListTreeNodeItem* newNode(char character, int frequency);
@@ -40,4 +46,4 @@ void print2DUtil(TreeNode* root, int space);
 extern LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary* dict);
 extern BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree);
 extern void printHuffmanTree(TreeNode* root, int depth);
-extern int getByteSizeOfTree(TreeNode* root); 
+extern int getByteSizeOfTree(TreeNode* root);
