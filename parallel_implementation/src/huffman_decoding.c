@@ -8,8 +8,12 @@ char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToS
 
 	int bitsProcessed = 0;
 	while (fread(&c, sizeof(char), 1, fp2)) {
-
 		for (int i = 0; i < 8; i++) {
+			if (bitsToSkip > 0) { // skip the initial bits, if any
+				bitsToSkip--;
+				continue;
+			}
+
 			if (bitsProcessed >= bitsToProcess) {
 				break;
 			}
@@ -17,8 +21,8 @@ char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToS
 
 			if (intermediateNode->character != '$') {
 
-				printf("%c", intermediateNode->character);
-			
+				//printf("%c", intermediateNode->character);
+				decodedText[(*numberOfChars)++] = intermediateNode->character;
 
 				intermediateNode = root;
 			}
@@ -32,6 +36,7 @@ char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToS
 	}
 
 	fclose(fp2);
+	return decodedText;
 }
 
 TreeNode* readTreeFromFile(FILE* fp) {
@@ -53,10 +58,15 @@ TreeNode* readTreeFromFile(FILE* fp) {
 	return node;
 }
 
+short* readBlockLengths(FILE* fp, int numberOfBlocks) {
+	short* blockLengths = malloc(sizeof(short) * numberOfBlocks);
+	fread(blockLengths, sizeof(short), numberOfBlocks, fp);
+	return blockLengths;
+}
+
 typedef struct EncodedFileHeader {
 	short number_of_blocks;
-	//short chars_per_block; 
-	short *block_lengths;
+	unsigned int encoded_text_byte_size; 
 } EncodedFileHeader;
 
 EncodedFileHeader* readHeaderFromFile(FILE* fp) {
@@ -83,13 +93,16 @@ int main() {
 	fp2 = fopen(ENCODED_FILE, "rb");
 
 	EncodedFileHeader *header = readHeaderFromFile(fp2);
-	int headerByteSize = 2*sizeof(short) + header->number_of_blocks * sizeof(short);
 
 	fseek(fp2, 0, SEEK_SET);
-	fseek(fp2, headerByteSize, SEEK_SET);
+	fseek(fp2, sizeof(EncodedFileHeader), SEEK_SET);
 	TreeNode* root = readTreeFromFile(fp2);
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
+
+	fseek(fp2, 0, SEEK_SET);
+	fseek(fp2, sizeof(EncodedFileHeader) + treeByteSize + header->encoded_text_byte_size, SEEK_SET);
+	short *blockLengths = readBlockLengths(fp2, header->number_of_blocks);
 
 	int idealBlocksPerProcess = header->number_of_blocks / proc_number;
 	if (pid == proc_number - 1) {
@@ -119,11 +132,8 @@ int main() {
 	int numberOfChars = 0;
 	char* decodedText = decode_from_file(fp2, root, endBit - startBit, remainderBits, &numberOfChars);
 
-
-	
-	//if (pid == 0) {
-	//	printHuffmanTree(root, 0);
-	//}
+	printf("Process %d: %d chars\n", pid, numberOfChars);
+	printf("Process %d: %s\n", pid, decodedText);
 
 	MPI_Finalize();
 
