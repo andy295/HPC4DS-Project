@@ -26,7 +26,11 @@ BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary* dict, int *bufferSize) 
 	*bufferSize = sizeof(MsgCharFreqDictionary) + (sizeof(CharFreq) * dict->number_of_chars);
 	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
 
-	MsgCharFreqDictionary msg = {.header.id = MSG_DICTIONARY, .header.size = *bufferSize, .charsNr = dict->number_of_chars, .charFreqs = NULL};
+	MsgCharFreqDictionary msg = {
+		.header.id = MSG_DICTIONARY,
+		.header.size = *bufferSize,
+		.charsNr = dict->number_of_chars,
+		.charFreqs = NULL};
 	memcpy(buffer, &msg, sizeof(MsgCharFreqDictionary));
 	memcpy(buffer + sizeof(MsgCharFreqDictionary), dict->charFreqs, sizeof(CharFreq) * dict->number_of_chars);
 
@@ -37,7 +41,11 @@ BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, int *buff
 	*bufferSize = sizeof(MsgCharEncodingDictionary);
 	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
 
-	MsgCharEncodingDictionary msg = {.header.id = MSG_ENCODING_DICTIONARY, .header.size = *bufferSize, .charsNr = dict->number_of_chars, .charEncoding = NULL};
+	MsgCharEncodingDictionary msg = {
+		.header.id = MSG_ENCODING_DICTIONARY,
+		.header.size = *bufferSize,
+		.charsNr = dict->number_of_chars,
+		.charEncoding = NULL};
 	memcpy(buffer, &msg, sizeof(MsgCharEncodingDictionary));
 
 	int totalStrLen = 0;
@@ -57,17 +65,22 @@ BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, int *buff
 	return buffer;
 }
 
-BYTE *serializeMsgEncodingText(EncodingText *data, int *bufferSize) {
-	int bytesNr = data->number_of_bits / 8;
-	if (data->number_of_bits % 8 != 0)
-		++bytesNr;
-	
-	*bufferSize = sizeof(MsgEncodingText) + (sizeof(BYTE) * bytesNr);
+BYTE *serializeMsgEncodingText(EncodingText *encodingText, int *bufferSize) {
+	int posSize = sizeof(short) * encodingText->nr_of_pos;
+	int encTextSize = sizeof(BYTE) * encodingText->nr_of_bytes;
+	*bufferSize = sizeof(MsgEncodingText) + posSize + encTextSize;
+
 	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
 
-	MsgEncodingText msg = {.header.id = MSG_ENCODING_TEXT, .header.size = *bufferSize, .BitsNr = data->number_of_bits, .text = NULL};
+	MsgEncodingText msg = {
+		.header.id = MSG_ENCODING_TEXT,
+		.header.size = *bufferSize,
+		.nrOfPos = encodingText->nr_of_pos,
+		.nrOfBytes = encodingText->nr_of_bytes, 
+		.positions = NULL, .text = NULL};
 	memcpy(buffer, &msg, sizeof(MsgEncodingText));
-	memcpy(buffer + sizeof(MsgEncodingText), data->text, sizeof(BYTE) * bytesNr);
+	memcpy(buffer + sizeof(MsgEncodingText), encodingText->positions, posSize);
+	memcpy(buffer + sizeof(MsgEncodingText) + posSize, encodingText->encodedText, encTextSize);
 
 	return buffer;
 }
@@ -135,16 +148,18 @@ void deserializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, BYTE *bu
 	#endif
 }
 
-void deserializeMsgEncodingText(EncodingText *data, BYTE *buffer) {
+void deserializeMsgEncodingText(EncodingText *encodingText, BYTE *buffer) {
 	MsgEncodingText msg;
 	memcpy(&msg, buffer, sizeof(MsgEncodingText));
 
-	data->number_of_bits = msg.BitsNr;
+	int posSize = sizeof(short) * msg.nrOfPos;
+	int encTextSize = sizeof(BYTE) * msg.nrOfBytes;
 
-	int bytesNr = data->number_of_bits / 8;
-	if (data->number_of_bits % 8 != 0)
-		++bytesNr;
-	
-	data->text = malloc(sizeof(BYTE) * bytesNr);
-	memcpy(data->text, buffer + sizeof(MsgEncodingText), sizeof(BYTE) * bytesNr);
+	encodingText->nr_of_pos = msg.nrOfPos;
+	encodingText->positions = malloc(sizeof(short) * encodingText->nr_of_pos);
+	memcpy(encodingText->positions, buffer + sizeof(MsgEncodingText), posSize);
+
+	encodingText->nr_of_bytes = msg.nrOfBytes;
+	encodingText->encodedText = malloc(sizeof(BYTE) * encodingText->nr_of_bytes);
+	memcpy(encodingText->encodedText, buffer + sizeof(MsgEncodingText) + posSize, encTextSize);
 }
