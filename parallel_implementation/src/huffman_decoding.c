@@ -1,23 +1,21 @@
 #include "include/huffman_decoding.h"
 
-void decode_from_file(FILE* fp2, TreeNode* root){
+char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToSkip, int* numberOfChars){
 	char c;
 	TreeNode* intermediateNode = root;
 
-	int endReached = 0;
+	char* decodedText = malloc(sizeof(char) * bitsToProcess);
+
+	int bitsProcessed = 0;
 	while (fread(&c, sizeof(char), 1, fp2)) {
 
-		if (endReached == 1) {
-			break;
-		}
-
 		for (int i = 0; i < 8; i++) {
-			if (intermediateNode->character != '$') {
+			if (bitsProcessed >= bitsToProcess) {
+				break;
+			}
+			bitsProcessed++;
 
-				if (intermediateNode->character == '#'){
-					endReached = 1;
-					break;
-				}
+			if (intermediateNode->character != '$') {
 
 				printf("%c", intermediateNode->character);
 			
@@ -55,7 +53,6 @@ TreeNode* readTreeFromFile(FILE* fp) {
 	return node;
 }
 
-
 typedef struct EncodedFileHeader {
 	short number_of_blocks;
 	//short chars_per_block; 
@@ -73,7 +70,6 @@ EncodedFileHeader* readHeaderFromFile(FILE* fp) {
 	return header;
 }
 
-
 int main() {
 	MPI_Init(NULL, NULL);
 
@@ -86,15 +82,14 @@ int main() {
     FILE *fp2;
 	fp2 = fopen(ENCODED_FILE, "rb");
 
-	TreeNode* root = readTreeFromFile(fp2);
-
-	int nodes = countTreeNodes(root);
-	int treeByteSize = nodes * sizeof(TreeArrayItem);
-
-	fseek(fp2, 0, SEEK_SET);
-	fseek(fp2, treeByteSize, SEEK_SET);
 	EncodedFileHeader *header = readHeaderFromFile(fp2);
 	int headerByteSize = 2*sizeof(short) + header->number_of_blocks * sizeof(short);
+
+	fseek(fp2, 0, SEEK_SET);
+	fseek(fp2, headerByteSize, SEEK_SET);
+	TreeNode* root = readTreeFromFile(fp2);
+	int nodes = countTreeNodes(root);
+	int treeByteSize = nodes * sizeof(TreeArrayItem);
 
 	int idealBlocksPerProcess = header->number_of_blocks / proc_number;
 	if (pid == proc_number - 1) {
@@ -115,10 +110,17 @@ int main() {
 
 	printf("Process %d: %d - %d\n", pid, startBit, endBit);
 
-	//fseek(fp2, 0, SEEK_SET);
-	//fseek(fp2, treeByteSize + headerByteSize, SEEK_SET);
-	//decode_from_file(fp2, root);
-//
+	// fseek works with bytes, not bits,
+	// so we first adjust the file cursor to the nearest byte, then to the bit
+	int startByte = startBit / 8;
+	int remainderBits = startBit % 8;
+	fseek(fp2, 0, SEEK_SET);
+	fseek(fp2, startByte, SEEK_SET);
+	int numberOfChars = 0;
+	char* decodedText = decode_from_file(fp2, root, endBit - startBit, remainderBits, &numberOfChars);
+
+
+	
 	//if (pid == 0) {
 	//	printHuffmanTree(root, 0);
 	//}
