@@ -15,6 +15,8 @@
 #define BIT_8 8 // number of bits in a byte
 #define ENDTEXT '\0'
 #define TREENODE '$'
+#define ENDBLOCK '#'
+#define CHARS_PER_BLOCK 15 // just for test
 
 #define ENCODED_FILE "HPC4DS-Project/parallel_implementation/output/encoded_file"
 #define SRC_FILE "HPC4DS-Project/parallel_implementation/text.txt"

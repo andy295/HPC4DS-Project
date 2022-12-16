@@ -15,9 +15,9 @@ bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int
 		}
 
 		if (!found && root->rightChild != NULL) {
-			if (!found){
+			if (!found)
 				dst->encoding = realloc(dst->encoding, sizeof(char) * (depth+1));
-			}
+
 			dst->encoding[depth] = '1';
 			found = findEncodingFromTree(character, root->rightChild, dst, depth+1); 
 		}
@@ -39,39 +39,51 @@ void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionar
 	}
 }
 
-void appendStringToByteArray(char* string, BYTE* byte_array, int* byteArrayIndex, int* charIndex, char* currentChar) {
-	int stringLength = strlen(string); 
-	for (int k = 0; k < stringLength; k++) {
+void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, int* charIndex, char* currentChar) {
+	BYTE *byte_array = encodingText->encodedText;
+	int *byteArrayIndex = &encodingText->nr_of_bytes;
+
+	for (int k = 0; k < charEncoding->length; k++) {
 		
-		if (string[k] == '1'){
-			*currentChar |= 1 << *charIndex;
-		}
+		if (charEncoding->encoding[k] == '1')
+			SetBit(*currentChar, *charIndex);
 		
-		if (*charIndex == 7){
+		if (*charIndex == 7) {
 			byte_array[*byteArrayIndex] = *currentChar; 
-			*byteArrayIndex = *byteArrayIndex + 1;
+			++(*byteArrayIndex);
 			*charIndex = 0; 
 			*currentChar = 0; 
-		} else{
-			*charIndex += 1;
 		}
+		else
+			++(*charIndex);
 	}
 }
 
-BYTE* encodeStringToByteArray(char* text, CharEncodingDictionary* encodingDict, int total_letters, int* byteArrayIndex) {
+void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_letters) {
 	int charIndex = 0; 
 	char c = 0;
-	BYTE* encoded_text = malloc(sizeof(BYTE) * total_letters); 
 
-	for (int i = 0; i < total_letters; i++)
+	encodingText->nr_of_pos =  (encodingText->nr_of_pos % CHARS_PER_BLOCK != 0) ? (total_letters / CHARS_PER_BLOCK) + 1 : total_letters / CHARS_PER_BLOCK;
+	encodingText->positions = malloc(sizeof(short) * encodingText->nr_of_pos); 
+
+	encodingText->encodedText = malloc(sizeof(BYTE) * total_letters); 
+
+	for (int i = 0; i < total_letters; i++) {
 		for (int j = 0; j < encodingDict->number_of_chars; j++)
 			if (text[i] == encodingDict->charEncoding[j].character)
-				appendStringToByteArray(encodingDict->charEncoding[j].encoding, encoded_text, byteArrayIndex, &charIndex, &c);
+				appendStringToByteArray(&encodingDict->charEncoding[j], encodingText, &charIndex, &c);
 
+		if (i % CHARS_PER_BLOCK == 0 && i > 0) {
+			int idx = (i / CHARS_PER_BLOCK) - 1;
+			encodingText->positions[idx] = encodingText->nr_of_bytes + charIndex;
+		}
+	}
+
+	// todo realloc encoded text if its size is smaller than the default one
+
+	// maybe we don't need it
 	// appends and writes custom end of file character
-	appendStringToByteArray(encodingDict->charEncoding[encodingDict->number_of_chars-1].encoding, encoded_text, byteArrayIndex, &charIndex, &c); 
-
-	return encoded_text; 
+	// appendStringToByteArray(&encodingDict->charEncoding[encodingDict->number_of_chars-1], encodingText, &charIndex, &c); 
 }
 
 void printEncodings(CharEncodingDictionary* dict) {
