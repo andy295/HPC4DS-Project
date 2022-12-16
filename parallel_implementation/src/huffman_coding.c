@@ -66,6 +66,7 @@ int main() {
 			
 			freeBuffer(buffer);
 		}
+
 		printf("Received all character frequencies\n"); 
 
 		sortCharFreqs(&allChars);
@@ -102,7 +103,7 @@ int main() {
 		printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
 
 		// encode the text for process 0
-		EncodingText encodingText = {.nr_of_pos = 0, .nr_of_bytes = 0, .positions = NULL, .encodedText = NULL};
+		EncodingText encodingText = {.nr_of_pos = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .positions = NULL, .encodedText = NULL};
 		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
 		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, false);
 

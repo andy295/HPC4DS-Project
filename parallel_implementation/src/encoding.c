@@ -39,28 +39,27 @@ void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionar
 	}
 }
 
-void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, int* charIndex, char* currentChar) {
+void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char* currentChar) {
 	BYTE *byte_array = encodingText->encodedText;
 	int *byteArrayIndex = &encodingText->nr_of_bytes;
 
 	for (int k = 0; k < charEncoding->length; k++) {
 		
 		if (charEncoding->encoding[k] == '1')
-			SetBit(*currentChar, *charIndex);
+			SetBit(*currentChar, encodingText->nr_of_bits);
 		
-		if (*charIndex == 7) {
+		if (encodingText->nr_of_bits == 7) {
 			byte_array[*byteArrayIndex] = *currentChar; 
 			++(*byteArrayIndex);
-			*charIndex = 0; 
+			encodingText->nr_of_bits = 0; 
 			*currentChar = 0; 
 		}
 		else
-			++(*charIndex);
+			++encodingText->nr_of_bits;
 	}
 }
 
 void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_letters) {
-	int charIndex = 0; 
 	char c = 0;
 
 	encodingText->nr_of_pos =  (encodingText->nr_of_pos % CHARS_PER_BLOCK != 0) ? (total_letters / CHARS_PER_BLOCK) + 1 : total_letters / CHARS_PER_BLOCK;
@@ -71,15 +70,17 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary*
 	for (int i = 0; i < total_letters; i++) {
 		for (int j = 0; j < encodingDict->number_of_chars; j++)
 			if (text[i] == encodingDict->charEncoding[j].character)
-				appendStringToByteArray(&encodingDict->charEncoding[j], encodingText, &charIndex, &c);
+				appendStringToByteArray(&encodingDict->charEncoding[j], encodingText, &c);
 
 		if (i % CHARS_PER_BLOCK == 0 && i > 0) {
 			int idx = (i / CHARS_PER_BLOCK) - 1;
-			encodingText->positions[idx] = encodingText->nr_of_bytes + charIndex;
+			encodingText->positions[idx] = (encodingText->nr_of_bytes * BIT_8) + encodingText->nr_of_bits;
 		}
 	}
 
-	// todo realloc encoded text if its size is smaller than the default one
+	// reduce encoded text size if this last is smaller than the allocated one
+	if (sizeof(BYTE) * total_letters > sizeof(BYTE) * encodingText->nr_of_bytes)
+		encodingText->encodedText = realloc(encodingText->encodedText, sizeof(BYTE) * encodingText->nr_of_bytes);
 
 	// maybe we don't need it
 	// appends and writes custom end of file character

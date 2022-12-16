@@ -19,14 +19,15 @@ typedef struct CharEncodingDictionary {
 } CharEncodingDictionary;
 
 typedef struct EncodingText {
-	int nr_of_pos;
-	int nr_of_bytes;
+	int nr_of_pos; // number of elemnts in the positions array
+	int nr_of_bytes; // number of bytes in the encodedText array
+	int nr_of_bits; // number of used bits in the last byte of the encodedText array
 	short *positions;
 	BYTE *encodedText;
 } EncodingText;
 
 bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int depth);
-void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, int* charIndex, char* currentChar);
+void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char* currentChar);
 
 extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionary *charFreqDict, TreeNode *root); 
 extern void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_letters);
