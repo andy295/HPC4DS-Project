@@ -39,6 +39,9 @@ int main() {
 
 	CharEncodingDictionary encodingsDict = {.number_of_chars = allChars.number_of_chars, .charEncoding = NULL};
 
+	LinkedListTreeNodeItem* root = NULL;
+	EncodingText encodingText = {.nr_of_pos = 0, .nr_of_bytes = 0, .positions = NULL, .encodedText = NULL};
+
 	if (pid != 0) {
 		int bufferSize = 0;
 		BYTE *buffer = getMessage(&allChars, MSG_DICTIONARY, &bufferSize);
@@ -67,20 +70,12 @@ int main() {
 			freeBuffer(buffer);
 		}
 
-		printf("Received all character frequencies\n"); 
-
 		sortCharFreqs(&allChars);
 		appendToCharFreqs(&allChars, ENDTEXT, FIRST);
 
-		printf("Sorted all character frequencies\n");
-		
 		// creates the huffman tree
-		LinkedListTreeNodeItem* root = createHuffmanTree(&allChars);
-		printf("Created the huffman tree\n");
+		root = createHuffmanTree(&allChars);
 		getEncodingFromTree(&encodingsDict, &allChars, root->item);
-		printf("Created the encoding dictionary\n");
-
-		//printEncodings(&encodingsDict);
 
 		// send the complete encoding table to each process
 		// and each one encodes its portion of the text
@@ -95,62 +90,62 @@ int main() {
 
 		freeBuffer(buffer);
 
-		int byteSizeOfTree; 
-		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
+		// encode the text for process 0
+		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
+	}
+
+	// each process receives the encoding dictionary 
+	// and encodes its portion of the text 
+	// then sends the encoded text to the master process
+	if (pid != 0) {
+		MPI_Status status;
+		int bufferSize = 0;
+
+		BYTE *buffer = prepareForReceive(&status, &bufferSize, 0, 0);
+		MPI_Recv(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &status);
+
+		encodingsDict.number_of_chars = 0;
+		setMessage(&encodingsDict, buffer);
+
+		freeBuffer(buffer);
+
+		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
+
+		// send to master process the encoded text
+		bufferSize = 0;
+		buffer = getMessage(&encodingText, MSG_ENCODING_TEXT, &bufferSize);
+
+		if (buffer != NULL && bufferSize > 0)
+			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+		else
+			// eventually print an error message
+			printf("Error while sending encoded text to process 0\n");
+
+		freeBuffer(buffer);
+	}
+
+	// master process receives the encoded text from each process
+	// and writes it to the file
+	if (pid == 0) {
+		// write header to file
+		int indexOfNrOfBytes = sizeof(short);
+		BYTE* nr_of_pos = (BYTE*)&encodingText.nr_of_pos; // explicit cast to BYTE*, removes warning
+		writeBufferToFile(ENCODED_FILE, nr_of_pos, sizeof(int), true);
+		// write garbage, still needed to keep space for this short
+		BYTE* nr_of_bytes = (BYTE*)&encodingText.nr_of_bytes; 
+		writeBufferToFile(ENCODED_FILE, nr_of_bytes, sizeof(int), false);
+		BYTE* nr_of_bits = (BYTE*)&encodingText.nr_of_bits;
+		writeBufferToFile(ENCODED_FILE, nr_of_bits, sizeof(int), false);
+		printf("Header size: %lu\n", indexOfNrOfBytes + 2 * sizeof(short));
 
 		// write the encoded tree to the file
-		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, true);
+		int byteSizeOfTree; 
+		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
+		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, false);
 		printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
 
-		// encode the text for process 0
-		EncodingText encodingText = {.nr_of_pos = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .positions = NULL, .encodedText = NULL};
-		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
-		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, false);
-
-		// write the start positions of each encoded block to the file
-		// we have to wait before writing the header because we don't know the positions coming from the other processes
-		int byteSizeOfHeader = encodingText.nr_of_pos * sizeof(short);
-		writeBufferToFile(ENCODED_FILE, (BYTE*)encodingText.positions, byteSizeOfHeader, false);
-		printf("Header size: %d\n", byteSizeOfHeader);
-
-		// write the encoded text to file
-		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, false);
-
-		//printEncodings(&encodingsDict);
-	}
-
-	EncodingText encodingText = {.nr_of_pos = 0, .nr_of_bytes = 0, .positions = NULL, .encodedText = NULL};
-	if (pid != 0) {
-		for (int i = 1; i < proc_number; i++) {
-			MPI_Status status;
-			int bufferSize = 0;
-
-			BYTE *buffer = prepareForReceive(&status, &bufferSize, 0, 0);
-			MPI_Recv(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &status);
-
-			encodingsDict.number_of_chars = 0;
-			setMessage(&encodingsDict, buffer);
-			//printEncodings(&rcvEncodingsDict);
-
-			freeBuffer(buffer);
-
-			encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
-
-			// send to master process the encoded text
-			bufferSize = 0;
-			buffer = getMessage(&encodingText, MSG_ENCODING_TEXT, &bufferSize);
-
-			if (buffer != NULL && bufferSize > 0)
-				MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-			else
-				// eventually print an error message
-				printf("Error while sending encoded text to process 0\n");
-
-			freeBuffer(buffer);
-		}
-	}
-
-	if (pid == 0) {
+		// receive the encoded text from each process
+		// store in unique buffer
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
 			int bufferSize = 0;
@@ -158,20 +153,33 @@ int main() {
 			BYTE *buffer = prepareForReceive(&status, &bufferSize, i, 0);
 			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
 
-			setMessage(&encodingText, buffer);	
-
-			writeBufferToFile(ENCODED_FILE, buffer, bufferSize, false);
-
+			EncodingText temp;
+			setMessage(&temp, buffer);
+			// not sure if this leaves spaces between bytes... probably yes
+			// but we may make it work with the block sizes	
+			mergeEncodedText(&encodingText, &temp);
 			freeBuffer(buffer);
 		}
 
+		// write all the encoded text to file
+		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, false);
+
+		// write the positions array to file
+		BYTE* positions = (BYTE*)&encodingText.positions;
+		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_pos * sizeof(short), false);
+
+		// go back and write number of bytes
+		nr_of_bytes = (BYTE*)&encodingText.nr_of_bytes;
+		writeBufferToFileAtBytePosition(ENCODED_FILE, nr_of_bytes, sizeof(int), indexOfNrOfBytes);
+
 		printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));
+	
+		takeTime();
+		printTime("Time elapsed");
+		saveTime(LOG_FILE, "Time elapsed");
 	}
 
-	takeTime();
-	printTime("Time elapsed");
-	saveTime(LOG_FILE, "Time elapsed");
 
 	freeBuffer(allChars.charFreqs);
 	freeBuffer(text);

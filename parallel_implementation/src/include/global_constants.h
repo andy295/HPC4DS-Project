@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <mpi.h>
 #include <unistd.h> // get current directory
+#include <math.h>
 
 #define VERBOSE 3
 #define MAX_UNIQUE_LETTERS 100

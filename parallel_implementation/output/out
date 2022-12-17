@@ -1,8 +1,9 @@
-Process 1: 1 blocks
-Process 1: 1436 - 1459
-Process 3: 1 blocks
-Process 3: 1504 - 1560
-Process 2: 1 blocks
-Process 2: 1459 - 1504
-Process 0: 1 blocks
-Process 0: 1424 - 1436
+Process 1: 846 characters read in bytes 
+Process 2: 846 characters read in bytes 
+Process 0: 846 characters read in bytes 
+Process 3: 846 characters read in bytes 
+Header size: 6
+Encoded tree size: 166
+Encoded file size: 2421
+Original file size: 3384
+Time elapsed: 0.074355

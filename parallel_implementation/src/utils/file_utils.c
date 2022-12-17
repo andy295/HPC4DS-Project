@@ -70,6 +70,18 @@ void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize, bool clearF
 	fclose(file);
 }
 
+void writeBufferToFileAtBytePosition(char *filename, BYTE *buffer, int bufferSize, int bytePosition) {
+	FILE *file = fopen(filename, "ab+");
+	if (file == NULL) {
+		printf("Error while opening file %s\n", filename);
+		return;
+	}
+
+	fseek(file, bytePosition, SEEK_SET);
+	fwrite(buffer, sizeof(BYTE), bufferSize, file);
+	fclose(file);
+}
+
 // void encodeToFile(char* text, CharEncoding* encodings, int unique_letters, int total_letters){
 	
 // 	FILE *fp;

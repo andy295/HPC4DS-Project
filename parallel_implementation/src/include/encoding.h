@@ -31,4 +31,5 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 
 extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionary *charFreqDict, TreeNode *root); 
 extern void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_letters);
+extern void mergeEncodedText(EncodingText *dst, EncodingText *src);
 extern void printEncodings(CharEncodingDictionary* dict);

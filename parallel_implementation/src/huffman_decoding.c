@@ -72,11 +72,9 @@ typedef struct EncodedFileHeader {
 EncodedFileHeader* readHeaderFromFile(FILE* fp) {
 	EncodedFileHeader* header = malloc(sizeof(EncodedFileHeader));
 	fread(&header->number_of_blocks, sizeof(short), 1, fp);
-	//fread(&header->chars_per_block, sizeof(short), 1, fp);
-
-	header->block_lengths = malloc(sizeof(short) * header->number_of_blocks);
-	fread(header->block_lengths, sizeof(short), header->number_of_blocks, fp);
-
+	printf("Number of blocks: %d\n", header->number_of_blocks);
+	fread(&header->encoded_text_byte_size, sizeof(unsigned int), 1, fp);
+	printf("Encoded text byte size: %d\n", header->encoded_text_byte_size);
 	return header;
 }
 
@@ -104,22 +102,29 @@ int main() {
 	fseek(fp2, sizeof(EncodedFileHeader) + treeByteSize + header->encoded_text_byte_size, SEEK_SET);
 	short *blockLengths = readBlockLengths(fp2, header->number_of_blocks);
 
-	int idealBlocksPerProcess = header->number_of_blocks / proc_number;
+	if (pid == 0) {
+		for (int i = 0; i < header->number_of_blocks; i++) {
+			printf("Block %d: %d bits\n", i, blockLengths[i]);
+		}
+	}
+
+	float partBlockPerProcess = ((float)header->number_of_blocks) / proc_number;
+	int idealBlocksPerProcess = (int)partBlockPerProcess + (partBlockPerProcess - (int)partBlockPerProcess > 0 ? 1 : 0); // ceil
 	if (pid == proc_number - 1) {
-		idealBlocksPerProcess += header->number_of_blocks % proc_number;
+		idealBlocksPerProcess = header->number_of_blocks - (proc_number-1)*idealBlocksPerProcess; // last process gets the remainder
 	}
 	printf("Process %d: %d blocks\n", pid, idealBlocksPerProcess);
 
 	int bitsToProcess = 0;
 	for (int i = 0; i < idealBlocksPerProcess; i++) {
-		bitsToProcess += header->block_lengths[pid * idealBlocksPerProcess + i];
+		bitsToProcess += blockLengths[pid * idealBlocksPerProcess + i];
 	}
 	int bitsToSkip = 0;
 	for (int i = 0; i < pid * idealBlocksPerProcess; i++) {
-		bitsToSkip += header->block_lengths[i];
+		bitsToSkip += blockLengths[i];
 	}
-	int startBit = treeByteSize*8 + headerByteSize*8 + bitsToSkip; 
-	int endBit = treeByteSize*8 + headerByteSize*8 + bitsToSkip + bitsToProcess;
+	int startBit = treeByteSize*8 + sizeof(EncodedFileHeader)*8 + bitsToSkip; 
+	int endBit = treeByteSize*8 + sizeof(EncodedFileHeader)*8 + bitsToSkip + bitsToProcess;
 
 	printf("Process %d: %d - %d\n", pid, startBit, endBit);
 

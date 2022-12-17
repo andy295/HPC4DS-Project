@@ -87,6 +87,16 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary*
 	// appendStringToByteArray(&encodingDict->charEncoding[encodingDict->number_of_chars-1], encodingText, &charIndex, &c); 
 }
 
+void mergeEncodedText(EncodingText *dst, EncodingText *src) {
+	dst->encodedText = realloc(dst->encodedText, sizeof(BYTE) * (dst->nr_of_bytes + src->nr_of_bytes));
+	memcpy(dst->encodedText + dst->nr_of_bytes, src->encodedText, src->nr_of_bytes);
+	dst->nr_of_bytes += src->nr_of_bytes;
+
+	dst->positions = realloc(dst->positions, sizeof(short) * (dst->nr_of_pos + src->nr_of_pos));
+	memcpy(dst->positions + dst->nr_of_pos, src->positions, src->nr_of_pos);
+	dst->nr_of_pos += src->nr_of_pos;
+}
+
 void printEncodings(CharEncodingDictionary* dict) {
 	for (int i = 0; i < dict->number_of_chars; i++) {
 		printFormattedChar(dict->charEncoding[i].character);
