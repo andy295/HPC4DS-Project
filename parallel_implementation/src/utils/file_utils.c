@@ -53,13 +53,27 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 }
 
 // function to write byte buffer to file
-void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize, bool clearFile) {
-
+void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition) {
 	FILE *file; 
-	// if clearFile is true, then we clear the file before writing, 
-	// we don't want to append to previous execution
-	if (clearFile) file = fopen(filename, "wb"); 
-	else file = fopen(filename, "ab+");
+
+	switch (openMode) {
+		case WRITE:
+			file = fopen(filename, "wb"); 
+			break;
+		
+		case APPEND:
+			file = fopen(filename, "ab+");
+			break;
+
+		case WRITE_AT:
+			file = fopen(filename, "ab+");
+			fseek(file, bytePosition, SEEK_SET);
+			break;
+		
+		default:
+			printf("Error while opening file %s, unknown open mode: %d\n", filename, openMode);
+			return;
+	}
 
 	if (file == NULL) {
 		printf("Error while opening file %s\n", filename);
@@ -69,96 +83,3 @@ void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize, bool clearF
 	fwrite(buffer, sizeof(BYTE), bufferSize, file);
 	fclose(file);
 }
-
-void writeBufferToFileAtBytePosition(char *filename, BYTE *buffer, int bufferSize, int bytePosition) {
-	FILE *file = fopen(filename, "ab+");
-	if (file == NULL) {
-		printf("Error while opening file %s\n", filename);
-		return;
-	}
-
-	fseek(file, bytePosition, SEEK_SET);
-	fwrite(buffer, sizeof(BYTE), bufferSize, file);
-	fclose(file);
-}
-
-// void encodeToFile(char* text, CharEncoding* encodings, int unique_letters, int total_letters){
-	
-// 	FILE *fp;
-// 	fp = fopen(ENCODED_FILE, "wb");
-
-// 	int charIndex = 0; 
-// 	char c = 0;
-// 	for (int i = 0; i < total_letters; i++) {
-// 		for (int j = 0; j < unique_letters; j++) {
-// 			if (text[i] == encodings[j].letter) {
-// 				append_string_to_binary_file(encodings[j].encoding, fp, &charIndex, &c); 
-// 			}
-// 		}
-// 	}
-
-// 	// appends and writes custom end of file character
-// 	append_string_to_binary_file(encodings[unique_letters-1].encoding, fp, &charIndex, &c); 
-// 	fwrite(&c, sizeof(char), 1, fp);
-
-// 	fclose(fp);
-// }
-
-// void append_string_to_binary_file(char* string, FILE* fp, int* charIndex, char* currentChar) {
-// 	int strlength = strlen(string);
-// 	for (int k = 0; k < strlength; k++) {
-
-// 		if (string[k] == '1')
-// 			*currentChar |= 1 << *charIndex;
-
-// 		if (*charIndex == 7) {
-// 			fwrite(currentChar, sizeof(char), 1, fp);
-// 			*charIndex = 0;
-// 			*currentChar = 0;
-// 		} else
-// 			*charIndex += 1;
-// 	}
-// }
-
-// void decode_from_file(struct TreeNode* root){
-
-// 	FILE *fp2;
-// 	fp2 = fopen(ENCODED_FILE, "rb");
-
-// 	char c;
-// 	char lastContinuousChar = 0;
-
-// 	struct TreeNode* intermediateNode = root;
-
-// 	int endReached = 0;
-// 	while (fread(&c, sizeof(char), 1, fp2)) {
-
-// 		if (endReached == 1) {
-// 			break;
-// 		}
-
-// 		for (int i = 0; i < 8; i++) {
-// 			if (intermediateNode->letter != '$') {
-
-// 				if (intermediateNode->letter == '#'){
-// 					endReached = 1;
-// 					break;
-// 				}
-
-// 				if (VERBOSE){
-// 					printf("%c", intermediateNode->letter);
-// 				}
-
-// 				intermediateNode = root;
-// 			}
-
-// 			if (c & (1 << i)) {
-// 				intermediateNode = intermediateNode->rightChild;
-// 			} else {
-// 				intermediateNode = intermediateNode->leftChild;
-// 			}
-// 		}
-// 	}
-
-// 	fclose(fp2);
-// }

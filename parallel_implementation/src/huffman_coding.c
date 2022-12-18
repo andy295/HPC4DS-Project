@@ -152,20 +152,20 @@ int main() {
 
 		int indexOfNrOfBytes = sizeof(short);
 		BYTE* nr_of_pos = (BYTE*)&encodingText.nr_of_pos; // explicit cast to BYTE*, removes warning
-		writeBufferToFile(ENCODED_FILE, nr_of_pos, sizeof(int), true);
+		writeBufferToFile(ENCODED_FILE, nr_of_pos, sizeof(int), WRITE, 0);
 
 		// write garbage, still needed to keep space for this short
 		BYTE* nr_of_bytes = (BYTE*)&encodingText.nr_of_bytes; 
-		writeBufferToFile(ENCODED_FILE, nr_of_bytes, sizeof(int), false);
+		writeBufferToFile(ENCODED_FILE, nr_of_bytes, sizeof(int), APPEND, 0);
 
 		BYTE* nr_of_bits = (BYTE*)&encodingText.nr_of_bits;
-		writeBufferToFile(ENCODED_FILE, nr_of_bits, sizeof(int), false);
+		writeBufferToFile(ENCODED_FILE, nr_of_bits, sizeof(int), APPEND, 0);
 		printf("Header size: %lu\n", indexOfNrOfBytes + 2 * sizeof(short));
 
 		// write the encoded tree to the file
 		int byteSizeOfTree; 
 		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
-		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, false);
+		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, APPEND, 0);
 		printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
 
 		// receive the encoded text from each process
@@ -190,15 +190,15 @@ int main() {
 		}
 
 		// write all the encoded text to file
-		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, false);
+		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, APPEND, 0);
 
 		// write the positions array to file
 		BYTE* positions = (BYTE*)&encodingText.positions;
-		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_pos * sizeof(short), false);
+		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_pos * sizeof(short), APPEND, 0);
 
 		// go back and write number of bytes
 		nr_of_bytes = (BYTE*)&encodingText.nr_of_bytes;
-		writeBufferToFileAtBytePosition(ENCODED_FILE, nr_of_bytes, sizeof(int), indexOfNrOfBytes);
+		writeBufferToFile(ENCODED_FILE, nr_of_bytes, sizeof(int), WRITE_AT, indexOfNrOfBytes);
 
 		printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));
