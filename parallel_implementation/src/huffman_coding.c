@@ -40,8 +40,9 @@ int main() {
 	CharEncodingDictionary encodingsDict = {.number_of_chars = allChars.number_of_chars, .charEncoding = NULL};
 
 	LinkedListTreeNodeItem* root = NULL;
-	EncodingText encodingText = {.nr_of_pos = 0, .nr_of_bytes = 0, .positions = NULL, .encodedText = NULL};
+	EncodingText encodingText = {.nr_of_pos = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .positions = NULL, .encodedText = NULL};
 
+	// send the character frequencies to the master process
 	if (pid != 0) {
 		int bufferSize = 0;
 		BYTE *buffer = getMessage(&allChars, MSG_DICTIONARY, &bufferSize);
@@ -54,7 +55,7 @@ int main() {
 			printf("Error while sending all character frequencies to the master process\n");
 
 		freeBuffer(buffer);
-	} else {
+	} else { // receive the character frequencies from the other processes
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
 			int bufferSize = 0;
@@ -67,6 +68,7 @@ int main() {
 
 			mergeCharFreqs(&allChars, rcvChars.charFreqs, rcvChars.number_of_chars);
 			
+			freeBuffer(rcvChars.charFreqs);
 			freeBuffer(buffer);
 		}
 
@@ -78,7 +80,6 @@ int main() {
 		getEncodingFromTree(&encodingsDict, &allChars, root->item);
 
 		// send the complete encoding table to each process
-		// and each one encodes its portion of the text
 		int bufferSize = 0;
 		BYTE *buffer = getMessage(&encodingsDict, MSG_ENCODING_DICTIONARY, &bufferSize);
 		if (buffer != NULL && bufferSize > 0)
@@ -94,6 +95,8 @@ int main() {
 		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
 	}
 
+	freeBuffer(allChars.charFreqs);
+
 	// each process receives the encoding dictionary 
 	// and encodes its portion of the text 
 	// then sends the encoded text to the master process
@@ -104,7 +107,6 @@ int main() {
 		BYTE *buffer = prepareForReceive(&status, &bufferSize, 0, 0);
 		MPI_Recv(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &status);
 
-		encodingsDict.number_of_chars = 0;
 		setMessage(&encodingsDict, buffer);
 
 		freeBuffer(buffer);
@@ -121,19 +123,41 @@ int main() {
 			// eventually print an error message
 			printf("Error while sending encoded text to process 0\n");
 
+		freeBuffer(encodingText.positions);
+		freeBuffer(encodingText.encodedText);
+
+		for (int i = 0; i < encodingsDict.number_of_chars; i++)
+			freeBuffer(encodingsDict.charEncoding[i].encoding);
+
+		freeBuffer(encodingsDict.charEncoding);
 		freeBuffer(buffer);
 	}
+
+	freeBuffer(text);
 
 	// master process receives the encoded text from each process
 	// and writes it to the file
 	if (pid == 0) {
 		// write header to file
+
+		// non mi e' chiaro cosa stiamo facendo qui
+		// se abbiamo detto che l'header ha la seguente struttura
+		// header
+		// {
+		//		tree_start_pos
+		//		encoded text start pos
+		//		array position start pos
+		// }
+		// perche' stiamo salvando i dati di encodingText ?
+
 		int indexOfNrOfBytes = sizeof(short);
 		BYTE* nr_of_pos = (BYTE*)&encodingText.nr_of_pos; // explicit cast to BYTE*, removes warning
 		writeBufferToFile(ENCODED_FILE, nr_of_pos, sizeof(int), true);
+
 		// write garbage, still needed to keep space for this short
 		BYTE* nr_of_bytes = (BYTE*)&encodingText.nr_of_bytes; 
 		writeBufferToFile(ENCODED_FILE, nr_of_bytes, sizeof(int), false);
+
 		BYTE* nr_of_bits = (BYTE*)&encodingText.nr_of_bits;
 		writeBufferToFile(ENCODED_FILE, nr_of_bits, sizeof(int), false);
 		printf("Header size: %lu\n", indexOfNrOfBytes + 2 * sizeof(short));
@@ -155,9 +179,13 @@ int main() {
 
 			EncodingText temp;
 			setMessage(&temp, buffer);
+			
 			// not sure if this leaves spaces between bytes... probably yes
 			// but we may make it work with the block sizes	
 			mergeEncodedText(&encodingText, &temp);
+
+			freeBuffer(temp.positions);
+			freeBuffer(temp.encodedText);
 			freeBuffer(buffer);
 		}
 
@@ -174,15 +202,14 @@ int main() {
 
 		printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));
-	
+
+		freeBuffer(encodingText.positions);
+		freeBuffer(encodingText.encodedText);
+
 		takeTime();
 		printTime("Time elapsed");
 		saveTime(LOG_FILE, "Time elapsed");
 	}
-
-
-	freeBuffer(allChars.charFreqs);
-	freeBuffer(text);
 
 	MPI_Finalize();
 
