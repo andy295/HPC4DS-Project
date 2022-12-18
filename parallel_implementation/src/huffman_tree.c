@@ -1,30 +1,30 @@
 #include "include/huffman_tree.h"
 
 LinkedListTreeNodeItem* newNode(char character, int frequency) {
-	TreeNode* r = malloc(sizeof(TreeNode)); 
+	TreeNode *r = malloc(sizeof(TreeNode)); 
 	r->character = character; 
 	r->frequency = frequency; 
 	r->rightChild = NULL; 
 	r->leftChild = NULL; 
 
-	LinkedListTreeNodeItem* listItem = malloc(sizeof(LinkedListTreeNodeItem));
+	LinkedListTreeNodeItem *listItem = malloc(sizeof(LinkedListTreeNodeItem));
 	listItem->item = r;
 	listItem->next = NULL;
 
 	return listItem; 
 }
 
-LinkedListTreeNodeItem* getMinFreq(LinkedListTreeNodeItem* start) {
-	LinkedListTreeNodeItem* temp = newNode(start->item->character, start->item->frequency); 
+LinkedListTreeNodeItem* getMinFreq(LinkedListTreeNodeItem *start) {
+	LinkedListTreeNodeItem *temp = newNode(start->item->character, start->item->frequency); 
 	temp->item->leftChild = start->item->leftChild;  
 	temp->item->rightChild = start->item->rightChild;  
 
 	return temp;
 }
 
-LinkedListTreeNodeItem* orderedAppendToFreq(LinkedListTreeNodeItem* start, LinkedListTreeNodeItem* item) {
-	LinkedListTreeNodeItem* prev = NULL; 
-	LinkedListTreeNodeItem* firstStart = start; 
+LinkedListTreeNodeItem* orderedAppendToFreq(LinkedListTreeNodeItem *start, LinkedListTreeNodeItem *item) {
+	LinkedListTreeNodeItem *prev = NULL; 
+	LinkedListTreeNodeItem *firstStart = start; 
 
 	if (item->item->frequency < start->item->frequency) {
 		item->next = start; 
@@ -49,13 +49,13 @@ LinkedListTreeNodeItem* orderedAppendToFreq(LinkedListTreeNodeItem* start, Linke
 	return firstStart;
 }
 
-LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary* dict) {
-	LinkedListTreeNodeItem* start = newNode(dict->charFreqs[0].character, dict->charFreqs[0].frequency); 
+LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary *dict) {
+	LinkedListTreeNodeItem *start = newNode(dict->charFreqs[0].character, dict->charFreqs[0].frequency); 
 
-	LinkedListTreeNodeItem* old; 
+	LinkedListTreeNodeItem *old; 
 	old = start; 
 	for (int i = 1; i < dict->number_of_chars; i++)	{
-		LinkedListTreeNodeItem* temp = newNode(dict->charFreqs[i].character, dict->charFreqs[i].frequency);
+		LinkedListTreeNodeItem *temp = newNode(dict->charFreqs[i].character, dict->charFreqs[i].frequency);
 		old->next = temp; 
 		old = temp; 
 	}
@@ -63,21 +63,21 @@ LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary* dict) {
 	return start; 
 }
 
-LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary* dict) {
-	LinkedListTreeNodeItem* start = createLinkedList(dict); 
+LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary *dict) {
+	LinkedListTreeNodeItem *start = createLinkedList(dict); 
 
 	do {
-		TreeNode* left = getMinFreq(start)->item; 
-		LinkedListTreeNodeItem* oldStart = start; 
+		TreeNode *left = getMinFreq(start)->item; 
+		LinkedListTreeNodeItem *oldStart = start; 
 		start = start->next; 
 		free(oldStart); 
 
-		TreeNode* right = getMinFreq(start)->item; 
+		TreeNode *right = getMinFreq(start)->item; 
 		oldStart = start;  
 		start = start->next; 
 		free(oldStart); 
 
-		LinkedListTreeNodeItem* top = newNode('$', left->frequency + right->frequency); 
+		LinkedListTreeNodeItem *top = newNode('$', left->frequency + right->frequency); 
 		top->item->leftChild = left; 
 		top->item->rightChild = right; 
 
@@ -90,14 +90,14 @@ LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary* dict) {
 	return start; 
 }
 
-void printHuffmanTree(TreeNode* root, int depth) {
+void printHuffmanTree(TreeNode *root, int depth) {
 	if (TREE_PRINT_TYPE == 0)
 		print(root, depth);
 	else
 		print2D(root);
 }
 
-void print(TreeNode* root, int depth) {
+void print(TreeNode *root, int depth) {
 	if (root == NULL)
 		return; 
 
@@ -112,7 +112,7 @@ void print(TreeNode* root, int depth) {
 }
 
 // Wrapper over print2DUtil()
-void print2D(TreeNode* root)
+void print2D(TreeNode *root)
 {
 	// Pass initial space count as 0
 	print2DUtil(root, 0);
@@ -120,7 +120,7 @@ void print2D(TreeNode* root)
 
 // Function to print binary tree in 2D
 // It does reverse inorder traversal
-void print2DUtil(TreeNode* root, int space)
+void print2DUtil(TreeNode *root, int space)
 {
 	// Base case
 	if (root == NULL)
@@ -143,13 +143,13 @@ void print2DUtil(TreeNode* root, int space)
 	print2DUtil(root->leftChild, space);
 }
 
-int countTreeNodes(TreeNode* root) {
+int countTreeNodes(TreeNode *root) {
 	if (root == NULL)
 		return 0;
 	return 1 + countTreeNodes(root->leftChild) + countTreeNodes(root->rightChild);
 }
 
-void encodeTree(TreeNode* root, TreeArrayItem* treeArray, int* globalIndex) {
+void encodeTree(TreeNode *root, TreeArrayItem *treeArray, int *globalIndex) {
 	if (root == NULL)
 		return;
 
@@ -170,7 +170,7 @@ void encodeTree(TreeNode* root, TreeArrayItem* treeArray, int* globalIndex) {
 	encodeTree(root->rightChild, treeArray, globalIndex);
 }
 
-BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree) {
+BYTE* encodeTreeToByteArray(TreeNode *root, int *byteSizeOfTree) {
 
 	int treeSize = countTreeNodes(root);
 	TreeArrayItem* treeArray = calloc(treeSize, sizeof(TreeArrayItem));
@@ -182,6 +182,6 @@ BYTE* encodeTreeToByteArray(TreeNode* root, int* byteSizeOfTree) {
 	return (BYTE*)treeArray;
 }
 
-int getByteSizeOfTree(TreeNode* root) {
+int getByteSizeOfTree(TreeNode *root) {
 	return sizeof(TreeArrayItem) * countTreeNodes(root);
 }
