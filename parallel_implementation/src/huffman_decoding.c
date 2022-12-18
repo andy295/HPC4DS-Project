@@ -1,10 +1,5 @@
 #include "include/huffman_decoding.h"
 
-typedef struct EncodedFileHeader {
-//	short number_of_blocks;
-	unsigned int encoded_text_byte_size; 
-} EncodedFileHeader;
-
 char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToSkip, int* numberOfChars){
 	char c;
 	TreeNode* intermediateNode = root;
@@ -69,12 +64,12 @@ short* parseBlockLengths(FILE* fp, int numberOfBlocks) {
 	return blockLengths;
 }
 
-EncodedFileHeader* parseHeader(FILE* fp) {
-	EncodedFileHeader* header = malloc(sizeof(EncodedFileHeader));
+FileHeader* parseHeader(FILE* fp) {
+	FileHeader* header = malloc(sizeof(FileHeader));
 	//fread(&header->number_of_blocks, sizeof(short), 1, fp);
 	//printf("Number of blocks: %d\n", header->number_of_blocks);
-	fread(&header->encoded_text_byte_size, sizeof(unsigned int), 1, fp);
-	printf("Encoded text byte size: %d\n", header->encoded_text_byte_size);
+	fread(&header->arrayPosStartPos, sizeof(unsigned int), 1, fp);
+	printf("Encoded text byte size: %d\n", header->arrayPosStartPos);
 	return header;
 }
 
@@ -90,19 +85,19 @@ int main() {
     FILE *fp2;
 	fp2 = fopen(ENCODED_FILE, "rb");
 
-	EncodedFileHeader *header = parseHeader(fp2);
+	FileHeader *header = parseHeader(fp2);
 
 //	fseek(fp2, 0, SEEK_SET);
-	fseek(fp2, sizeof(EncodedFileHeader), SEEK_SET);
+	fseek(fp2, sizeof(FileHeader), SEEK_SET);
 	TreeNode* root = parseHuffmanTree(fp2);
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
 
-	int number_of_blocks = (getFileSize(ENCODED_FILE) - sizeof(EncodedFileHeader) - header->encoded_text_byte_size) / sizeof(short);
+	int number_of_blocks = (getFileSize(ENCODED_FILE) - header->arrayPosStartPos) / sizeof(short);
 	printf("Number of blocks: %d\n", number_of_blocks); 
 
 //	fseek(fp2, 0, SEEK_SET);
-	fseek(fp2, sizeof(EncodedFileHeader) + treeByteSize + header->encoded_text_byte_size, SEEK_SET);
+	fseek(fp2, sizeof(FileHeader) + treeByteSize + header->arrayPosStartPos, SEEK_SET);
 	short *blockLengths = parseBlockLengths(fp2, number_of_blocks);
 
 	if (pid == 0) {
@@ -126,8 +121,8 @@ int main() {
 	for (int i = 0; i < pid * idealBlocksPerProcess; i++) {
 		bitsToSkip += blockLengths[i];
 	}
-	int startBit = treeByteSize*8 + sizeof(EncodedFileHeader)*8 + bitsToSkip; 
-	int endBit = treeByteSize*8 + sizeof(EncodedFileHeader)*8 + bitsToSkip + bitsToProcess;
+	int startBit = treeByteSize*8 + sizeof(FileHeader)*8 + bitsToSkip; 
+	int endBit = treeByteSize*8 + sizeof(FileHeader)*8 + bitsToSkip + bitsToProcess;
 
 	printf("Process %d: %d - %d\n", pid, startBit, endBit);
 
