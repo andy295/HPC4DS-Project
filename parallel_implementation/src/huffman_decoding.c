@@ -65,14 +65,14 @@ short* readBlockLengths(FILE* fp, int numberOfBlocks) {
 }
 
 typedef struct EncodedFileHeader {
-	short number_of_blocks;
+//	short number_of_blocks;
 	unsigned int encoded_text_byte_size; 
 } EncodedFileHeader;
 
 EncodedFileHeader* readHeaderFromFile(FILE* fp) {
 	EncodedFileHeader* header = malloc(sizeof(EncodedFileHeader));
-	fread(&header->number_of_blocks, sizeof(short), 1, fp);
-	printf("Number of blocks: %d\n", header->number_of_blocks);
+	//fread(&header->number_of_blocks, sizeof(short), 1, fp);
+	//printf("Number of blocks: %d\n", header->number_of_blocks);
 	fread(&header->encoded_text_byte_size, sizeof(unsigned int), 1, fp);
 	printf("Encoded text byte size: %d\n", header->encoded_text_byte_size);
 	return header;
@@ -92,15 +92,18 @@ int main() {
 
 	EncodedFileHeader *header = readHeaderFromFile(fp2);
 
-	fseek(fp2, 0, SEEK_SET);
+//	fseek(fp2, 0, SEEK_SET);
 	fseek(fp2, sizeof(EncodedFileHeader), SEEK_SET);
 	TreeNode* root = readTreeFromFile(fp2);
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
 
-	fseek(fp2, 0, SEEK_SET);
+	int number_of_blocks = (getFileSize(ENCODED_FILE) - sizeof(EncodedFileHeader) - header->encoded_text_byte_size) / sizeof(short);
+	printf("Number of blocks: %d\n", number_of_blocks); 
+
+//	fseek(fp2, 0, SEEK_SET);
 	fseek(fp2, sizeof(EncodedFileHeader) + treeByteSize + header->encoded_text_byte_size, SEEK_SET);
-	short *blockLengths = readBlockLengths(fp2, header->number_of_blocks);
+	short *blockLengths = readBlockLengths(fp2, number_of_blocks);
 
 	if (pid == 0) {
 		for (int i = 0; i < header->number_of_blocks; i++) {
