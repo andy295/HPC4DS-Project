@@ -1,5 +1,10 @@
 #include "include/huffman_decoding.h"
 
+typedef struct EncodedFileHeader {
+//	short number_of_blocks;
+	unsigned int encoded_text_byte_size; 
+} EncodedFileHeader;
+
 char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToSkip, int* numberOfChars){
 	char c;
 	TreeNode* intermediateNode = root;
@@ -39,37 +44,32 @@ char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToS
 	return decodedText;
 }
 
-TreeNode* readTreeFromFile(FILE* fp) {
+TreeNode* parseHuffmanTree(FILE* fp) {
 	TreeNode* node = malloc(sizeof(TreeNode));
 	node->character = fgetc(fp);
-	node->frequency = 10; // not used
+	node->frequency = 0; // not used
 	node->leftChild = NULL;
 	node->rightChild = NULL;
 
 	char children = fgetc(fp);
 	if (IsBit(children, 0)) {
-		node->leftChild = readTreeFromFile(fp);
+		node->leftChild = parseHuffmanTree(fp);
 	} 
 	
 	if (IsBit(children, 1)) {
-		node->rightChild = readTreeFromFile(fp);
+		node->rightChild = parseHuffmanTree(fp);
 	}
 
 	return node;
 }
 
-short* readBlockLengths(FILE* fp, int numberOfBlocks) {
+short* parseBlockLengths(FILE* fp, int numberOfBlocks) {
 	short* blockLengths = malloc(sizeof(short) * numberOfBlocks);
 	fread(blockLengths, sizeof(short), numberOfBlocks, fp);
 	return blockLengths;
 }
 
-typedef struct EncodedFileHeader {
-//	short number_of_blocks;
-	unsigned int encoded_text_byte_size; 
-} EncodedFileHeader;
-
-EncodedFileHeader* readHeaderFromFile(FILE* fp) {
+EncodedFileHeader* parseHeader(FILE* fp) {
 	EncodedFileHeader* header = malloc(sizeof(EncodedFileHeader));
 	//fread(&header->number_of_blocks, sizeof(short), 1, fp);
 	//printf("Number of blocks: %d\n", header->number_of_blocks);
@@ -90,11 +90,11 @@ int main() {
     FILE *fp2;
 	fp2 = fopen(ENCODED_FILE, "rb");
 
-	EncodedFileHeader *header = readHeaderFromFile(fp2);
+	EncodedFileHeader *header = parseHeader(fp2);
 
 //	fseek(fp2, 0, SEEK_SET);
 	fseek(fp2, sizeof(EncodedFileHeader), SEEK_SET);
-	TreeNode* root = readTreeFromFile(fp2);
+	TreeNode* root = parseHuffmanTree(fp2);
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
 
@@ -103,18 +103,18 @@ int main() {
 
 //	fseek(fp2, 0, SEEK_SET);
 	fseek(fp2, sizeof(EncodedFileHeader) + treeByteSize + header->encoded_text_byte_size, SEEK_SET);
-	short *blockLengths = readBlockLengths(fp2, number_of_blocks);
+	short *blockLengths = parseBlockLengths(fp2, number_of_blocks);
 
 	if (pid == 0) {
-		for (int i = 0; i < header->number_of_blocks; i++) {
+		for (int i = 0; i < number_of_blocks; i++) {
 			printf("Block %d: %d bits\n", i, blockLengths[i]);
 		}
 	}
 
-	float partBlockPerProcess = ((float)header->number_of_blocks) / proc_number;
+	float partBlockPerProcess = ((float)number_of_blocks) / proc_number;
 	int idealBlocksPerProcess = (int)partBlockPerProcess + (partBlockPerProcess - (int)partBlockPerProcess > 0 ? 1 : 0); // ceil
 	if (pid == proc_number - 1) {
-		idealBlocksPerProcess = header->number_of_blocks - (proc_number-1)*idealBlocksPerProcess; // last process gets the remainder
+		idealBlocksPerProcess = number_of_blocks - (proc_number-1)*idealBlocksPerProcess; // last process gets the remainder
 	}
 	printf("Process %d: %d blocks\n", pid, idealBlocksPerProcess);
 

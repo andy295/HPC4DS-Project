@@ -9,11 +9,11 @@ enum OpenMode {
     WRITE_AT = 3
 };
 
-FILE* openFile(char* filename, int openMode);
+FILE* openFile(const char* filename, int openMode);
 
-extern int getFileSize(char* fileName);
+extern int getFileSize(const char* fileName);
 extern long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number);
-extern void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition);
+extern void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition); 
 
 extern void printWorkDir(int processId);
 

@@ -1,6 +1,6 @@
 #include "file_utils.h"
 
-int getFileSize(char* fileName) {
+int getFileSize(const char* fileName) {
 	FILE* fp = openFile(fileName, READ); 
 	//fseek(fp, 0, SEEK_END); 
 	long fSize = ftell(fp); 
@@ -53,14 +53,14 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 }
 
 // function to write byte buffer to file
-void writeBufferToFile(char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition) {
+void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition) {
 	FILE *file = openFile(filename, openMode);
 	fwrite(buffer, sizeof(BYTE), bufferSize, file);
 	fclose(file);
 }
 
 
-FILE* openFile(char* filename, int openMode) {
+FILE* openFile(const char* filename, int openMode) {
 	FILE* file; 
 
 	switch (openMode) {
