@@ -112,12 +112,6 @@ int main() {
 		freeBuffer(buffer);
 
 		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
-		//printf("Process %d: %d positions \n", pid, encodingText.nr_of_pos);
-		//for (int i = 0; i < encodingText.nr_of_pos; i++){
-		//	printf("%d ", encodingText.positions[i]);
-		//}
-		//printf("\n");
-
 		// send to master process the encoded text
 		bufferSize = 0;
 		buffer = getMessage(&encodingText, MSG_ENCODING_TEXT, &bufferSize);
