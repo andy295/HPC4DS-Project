@@ -3,11 +3,14 @@
 #include "../include/global_constants.h"
 
 enum OpenMode {
-    READ_CHARS = 0,
-    READ_BYTES = 1,
-    WRITE = 2,
-    APPEND = 3,
-    WRITE_AT = 4
+    READ = 0,
+    WRITE = 1,
+    APPEND = 2,
+    WRITE_AT = 3,
+    READ_B = 4,
+    WRITE_B = 5,
+    APPEND_B = 6,
+    WRITE_B_AT = 7
 };
 
 static const int FILE_HEADER_ELEMENTS = 1;
@@ -16,12 +19,9 @@ typedef struct FileHeader {
     unsigned int byteSizeOfPositionArray; 
 } FileHeader;
 
-FILE* openFile(const char* filename, int openMode, int bytePosition);
-
-extern int getFileSize(const char* fileName);
-extern long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number);
+extern FILE* openFile(const char *filename, int openMode, int bytePosition);
+extern int getFileSize(const char *fileName);
+extern long readFilePortionForProcess(const char *fileName, char **fileDest, int processId, int proc_number);
 extern void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition); 
 
 extern void printWorkDir(int processId);
-
-// extern void append_string_to_binary_file(char* string, FILE* fp, int* charIndex, char* currentChar);

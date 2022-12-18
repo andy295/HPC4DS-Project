@@ -83,11 +83,11 @@ int main() {
 	
 	if (pid == 0) {
 		FILE *fp2;
-		fp2 = openFile(ENCODED_FILE, READ_BYTES, 0);
+		fp2 = openFile(ENCODED_FILE, READ_B, 0);
 
 		FileHeader *header = parseHeader(fp2);
 		printf("Encoded arrayPosStartPos: %d\n", header->byteSizeOfPositionArray);
-		int number_of_blocks = (getFileSize(ENCODED_FILE) - header->byteSizeOfPositionArray) / sizeof(short);
+		int number_of_blocks = (getFileSize(ENCODED_FILE) - header->byteSizeOfPositionArray) / sizeof(unsigned short);
 		printf("Number of blocks: %d\n", number_of_blocks); 
 
 		fseek(fp2, 0, SEEK_SET);
