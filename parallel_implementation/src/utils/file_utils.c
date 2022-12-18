@@ -1,7 +1,7 @@
 #include "file_utils.h"
 
 int getFileSize(const char* fileName) {
-	FILE* fp = openFile(fileName, READ); 
+	FILE* fp = openFile(fileName, READ, 0); 
 	long fSize = ftell(fp); 
 	fseek(fp, 0, SEEK_SET); 
 
@@ -12,14 +12,14 @@ int getFileSize(const char* fileName) {
 
 void printWorkDir(int processId) {
 	char cwd[2048];
-   	if (getcwd(cwd, sizeof(cwd)) != NULL) {
+   	if (getcwd(cwd, sizeof(cwd)) != NULL)
     	printf("Process %d current working dir: %s\n", processId, cwd);
-   	} else
+   	else
 		perror("getcwd() error");
 }
 
 long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number) {
-	FILE* fp = openFile(fileName, READ); 
+	FILE* fp = openFile(fileName, READ, 0); 
 	if (fp != NULL) {
 		long fSize = ftell(fp);
 
@@ -52,13 +52,14 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 
 // function to write byte buffer to file
 void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition) {
-	FILE *file = openFile(filename, openMode);
+	FILE *file = openFile(filename, openMode, bytePosition);
+
 	fwrite(buffer, sizeof(BYTE), bufferSize, file);
 	fclose(file);
 }
 
 
-FILE* openFile(const char* filename, int openMode) {
+FILE* openFile(const char* filename, int openMode, int bytePosition) {
 	FILE* file; 
 
 	switch (openMode) {
@@ -68,15 +69,34 @@ FILE* openFile(const char* filename, int openMode) {
 			break;
 		
 		case WRITE:
-			file = fopen(filename, "wb"); 
+			file = fopen(filename, "w"); 
 			break;
 		
 		case APPEND:
-			file = fopen(filename, "ab+");
+			file = fopen(filename, "a+");
 			break;
 
 		case WRITE_AT:
+			file = fopen(filename, "a+");
+			fseek(file, bytePosition, SEEK_SET);
+			break;
+
+		case READ_B:
+			file = fopen(filename, "rb"); 
+			fseek(file, 0, SEEK_END); 
+			break;
+		
+		case WRITE_B:
+			file = fopen(filename, "wb"); 
+			break;
+		
+		case APPEND_B:
 			file = fopen(filename, "ab+");
+			break;
+
+		case WRITE_B_AT:
+			file = fopen(filename, "ab+");
+			fseek(file, bytePosition, SEEK_SET);
 			break;
 		
 		default:
