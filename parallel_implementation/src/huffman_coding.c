@@ -112,6 +112,11 @@ int main() {
 		freeBuffer(buffer);
 
 		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
+		//printf("Process %d: %d positions \n", pid, encodingText.nr_of_pos);
+		//for (int i = 0; i < encodingText.nr_of_pos; i++){
+		//	printf("%d ", encodingText.positions[i]);
+		//}
+		//printf("\n");
 
 		// send to master process the encoded text
 		bufferSize = 0;
@@ -139,8 +144,8 @@ int main() {
 	// and writes it to the file
 	if (pid == 0) {
 		// write an empty header to the file
-		int indexOfNrOfBytes = 0;
-		FileHeader fileHeader = {.arrayPosStartPos = 0};
+		//int indexOfNrOfBytes = 0;
+		FileHeader fileHeader = {.byteSizeOfPositionArray = 0};
 		BYTE *startPos = (BYTE*)&fileHeader;
 		writeBufferToFile(ENCODED_FILE, startPos, sizeof(int) * FILE_HEADER_ELEMENTS, WRITE, 0);
 		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(int));
@@ -166,6 +171,7 @@ int main() {
 			// not sure if this leaves spaces between bytes... probably yes
 			// but we may make it work with the block sizes	
 			mergeEncodedText(&encodingText, &temp);
+			printf("Number of bytes: %d\n", encodingText.nr_of_bytes);
 
 			freeBuffer(temp.positions);
 			freeBuffer(temp.encodedText);
@@ -178,13 +184,13 @@ int main() {
 
 		// write the positions array to file
 		BYTE* positions = (BYTE*)&encodingText.positions;
-		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_pos * sizeof(short), APPEND, 0);
-		printf("Positions array size: %ld\n", encodingText.nr_of_pos * sizeof(short));
-
+		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_pos * sizeof(unsigned short), APPEND, 0);
+		
 		// write header to file
-		unsigned int totalNrOfBytes = encodingText.nr_of_bytes + 1;
+		unsigned int totalNrOfBytes = encodingText.nr_of_bytes+ sizeof(FileHeader)+ byteSizeOfTree;
 		startPos = (BYTE*)&totalNrOfBytes;
-		writeBufferToFile(ENCODED_FILE, startPos, sizeof(int), WRITE_AT, indexOfNrOfBytes);
+		printf("Total number of blocks: %ld\n", encodingText.nr_of_pos);
+		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int), WRITE_AT, 0);
 
 		printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));

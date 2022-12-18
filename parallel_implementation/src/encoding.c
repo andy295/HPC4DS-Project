@@ -41,7 +41,7 @@ void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionar
 
 void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char* currentChar) {
 	BYTE *byte_array = encodingText->encodedText;
-	int *byteArrayIndex = &encodingText->nr_of_bytes;
+	unsigned int *byteArrayIndex = &encodingText->nr_of_bytes;
 
 	for (int k = 0; k < charEncoding->length; k++) {
 		
@@ -62,29 +62,30 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_letters) {
 	char c = 0;
 
-	encodingText->nr_of_pos =  (encodingText->nr_of_pos % CHARS_PER_BLOCK != 0) ? (total_letters / CHARS_PER_BLOCK) + 1 : total_letters / CHARS_PER_BLOCK;
+	encodingText->nr_of_pos = (total_letters % CHARS_PER_BLOCK != 0) ? (total_letters / CHARS_PER_BLOCK) + 1 : total_letters / CHARS_PER_BLOCK;
 	encodingText->positions = malloc(sizeof(short) * encodingText->nr_of_pos); 
 
-	encodingText->encodedText = malloc(sizeof(BYTE) * total_letters); 
+	encodingText->encodedText = malloc(sizeof(BYTE) * total_letters); // TODO: check if this is the right size
 
 	for (int i = 0; i < total_letters; i++) {
-		for (int j = 0; j < encodingDict->number_of_chars; j++)
-			if (text[i] == encodingDict->charEncoding[j].character)
+		unsigned short bitSizeOfBlock = 0;
+		for (int j = 0; j < encodingDict->number_of_chars; j++){
+			if (text[i] == encodingDict->charEncoding[j].character){
 				appendStringToByteArray(&encodingDict->charEncoding[j], encodingText, &c);
+				bitSizeOfBlock += encodingDict->charEncoding[j].length;
+			}
+		}
 
 		if (i % CHARS_PER_BLOCK == 0 && i > 0) {
 			int idx = (i / CHARS_PER_BLOCK) - 1;
-			encodingText->positions[idx] = (encodingText->nr_of_bytes * BIT_8) + encodingText->nr_of_bits;
+			encodingText->positions[idx] = bitSizeOfBlock;
+			bitSizeOfBlock = 0;
 		}
 	}
 
 	// reduce encoded text size if this last is smaller than the allocated one
 	if (sizeof(BYTE) * total_letters > sizeof(BYTE) * encodingText->nr_of_bytes)
 		encodingText->encodedText = realloc(encodingText->encodedText, sizeof(BYTE) * encodingText->nr_of_bytes);
-
-	// maybe we don't need it
-	// appends and writes custom end of file character
-	// appendStringToByteArray(&encodingDict->charEncoding[encodingDict->number_of_chars-1], encodingText, &charIndex, &c); 
 }
 
 void mergeEncodedText(EncodingText *dst, EncodingText *src) {
@@ -92,8 +93,8 @@ void mergeEncodedText(EncodingText *dst, EncodingText *src) {
 	memcpy(dst->encodedText + dst->nr_of_bytes, src->encodedText, src->nr_of_bytes);
 	dst->nr_of_bytes += src->nr_of_bytes;
 
-	dst->positions = realloc(dst->positions, sizeof(short) * (dst->nr_of_pos + src->nr_of_pos));
-	memcpy(dst->positions + dst->nr_of_pos, src->positions, src->nr_of_pos);
+	dst->positions = realloc(dst->positions, sizeof(unsigned short) * (dst->nr_of_pos + src->nr_of_pos));
+	memcpy(dst->positions + dst->nr_of_pos, src->positions, src->nr_of_pos * sizeof(unsigned short));
 	dst->nr_of_pos += src->nr_of_pos;
 }
 

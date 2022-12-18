@@ -19,10 +19,10 @@ typedef struct CharEncodingDictionary {
 } CharEncodingDictionary;
 
 typedef struct EncodingText {
-	int nr_of_pos; // number of elemnts in the positions array
-	int nr_of_bytes; // number of bytes in the encodedText array
-	int nr_of_bits; // number of used bits in the last byte of the encodedText array
-	short *positions;
+	unsigned int nr_of_pos; // number of elemnts in the positions array
+	unsigned int nr_of_bytes; // number of bytes in the encodedText array
+	unsigned int nr_of_bits; // number of used bits in the last byte of the encodedText array
+	unsigned short *positions;
 	BYTE *encodedText;
 } EncodingText;
 

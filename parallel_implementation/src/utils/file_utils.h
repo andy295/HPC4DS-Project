@@ -3,19 +3,20 @@
 #include "../include/global_constants.h"
 
 enum OpenMode {
-    READ = 0,
-    WRITE = 1,
-    APPEND = 2,
-    WRITE_AT = 3
+    READ_CHARS = 0,
+    READ_BYTES = 1,
+    WRITE = 2,
+    APPEND = 3,
+    WRITE_AT = 4
 };
 
 static const int FILE_HEADER_ELEMENTS = 1;
 
 typedef struct FileHeader {
-    unsigned int arrayPosStartPos; 
+    unsigned int byteSizeOfPositionArray; 
 } FileHeader;
 
-FILE* openFile(const char* filename, int openMode);
+FILE* openFile(const char* filename, int openMode, int bytePosition);
 
 extern int getFileSize(const char* fileName);
 extern long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number);

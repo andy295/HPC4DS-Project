@@ -1,7 +1,7 @@
 #include "file_utils.h"
 
 int getFileSize(const char* fileName) {
-	FILE* fp = openFile(fileName, READ); 
+	FILE* fp = openFile(fileName, READ_CHARS, 0); 
 	long fSize = ftell(fp); 
 	fseek(fp, 0, SEEK_SET); 
 
@@ -19,7 +19,7 @@ void printWorkDir(int processId) {
 }
 
 long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number) {
-	FILE* fp = openFile(fileName, READ); 
+	FILE* fp = openFile(fileName, READ_CHARS, 0); 
 	if (fp != NULL) {
 		long fSize = ftell(fp);
 
@@ -52,19 +52,23 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 
 // function to write byte buffer to file
 void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition) {
-	FILE *file = openFile(filename, openMode);
+	FILE *file = openFile(filename, openMode, bytePosition);
 	fwrite(buffer, sizeof(BYTE), bufferSize, file);
 	fclose(file);
 }
 
 
-FILE* openFile(const char* filename, int openMode) {
+FILE* openFile(const char* filename, int openMode, int bytePosition) {
 	FILE* file; 
 
 	switch (openMode) {
-		case READ:
+		case READ_CHARS:
 			file = fopen(filename, "r"); 
-			fseek(file, 0, SEEK_END); 
+			fseek(file, bytePosition, SEEK_END); 
+			break;
+		case READ_BYTES:
+			file = fopen(filename, "rb"); 
+			fseek(file, bytePosition, SEEK_END); 
 			break;
 		
 		case WRITE:
@@ -76,7 +80,8 @@ FILE* openFile(const char* filename, int openMode) {
 			break;
 
 		case WRITE_AT:
-			file = fopen(filename, "ab+");
+			file = fopen(filename, "r+b");
+			fseek(file, bytePosition, SEEK_SET);
 			break;
 		
 		default:
