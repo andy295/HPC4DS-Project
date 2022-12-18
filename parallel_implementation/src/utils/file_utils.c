@@ -1,7 +1,7 @@
 #include "file_utils.h"
 
-int getFileSize(const char* fileName) {
-	FILE* fp = openFile(fileName, READ, 0); 
+int getFileSize(const char *fileName) {
+	FILE *fp = openFile(fileName, READ, 0); 
 	long fSize = ftell(fp); 
 	fseek(fp, 0, SEEK_SET); 
 
@@ -18,8 +18,8 @@ void printWorkDir(int processId) {
 		perror("getcwd() error");
 }
 
-long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number) {
-	FILE* fp = openFile(fileName, READ, 0); 
+long readFilePortionForProcess(const char *fileName, char **fileDest, int processId, int proc_number) {
+	FILE *fp = openFile(fileName, READ, 0);
 	if (fp != NULL) {
 		long fSize = ftell(fp);
 
@@ -27,8 +27,6 @@ long readFilePortionForProcess(const char* fileName, char** fileDest, int proces
 		fSize = fSize / proc_number;
 		fseek(fp, processId * fSize, SEEK_SET);
 
-		// quick and dirty solution 
-		// but i don't have a better idea right now
 		if (processId == proc_number - 1 && residual != 0)
 			fSize += residual;
 
@@ -60,7 +58,7 @@ void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int o
 
 
 FILE* openFile(const char* filename, int openMode, int bytePosition) {
-	FILE* file; 
+	FILE *file; 
 
 	switch (openMode) {
 		case READ:
