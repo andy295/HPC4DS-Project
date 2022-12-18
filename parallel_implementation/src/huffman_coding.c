@@ -174,10 +174,12 @@ int main() {
 
 		// write all the encoded text to file
 		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, APPEND, 0);
+		printf("Encoded text size: %d\n", encodingText.nr_of_bytes);
 
 		// write the positions array to file
 		BYTE* positions = (BYTE*)&encodingText.positions;
 		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_pos * sizeof(short), APPEND, 0);
+		printf("Positions array size: %ld\n", encodingText.nr_of_pos * sizeof(short));
 
 		// write header to file
 		unsigned int totalNrOfBytes = encodingText.nr_of_bytes + 1;

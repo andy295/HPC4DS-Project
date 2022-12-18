@@ -2,7 +2,6 @@
 
 int getFileSize(const char* fileName) {
 	FILE* fp = openFile(fileName, READ); 
-	//fseek(fp, 0, SEEK_END); 
 	long fSize = ftell(fp); 
 	fseek(fp, 0, SEEK_SET); 
 
@@ -22,7 +21,6 @@ void printWorkDir(int processId) {
 long readFilePortionForProcess(const char* fileName, char** fileDest, int processId, int proc_number) {
 	FILE* fp = openFile(fileName, READ); 
 	if (fp != NULL) {
-		//fseek(fp, 0, SEEK_END); 
 		long fSize = ftell(fp);
 
 		int residual = fSize % proc_number; 
@@ -66,6 +64,7 @@ FILE* openFile(const char* filename, int openMode) {
 	switch (openMode) {
 		case READ:
 			file = fopen(filename, "r"); 
+			fseek(file, 0, SEEK_END); 
 			break;
 		
 		case WRITE:
