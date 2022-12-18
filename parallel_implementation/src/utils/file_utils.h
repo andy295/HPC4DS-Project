@@ -9,6 +9,12 @@ enum OpenMode {
     WRITE_AT = 3
 };
 
+static const int FILE_HEADER_ELEMENTS = 1;
+
+typedef struct FileHeader {
+    unsigned int arrayPosStartPos; 
+} FileHeader;
+
 FILE* openFile(const char* filename, int openMode);
 
 extern int getFileSize(const char* fileName);

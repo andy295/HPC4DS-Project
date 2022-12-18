@@ -138,29 +138,12 @@ int main() {
 	// master process receives the encoded text from each process
 	// and writes it to the file
 	if (pid == 0) {
-		// write header to file
-
-		// non mi e' chiaro cosa stiamo facendo qui
-		// se abbiamo detto che l'header ha la seguente struttura
-		// header
-		// {
-		//		tree_start_pos
-		//		encoded text start pos
-		//		array position start pos
-		// }
-		// perche' stiamo salvando i dati di encodingText ?
-
-		int indexOfNrOfBytes = sizeof(short);
-		BYTE* nr_of_pos = (BYTE*)&encodingText.nr_of_pos; // explicit cast to BYTE*, removes warning
-		writeBufferToFile(ENCODED_FILE, nr_of_pos, sizeof(int), WRITE, 0);
-
-		// write garbage, still needed to keep space for this short
-		BYTE* nr_of_bytes = (BYTE*)&encodingText.nr_of_bytes; 
-		writeBufferToFile(ENCODED_FILE, nr_of_bytes, sizeof(int), APPEND, 0);
-
-		BYTE* nr_of_bits = (BYTE*)&encodingText.nr_of_bits;
-		writeBufferToFile(ENCODED_FILE, nr_of_bits, sizeof(int), APPEND, 0);
-		printf("Header size: %lu\n", indexOfNrOfBytes + 2 * sizeof(short));
+		// write an empty header to the file
+		int indexOfNrOfBytes = 0;
+		FileHeader fileHeader = {.arrayPosStartPos = 0};
+		BYTE *startPos = (BYTE*)&fileHeader;
+		writeBufferToFile(ENCODED_FILE, startPos, sizeof(int) * FILE_HEADER_ELEMENTS, WRITE, 0);
+		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(int));
 
 		// write the encoded tree to the file
 		int byteSizeOfTree; 
@@ -196,9 +179,10 @@ int main() {
 		BYTE* positions = (BYTE*)&encodingText.positions;
 		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_pos * sizeof(short), APPEND, 0);
 
-		// go back and write number of bytes
-		nr_of_bytes = (BYTE*)&encodingText.nr_of_bytes;
-		writeBufferToFile(ENCODED_FILE, nr_of_bytes, sizeof(int), WRITE_AT, indexOfNrOfBytes);
+		// write header to file
+		unsigned int totalNrOfBytes = encodingText.nr_of_bytes + 1;
+		startPos = (BYTE*)&totalNrOfBytes;
+		writeBufferToFile(ENCODED_FILE, startPos, sizeof(int), WRITE_AT, indexOfNrOfBytes);
 
 		printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));
