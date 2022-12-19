@@ -39,37 +39,25 @@ char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToS
 	return decodedText;
 }
 
-TreeNode* parseHuffmanTree(FILE* fp) {
-	TreeNode* node = malloc(sizeof(TreeNode));
-	node->character = fgetc(fp);
-	node->frequency = 0; // not used
-	node->leftChild = NULL;
-	node->rightChild = NULL;
+void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int *end) {
+    int quotient = nrOfBlocks / nrOfProcs;
+    int quoto =	nrOfBlocks % nrOfProcs;
 
-	char children = fgetc(fp);
-	if (IsBit(children, 0)) {
-		node->leftChild = parseHuffmanTree(fp);
-	} 
-	
-	if (IsBit(children, 1)) {
-		node->rightChild = parseHuffmanTree(fp);
+    // printf("result: %d - rest: %d\n", result, rest);
+
+	*start = (pid * quotient) + 1;
+	if (quoto != 0 && pid > 0) {
+		if (pid > quoto)
+			++(*start);
+		else
+			*start += pid;
 	}
 
-	return node;
-}
-
-unsigned short* parseBlockLengths(FILE* fp, int numberOfBlocks) {
-	unsigned short* blockLengths = malloc(sizeof(unsigned short) * numberOfBlocks);
-	fread(blockLengths, sizeof(unsigned short), numberOfBlocks, fp);
-	return blockLengths;
-}
-
-FileHeader* parseHeader(FILE* fp) {
-	fseek(fp, 0, SEEK_SET);
-
-	FileHeader* header = malloc(sizeof(FileHeader));
-	fread(&header->byteSizeOfPositionArray, sizeof(unsigned int), 1, fp);
-	return header;
+	*end = *start + quotient;
+	if (quoto != 0 && (pid == 0 || pid < quoto))
+		++(*end);
+		
+	// printf("cycle %d: start: %d - end: %d = %d\n", i, *start, *end - 1, *end - *start);
 }
 
 int main() {

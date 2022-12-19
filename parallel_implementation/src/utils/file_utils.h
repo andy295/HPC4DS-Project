@@ -23,5 +23,7 @@ extern FILE* openFile(const char *filename, int openMode, int bytePosition);
 extern int getFileSize(const char *fileName);
 extern long readFilePortionForProcess(const char *fileName, char **fileDest, int processId, int proc_number);
 extern void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition); 
+extern FileHeader* parseHeader(FILE *fp);
+extern short* parseBlockLengths(FILE* fp, int numberOfBlocks);
 
 extern void printWorkDir(int processId);

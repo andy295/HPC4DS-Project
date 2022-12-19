@@ -55,8 +55,7 @@ void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int o
 	fclose(file);
 }
 
-
-FILE* openFile(const char* filename, int openMode, int bytePosition) {
+FILE* openFile(const char *filename, int openMode, int bytePosition) {
 	FILE *file; 
 
 	switch (openMode) {
@@ -107,4 +106,18 @@ FILE* openFile(const char* filename, int openMode, int bytePosition) {
 	}
 
 	return file;
+}
+
+FileHeader* parseHeader(FILE* fp) {
+	FileHeader* header = malloc(sizeof(FileHeader));
+	fread(&header->arrayPosStartPos, sizeof(unsigned int), 1, fp);
+	printf("Encoded text byte size: %d\n", header->arrayPosStartPos - 1);
+
+	return header;
+}
+
+short* parseBlockLengths(FILE* fp, int numberOfBlocks) {
+	short* blockLengths = malloc(sizeof(short) * numberOfBlocks);
+	fread(blockLengths, sizeof(short), numberOfBlocks, fp);
+	return blockLengths;
 }
