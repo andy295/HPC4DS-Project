@@ -110,14 +110,38 @@ FILE* openFile(const char *filename, int openMode, int bytePosition) {
 
 FileHeader* parseHeader(FILE* fp) {
 	FileHeader* header = malloc(sizeof(FileHeader));
-	fread(&header->arrayPosStartPos, sizeof(unsigned int), 1, fp);
-	printf("Encoded text byte size: %d\n", header->arrayPosStartPos - 1);
+	fread(&header->byteStartOfPositionArray, sizeof(unsigned int), 1, fp);
+	printf("Encoded text byte size: %d\n", header->byteStartOfPositionArray - 1);
 
 	return header;
 }
 
-short* parseBlockLengths(FILE* fp, int numberOfBlocks) {
-	short* blockLengths = malloc(sizeof(short) * numberOfBlocks);
-	fread(blockLengths, sizeof(short), numberOfBlocks, fp);
+unsigned short* parseBlockLengths(FILE* fp, int numberOfBlocks) {
+	unsigned short *blockLengths = malloc(sizeof(unsigned short) * numberOfBlocks);
+	fread(blockLengths, sizeof(unsigned short), numberOfBlocks, fp);
+
 	return blockLengths;
+}
+
+int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned short *blockLengths) {
+	fp = openFile(ENCODED_FILE, READ_B, 0);
+	
+	if (fp == NULL)
+			// handle the error
+		return -1;
+
+	FileHeader *header = parseHeader(fp);
+	printf("Encoded arrayPosStartPos: %d\n", header->byteStartOfPositionArray);
+	int number_of_blocks = (getFileSize(ENCODED_FILE) - header->byteStartOfPositionArray) / sizeof(unsigned short);
+	printf("Number of blocks: %d\n", number_of_blocks); 
+
+	fseek(fp, 0, SEEK_SET);
+	fseek(fp, sizeof(FileHeader), SEEK_SET);
+	// root = parseHuffmanTree(fp);
+
+	fseek(fp, 0, SEEK_SET);
+	fseek(fp, header->byteStartOfPositionArray, SEEK_SET);
+	blockLengths = parseBlockLengths(fp, number_of_blocks);
+
+	return number_of_blocks;
 }

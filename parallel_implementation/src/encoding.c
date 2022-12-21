@@ -98,6 +98,54 @@ void mergeEncodedText(EncodingText *dst, EncodingText *src) {
 	dst->nr_of_pos += src->nr_of_pos;
 }
 
+char* decodeFromFile(FILE *fp, TreeNode *root, int bytesToProcess, int numberOfChars) {
+	char byte;
+	bool found = false;
+	bool updateByte = true;
+	int bit = 0;
+
+	TreeNode *intermediateNode = root;
+	char *decodedText = malloc(sizeof(char) * numberOfChars);
+
+	for (int i; i < numberOfChars;) {
+		if (updateByte) {
+			fread(&byte, sizeof(char), 1, fp);
+			updateByte = false;
+		}
+
+		for (; bit < BIT_8 && !found; bit++) {
+			if (IsBit(byte, bit)) {
+				if (intermediateNode->rightChild != NULL)
+					intermediateNode = intermediateNode->rightChild;
+				else {
+					found = true;
+					decodedText[i] = intermediateNode->character;
+				}
+			} else {
+				if (intermediateNode->leftChild != NULL)
+					intermediateNode = intermediateNode->leftChild;
+				else {
+					found = true;
+					decodedText[i] = intermediateNode->character;
+				}
+			} 
+		}
+
+		if (bit >= BIT_8) {
+			bit = 0;
+			updateByte = true;
+		}
+
+		if (found) {
+			++i;
+			intermediateNode = root;
+			found = false;
+		}
+	}
+
+	return decodedText;
+}
+
 void printEncodings(CharEncodingDictionary* dict) {
 	for (int i = 0; i < dict->number_of_chars; i++) {
 		printFormattedChar(dict->charEncoding[i].character);

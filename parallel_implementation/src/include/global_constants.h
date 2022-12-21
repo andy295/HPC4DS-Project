@@ -30,6 +30,11 @@
 
 typedef unsigned char BYTE;
 
+static inline void freeBuffer(void* buffer) {
+	if (buffer != NULL)
+		free(buffer);
+}
+
 // enable only if we need
 // if at the end of the project we don't use it, we can remove all of them
 

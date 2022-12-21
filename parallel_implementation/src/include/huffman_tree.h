@@ -19,7 +19,7 @@ typedef struct TreeNode_t {
 
 	struct TreeNode_t *leftChild; 
 	struct TreeNode_t *rightChild; 
-} TreeNode; 
+} TreeNode;
 
 typedef struct LinkedListTreeNodeItem_t {
 	TreeNode *item; 

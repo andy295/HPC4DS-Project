@@ -26,10 +26,18 @@ typedef struct EncodingText {
 	BYTE *encodedText;
 } EncodingText;
 
+typedef struct DecodingText {
+	int length;
+	char *decodedText;
+} DecodingText;
+
 bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int depth);
 void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char* currentChar);
 
 extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionary *charFreqDict, TreeNode *root); 
 extern void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_letters);
 extern void mergeEncodedText(EncodingText *dst, EncodingText *src);
+
+extern char* decodeFromFile(FILE *fp, TreeNode *root, int bytesToProcess, int numberOfChars);
+
 extern void printEncodings(CharEncodingDictionary* dict);

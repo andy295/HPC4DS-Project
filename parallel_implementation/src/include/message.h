@@ -10,6 +10,7 @@ enum Messages {
     MSG_DICTIONARY = 0,
     MSG_ENCODING_DICTIONARY = 1,
     MSG_ENCODING_TEXT = 2,
+    MSG_TEXT = 3,
 };
 
 typedef struct MsgHeader {
@@ -41,6 +42,11 @@ typedef struct MsgEncodingText {
     BYTE *text;
 } MsgEncodingText;
 
+typedef struct MsgText {
+    MsgHeader header;
+    BYTE *text;
+} MsgText;
+
 BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary *dict, int *bufferSize);
 void deserializeMsgCharFreqDictionary(CharFreqDictionary *dict, BYTE *buffer);
 
@@ -49,6 +55,9 @@ void deserializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, BYTE *bu
 
 BYTE *serializeMsgEncodingText(EncodingText *data, int *bufferSize);
 void deserializeMsgEncodingText(EncodingText *data, BYTE *buffer);
+
+BYTE *serializeMsgText(char *data, int *bufferSize);
+void deserializeMsgText(DecodingText *decodedText, BYTE *buffer);
 
 extern BYTE* getMessage(void *data, int msgType, int *bufferSize);
 extern void setMessage(void *data, BYTE *buffer);

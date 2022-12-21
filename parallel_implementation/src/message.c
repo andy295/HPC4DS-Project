@@ -14,6 +14,10 @@ BYTE* getMessage(void* data, int msgType, int *bufferSize) {
 	case MSG_ENCODING_TEXT:
 		return serializeMsgEncodingText((EncodingText*)data, bufferSize);
 		break;
+
+	case MSG_TEXT:
+		return serializeMsgText((char*)data, bufferSize);
+		break;
 	
 	default:
 		printf("Error: unknown message type: %d\n", msgType);
@@ -85,6 +89,20 @@ BYTE *serializeMsgEncodingText(EncodingText *encodingText, int *bufferSize) {
 	return buffer;
 }
 
+BYTE *serializeMsgText(char *text, int *bufferSize) {
+	*bufferSize = sizeof(MsgText) + (sizeof(char) * (strlen(text)+1));
+	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
+
+	MsgText msg = {
+		.header.id = MSG_TEXT,
+		.header.size = *bufferSize,
+		.text = NULL};
+	memcpy(buffer, &msg, sizeof(MsgText));
+	memcpy(buffer + sizeof(MsgText), text, sizeof(char) * (strlen(text)+1));
+
+	return buffer;
+}
+
 void setMessage(void *data, BYTE *buffer) {
 	MsgGeneric *p = (MsgGeneric*)buffer;
 	int msgId = p->header.id;
@@ -100,6 +118,10 @@ void setMessage(void *data, BYTE *buffer) {
 
 	case MSG_ENCODING_TEXT:
 		deserializeMsgEncodingText((EncodingText*)data, buffer);
+		break;
+
+	case MSG_TEXT:
+		deserializeMsgText((DecodingText*)data, buffer);
 		break;
 
 	default:
@@ -118,7 +140,7 @@ void deserializeMsgCharFreqDictionary(CharFreqDictionary* dict, BYTE *buffer) {
 	
 	#if VERBOSE <= 2
 		printf("\nReceived dictionary with %d chars:\n", dict->number_of_chars);
-		extern void printCharFreqs(dict);
+		printCharFreqs(dict);
 	#endif
 }
 
@@ -162,4 +184,12 @@ void deserializeMsgEncodingText(EncodingText *encodingText, BYTE *buffer) {
 	encodingText->nr_of_bytes = msg.nrOfBytes;
 	encodingText->encodedText = malloc(sizeof(BYTE) * encodingText->nr_of_bytes);
 	memcpy(encodingText->encodedText, buffer + sizeof(MsgEncodingText) + posSize, encTextSize);
+}
+
+// to check if it works
+void deserializeMsgText(DecodingText *decodedText, BYTE *buffer) {
+	// MsgText msg;
+	// memcpy(&msg, buffer, sizeof(MsgText));
+
+	// memcpy(decodedText.text, buffer + sizeof(MsgText), sizeof(char) * (strlen(msg.text)+1));
 }

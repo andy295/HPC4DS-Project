@@ -1,10 +1,5 @@
 #include "include/huffman_coding.h"
 
-void freeBuffer(void* buffer) {
-	if (buffer != NULL)
-		free(buffer);
-}
-
 BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag) {
 	MPI_Probe(pid, tag, MPI_COMM_WORLD, status);
 
@@ -139,7 +134,7 @@ int main() {
 	if (pid == 0) {
 		// write an empty header to the file
 		//int indexOfNrOfBytes = 0;
-		FileHeader fileHeader = {.byteSizeOfPositionArray = 0};
+		FileHeader fileHeader = {.byteStartOfPositionArray = 0};
 		BYTE *startPos = (BYTE*)&fileHeader;
 		writeBufferToFile(ENCODED_FILE, startPos, sizeof(int) * FILE_HEADER_ELEMENTS, WRITE_B, 0);
 		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(int));
