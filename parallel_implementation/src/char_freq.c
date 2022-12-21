@@ -49,10 +49,11 @@ void appendToCharFreqs(CharFreqDictionary* dict, char character, int pos) {
 		memcpy(tmp, dict->charFreqs, dict->number_of_chars * sizeof(CharFreq));
 
 		free(dict->charFreqs);
+		int oldSize = dict->number_of_chars;
 		++dict->number_of_chars;
 		dict->charFreqs = malloc(dict->number_of_chars * sizeof(CharFreq));
 
-		memcpy(dict->charFreqs + 1, tmp, (dict->number_of_chars) * sizeof(CharFreq));
+		memcpy(dict->charFreqs + 1, tmp, oldSize * sizeof(CharFreq));
 
 		dict->charFreqs[0].character = character;
 		dict->charFreqs[0].frequency = 1;
@@ -107,7 +108,7 @@ void mergeCharFreqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size) {
 void printCharFreqs(CharFreqDictionary* dict) {
 	printf("Dictionary: \n");
 	for (int i = 0; i < dict->number_of_chars; i++) {
-			printf("\tcharacter: "); 
+			printf("\t%d.\tcharacter: ", i); 
 			printFormattedChar(dict->charFreqs[i].character);
 			printf("\tfrequence: %d\n", dict->charFreqs[i].frequency); 
 	}
