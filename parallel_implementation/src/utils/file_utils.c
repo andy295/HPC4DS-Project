@@ -1,7 +1,7 @@
 #include "file_utils.h"
 
 int getFileSize(const char *fileName) {
-	FILE *fp = openFile(fileName, READ, 0); 
+	FILE *fp = openFile(fileName, READ_ALL, 0); 
 	long fSize = ftell(fp); 
 	fseek(fp, 0, SEEK_SET); 
 
@@ -19,7 +19,7 @@ void printWorkDir(int processId) {
 }
 
 long readFilePortionForProcess(const char *fileName, char **fileDest, int processId, int proc_number) {
-	FILE *fp = openFile(fileName, READ, 0);
+	FILE *fp = openFile(fileName, READ_ALL, 0);
 	if (fp != NULL) {
 		long fSize = ftell(fp);
 
@@ -60,12 +60,16 @@ FILE* openFile(const char *filename, int openMode, int bytePosition) {
 
 	switch (openMode) {
 		case READ:
-			file = fopen(filename, "r"); 
-			fseek(file, bytePosition, SEEK_END); 
+			file = fopen(filename, "r");
+			break;
+
+		case READ_ALL:
+			file = fopen(filename, "r");
+			fseek(file, 0, SEEK_END); 
 			break;
 		
 		case WRITE:
-			file = fopen(filename, "w"); 
+			file = fopen(filename, "w");
 			break;
 		
 		case APPEND:
@@ -73,25 +77,29 @@ FILE* openFile(const char *filename, int openMode, int bytePosition) {
 			break;
 
 		case WRITE_AT:
-			file = fopen(filename, "a+");
+			file = fopen(filename, "r+");
 			fseek(file, bytePosition, SEEK_SET);
 			break;
 
 		case READ_B:
-			file = fopen(filename, "rb"); 
-			fseek(file, bytePosition, SEEK_END); 
+			file = fopen(filename, "rb");
 			break;
 		
 		case WRITE_B:
-			file = fopen(filename, "wb"); 
+			file = fopen(filename, "wb");
 			break;
 		
 		case APPEND_B:
 			file = fopen(filename, "ab+");
 			break;
 
+		case READ_ALL_B:
+			file = fopen(filename, "rb");
+			fseek(file, 0, SEEK_END); 
+			break;
+
 		case WRITE_B_AT:
-			file = fopen(filename, "ab+");
+			file = fopen(filename, "rb+");
 			fseek(file, bytePosition, SEEK_SET);
 			break;
 		
@@ -108,12 +116,9 @@ FILE* openFile(const char *filename, int openMode, int bytePosition) {
 	return file;
 }
 
-FileHeader* parseHeader(FILE* fp) {
-	FileHeader* header = malloc(sizeof(FileHeader));
-	fread(&header->byteStartOfDimensionArray, sizeof(unsigned int), 1, fp);
+void parseHeader(FileHeader *header, FILE *fp) {
+	fread(header, sizeof(unsigned int), 1, fp);
 	printf("Encoded text byte size: %d\n", header->byteStartOfDimensionArray - 1);
-
-	return header;
 }
 
 unsigned short* parseBlockLengths(FILE* fp, int numberOfBlocks) {
