@@ -68,7 +68,7 @@ int main() {
 		}
 
 		sortCharFreqs(&allChars);
-		appendToCharFreqs(&allChars, ENDTEXT, FIRST);
+		// appendToCharFreqs(&allChars, ENDTEXT, FIRST);
 
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);
@@ -133,8 +133,7 @@ int main() {
 	// and writes it to the file
 	if (pid == 0) {
 		// write an empty header to the file
-		//int indexOfNrOfBytes = 0;
-		FileHeader fileHeader = {.byteStartOfPositionArray = 0};
+		FileHeader fileHeader = {.byteStartOfDimensionArray = 0};
 		BYTE *startPos = (BYTE*)&fileHeader;
 		writeBufferToFile(ENCODED_FILE, startPos, sizeof(int) * FILE_HEADER_ELEMENTS, WRITE_B, 0);
 		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(int));
@@ -174,7 +173,7 @@ int main() {
 		// write the positions array to file
 		BYTE* positions = (BYTE*)&encodingText.positions;
 		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_pos * sizeof(unsigned short), APPEND_B, 0);
-		printf("Positions array size: %ld\n", encodingText.nr_of_pos * sizeof(short));
+		printf("Dimension array size: %ld\n", encodingText.nr_of_pos * sizeof(short));
 
 		// write header to file
 		unsigned int totalNrOfBytes = encodingText.nr_of_bytes+ sizeof(FileHeader)+ byteSizeOfTree;

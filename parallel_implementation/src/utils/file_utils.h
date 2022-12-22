@@ -18,7 +18,7 @@ enum OpenMode {
 static const int FILE_HEADER_ELEMENTS = 1;
 
 typedef struct FileHeader {
-    unsigned int byteStartOfPositionArray; 
+    unsigned int byteStartOfDimensionArray; 
 } FileHeader;
 
 extern FILE* openFile(const char *filename, int openMode, int bytePosition);
