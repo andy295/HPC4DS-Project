@@ -43,6 +43,10 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 	BYTE *byte_array = encodingText->encodedText;
 	unsigned int *byteArrayIndex = &encodingText->nr_of_bytes;
 
+	#if VERBOSE <= 2
+		printf("char: %c, encoding: %s\n", charEncoding->character, charEncoding->encoding);
+	#endif
+
 	for (int k = 0; k < charEncoding->length; k++) {
 		
 		if (charEncoding->encoding[k] == '1')
@@ -67,20 +71,28 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary*
 
 	encodingText->encodedText = malloc(sizeof(BYTE) * total_letters); // TODO: check if this is the right size
 
+	unsigned short bitSizeOfBlock = 0;
 	for (int i = 0; i < total_letters; i++) {
-		unsigned short bitSizeOfBlock = 0;
-		for (int j = 0; j < encodingDict->number_of_chars; j++){
+		bool found = false;
+		for (int j = 0; j < encodingDict->number_of_chars && !found; j++){
 			if (text[i] == encodingDict->charEncoding[j].character){
 				appendStringToByteArray(&encodingDict->charEncoding[j], encodingText, &c);
 				bitSizeOfBlock += encodingDict->charEncoding[j].length;
+
+				found = true;
 			}
 		}
 
-		if (i % CHARS_PER_BLOCK == 0 && i > 0) {
-			int idx = (i / CHARS_PER_BLOCK) - 1;
+		if ((i+1) % CHARS_PER_BLOCK == 0 && i > 0) {
+			int idx = ((i+1) / CHARS_PER_BLOCK) - 1;
 			encodingText->positions[idx] = bitSizeOfBlock;
-			bitSizeOfBlock = 0;
 		}
+	}
+
+	if (encodingText->nr_of_bits > 0) {
+		encodingText->encodedText[encodingText->nr_of_bytes] = c;
+		++encodingText->nr_of_bytes;
+		encodingText->positions[encodingText->nr_of_pos-1] = bitSizeOfBlock;
 	}
 
 	// reduce encoded text size if this last is smaller than the allocated one
