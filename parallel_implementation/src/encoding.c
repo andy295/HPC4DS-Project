@@ -164,3 +164,17 @@ void printEncodings(CharEncodingDictionary* dict) {
 		printf(": %s\t\nlength: %d\n", dict->charEncoding[i].encoding, dict->charEncoding[i].length);
 	}
 }
+
+
+void printEncodedText(BYTE *text, int length) {
+	for (int i = 0; i < length; i++) {
+        printf("\t");
+
+		for (int j = 0; j < BIT_8; j++)
+            printf("%d", !!((text[i] << j) & 0x80));
+        
+        printf("\n");
+    }
+    
+    printf("\n");
+}

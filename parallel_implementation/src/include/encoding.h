@@ -41,3 +41,4 @@ extern void mergeEncodedText(EncodingText *dst, EncodingText *src);
 extern char* decodeFromFile(FILE *fp, TreeNode *root, int bytesToProcess, int numberOfChars);
 
 extern void printEncodings(CharEncodingDictionary* dict);
+extern void printEncodedText(BYTE *text, int length);
