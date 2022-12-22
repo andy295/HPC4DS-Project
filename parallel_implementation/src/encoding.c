@@ -44,7 +44,9 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 	unsigned int *byteArrayIndex = &encodingText->nr_of_bytes;
 
 	#if VERBOSE <= 2
-		printf("char: %c, encoding: %s\n", charEncoding->character, charEncoding->encoding);
+	printf("char: ");
+	printFormattedChar(charEncoding->character);
+	printf(" encoding: %s\n", charEncoding->encoding);
 	#endif
 
 	for (int k = 0; k < charEncoding->length; k++) {
