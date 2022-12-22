@@ -150,3 +150,28 @@ int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned sho
 
 	return number_of_blocks;
 }
+
+void parseHuffmanTree(TreeNode* root, FILE* fp) {
+	fseek(fp, 0, SEEK_SET);
+	fseek(fp, sizeof(FileHeader), SEEK_SET);
+
+	extractHuffmanTree(root, fp);
+}
+
+void extractNode(TreeNode* root, FILE* fp) {
+	root->character = fgetc(fp);
+	root->frequency = 0; // not used
+	root->leftChild = NULL;
+	root->rightChild = NULL;
+
+	char children = fgetc(fp);
+	if (IsBit(children, 0)) {
+		root->leftChild = malloc(sizeof(TreeNode));
+		extractHuffmanTree(root->leftChild, fp);
+	} 
+	
+	if (IsBit(children, 1)) {
+		root->rightChild = malloc(sizeof(TreeNode));
+		extractHuffmanTree(root->rightChild, fp);
+	}
+}
