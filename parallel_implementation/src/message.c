@@ -70,7 +70,7 @@ BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, int *buff
 }
 
 BYTE *serializeMsgEncodingText(EncodingText *encodingText, int *bufferSize) {
-	int posSize = sizeof(short) * encodingText->nr_of_pos;
+	int posSize = sizeof(short) * encodingText->nr_of_dim;
 	int encTextSize = sizeof(BYTE) * encodingText->nr_of_bytes;
 	*bufferSize = sizeof(MsgEncodingText) + posSize + encTextSize;
 
@@ -79,11 +79,11 @@ BYTE *serializeMsgEncodingText(EncodingText *encodingText, int *bufferSize) {
 	MsgEncodingText msg = {
 		.header.id = MSG_ENCODING_TEXT,
 		.header.size = *bufferSize,
-		.nrOfPos = encodingText->nr_of_pos,
+		.nrOfPos = encodingText->nr_of_dim,
 		.nrOfBytes = encodingText->nr_of_bytes, 
 		.positions = NULL, .text = NULL};
 	memcpy(buffer, &msg, sizeof(MsgEncodingText));
-	memcpy(buffer + sizeof(MsgEncodingText), encodingText->positions, posSize);
+	memcpy(buffer + sizeof(MsgEncodingText), encodingText->dimensions, posSize);
 	memcpy(buffer + sizeof(MsgEncodingText) + posSize, encodingText->encodedText, encTextSize);
 
 	return buffer;
@@ -177,9 +177,9 @@ void deserializeMsgEncodingText(EncodingText *encodingText, BYTE *buffer) {
 	int posSize = sizeof(short) * msg.nrOfPos;
 	int encTextSize = sizeof(BYTE) * msg.nrOfBytes;
 
-	encodingText->nr_of_pos = msg.nrOfPos;
-	encodingText->positions = malloc(sizeof(short) * encodingText->nr_of_pos);
-	memcpy(encodingText->positions, buffer + sizeof(MsgEncodingText), posSize);
+	encodingText->nr_of_dim = msg.nrOfPos;
+	encodingText->dimensions = malloc(sizeof(short) * encodingText->nr_of_dim);
+	memcpy(encodingText->dimensions, buffer + sizeof(MsgEncodingText), posSize);
 
 	encodingText->nr_of_bytes = msg.nrOfBytes;
 	encodingText->encodedText = malloc(sizeof(BYTE) * encodingText->nr_of_bytes);

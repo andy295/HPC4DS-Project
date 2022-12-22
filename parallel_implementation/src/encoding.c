@@ -44,9 +44,9 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 	unsigned int *byteArrayIndex = &encodingText->nr_of_bytes;
 
 	#if VERBOSE <= 2
-	printf("char: ");
-	printFormattedChar(charEncoding->character);
-	printf(" encoding: %s\n", charEncoding->encoding);
+		printf("char: ");
+		printFormattedChar(charEncoding->character);
+		printf(" encoding: %s\n", charEncoding->encoding);
 	#endif
 
 	for (int k = 0; k < charEncoding->length; k++) {
@@ -55,29 +55,29 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 			SetBit(*currentChar, encodingText->nr_of_bits);
 		
 		if (encodingText->nr_of_bits == 7) {
-			byte_array[*byteArrayIndex] = *currentChar; 
+			byte_array[*byteArrayIndex] = *currentChar;
 			++(*byteArrayIndex);
-			encodingText->nr_of_bits = 0; 
-			*currentChar = 0; 
+			encodingText->nr_of_bits = 0;
+			*currentChar = 0;
 		}
 		else
 			++encodingText->nr_of_bits;
 	}
 }
 
-void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_letters) {
+void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_chars) {
 	char c = 0;
 
-	encodingText->nr_of_pos = (total_letters % CHARS_PER_BLOCK != 0) ? (total_letters / CHARS_PER_BLOCK) + 1 : total_letters / CHARS_PER_BLOCK;
-	encodingText->positions = malloc(sizeof(short) * encodingText->nr_of_pos); 
+	encodingText->nr_of_dim = (total_chars % CHARS_PER_BLOCK != 0) ? (total_chars / CHARS_PER_BLOCK) + 1 : total_chars / CHARS_PER_BLOCK;
+	encodingText->dimensions = calloc(encodingText->nr_of_dim, sizeof(short)); 
 
-	encodingText->encodedText = malloc(sizeof(BYTE) * total_letters); // TODO: check if this is the right size
+	encodingText->encodedText = malloc(sizeof(BYTE) * total_chars); // TODO: check if this is the right size
 
 	unsigned short bitSizeOfBlock = 0;
-	for (int i = 0; i < total_letters; i++) {
+	for (int i = 0; i < total_chars; i++) {
 		bool found = false;
-		for (int j = 0; j < encodingDict->number_of_chars && !found; j++){
-			if (text[i] == encodingDict->charEncoding[j].character){
+		for (int j = 0; j < encodingDict->number_of_chars && !found; j++) {
+			if (text[i] == encodingDict->charEncoding[j].character) {
 				appendStringToByteArray(&encodingDict->charEncoding[j], encodingText, &c);
 				bitSizeOfBlock += encodingDict->charEncoding[j].length;
 
@@ -87,18 +87,24 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary*
 
 		if ((i+1) % CHARS_PER_BLOCK == 0 && i > 0) {
 			int idx = ((i+1) / CHARS_PER_BLOCK) - 1;
-			encodingText->positions[idx] = bitSizeOfBlock;
+			encodingText->dimensions[idx] = bitSizeOfBlock;
+			bitSizeOfBlock = 0;
 		}
 	}
 
 	if (encodingText->nr_of_bits > 0) {
 		encodingText->encodedText[encodingText->nr_of_bytes] = c;
 		++encodingText->nr_of_bytes;
-		encodingText->positions[encodingText->nr_of_pos-1] = bitSizeOfBlock;
+
+		if (bitSizeOfBlock > 0)
+			encodingText->dimensions[encodingText->nr_of_dim-1] = bitSizeOfBlock;
+	} else if (encodingText->dimensions[encodingText->nr_of_dim-1] == 0) {
+		--encodingText->nr_of_dim;
+		encodingText->dimensions = realloc(encodingText->dimensions, sizeof(short) * encodingText->nr_of_dim);
 	}
 
 	// reduce encoded text size if this last is smaller than the allocated one
-	if (sizeof(BYTE) * total_letters > sizeof(BYTE) * encodingText->nr_of_bytes)
+	if (sizeof(BYTE) * total_chars > sizeof(BYTE) * encodingText->nr_of_bytes)
 		encodingText->encodedText = realloc(encodingText->encodedText, sizeof(BYTE) * encodingText->nr_of_bytes);
 }
 
@@ -107,9 +113,9 @@ void mergeEncodedText(EncodingText *dst, EncodingText *src) {
 	memcpy(dst->encodedText + dst->nr_of_bytes, src->encodedText, src->nr_of_bytes);
 	dst->nr_of_bytes += src->nr_of_bytes;
 
-	dst->positions = realloc(dst->positions, sizeof(unsigned short) * (dst->nr_of_pos + src->nr_of_pos));
-	memcpy(dst->positions + dst->nr_of_pos, src->positions, src->nr_of_pos * sizeof(unsigned short));
-	dst->nr_of_pos += src->nr_of_pos;
+	dst->dimensions = realloc(dst->dimensions, sizeof(unsigned short) * (dst->nr_of_dim + src->nr_of_dim));
+	memcpy(dst->dimensions + dst->nr_of_dim, src->dimensions, src->nr_of_dim * sizeof(unsigned short));
+	dst->nr_of_dim += src->nr_of_dim;
 }
 
 char* decodeFromFile(FILE *fp, TreeNode *root, int bytesToProcess, int numberOfChars) {
@@ -158,6 +164,32 @@ char* decodeFromFile(FILE *fp, TreeNode *root, int bytesToProcess, int numberOfC
 	}
 
 	return decodedText;
+}
+
+// maybe we don't need if we use the dimensions instead of the positions
+void appendToEncodingText(EncodingText *encodingText, CharEncoding *charEncoding, char character) {
+	int freeBits = BIT_8 - encodingText->nr_of_bits;
+
+	if (freeBits < charEncoding->length) {
+		int bytesNr = charEncoding->length / BIT_8;
+		bytesNr += ((charEncoding->length % BIT_8) > freeBits) ? 1 : 0;
+
+		encodingText->encodedText = realloc(encodingText->encodedText, sizeof(BYTE) * (encodingText->nr_of_bytes + bytesNr));
+	}
+
+	appendStringToByteArray(charEncoding, encodingText, &encodingText->encodedText[encodingText->nr_of_bytes-1]);
+
+	if (encodingText->nr_of_bits == 0)
+		--encodingText->nr_of_bytes;
+}
+
+CharEncoding* getEncoding(CharEncodingDictionary *dict, char character) {
+	for (int i = 0; i < dict->number_of_chars; i++) {
+		if (dict->charEncoding[i].character == character)
+			return &dict->charEncoding[i];
+	}
+
+	return NULL;
 }
 
 void printEncodings(CharEncodingDictionary* dict) {
