@@ -121,11 +121,10 @@ void parseHeader(FileHeader *header, FILE *fp) {
 	printf("Encoded text byte size: %d\n", header->byteStartOfDimensionArray - 1);
 }
 
-unsigned short* parseBlockLengths(FILE* fp, int numberOfBlocks) {
-	unsigned short *blockLengths = malloc(sizeof(unsigned short) * numberOfBlocks);
+void parseBlockLengths(unsigned short *blockLengths, FILE *fp, int numberOfBlocks, int startPos) {
+	fseek(fp, 0, SEEK_SET);
+	fseek(fp, startPos, SEEK_SET);
 	fread(blockLengths, sizeof(unsigned short), numberOfBlocks, fp);
-
-	return blockLengths;
 }
 
 int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned short *blockLengths) {
@@ -135,9 +134,10 @@ int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned sho
 			// handle the error
 		return -1;
 
-	FileHeader *header = parseHeader(fp);
-	printf("Encoded arrayPosStartPos: %d\n", header->byteStartOfDimensionArray);
-	int number_of_blocks = (getFileSize(ENCODED_FILE) - header->byteStartOfDimensionArray) / sizeof(unsigned short);
+	FileHeader header = {.byteStartOfDimensionArray = 0};
+	parseHeader(&header, fp);
+	printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
+	int number_of_blocks = (getFileSize(ENCODED_FILE) - header.byteStartOfDimensionArray) / sizeof(unsigned short);
 	printf("Number of blocks: %d\n", number_of_blocks); 
 
 	fseek(fp, 0, SEEK_SET);
@@ -145,7 +145,7 @@ int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned sho
 	// root = parseHuffmanTree(fp);
 
 	fseek(fp, 0, SEEK_SET);
-	fseek(fp, header->byteStartOfDimensionArray, SEEK_SET);
+	fseek(fp, header.byteStartOfDimensionArray, SEEK_SET);
 	blockLengths = parseBlockLengths(fp, number_of_blocks);
 
 	return number_of_blocks;
@@ -155,7 +155,7 @@ void parseHuffmanTree(TreeNode* root, FILE* fp) {
 	fseek(fp, 0, SEEK_SET);
 	fseek(fp, sizeof(FileHeader), SEEK_SET);
 
-	extractHuffmanTree(root, fp);
+	extractNode(root, fp);
 }
 
 void extractNode(TreeNode* root, FILE* fp) {
@@ -167,11 +167,11 @@ void extractNode(TreeNode* root, FILE* fp) {
 	char children = fgetc(fp);
 	if (IsBit(children, 0)) {
 		root->leftChild = malloc(sizeof(TreeNode));
-		extractHuffmanTree(root->leftChild, fp);
+		extractNode(root->leftChild, fp);
 	} 
 	
 	if (IsBit(children, 1)) {
 		root->rightChild = malloc(sizeof(TreeNode));
-		extractHuffmanTree(root->rightChild, fp);
+		extractNode(root->rightChild, fp);
 	}
 }

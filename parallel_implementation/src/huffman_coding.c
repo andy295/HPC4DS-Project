@@ -35,7 +35,7 @@ int main() {
 	CharEncodingDictionary encodingsDict = {.number_of_chars = allChars.number_of_chars, .charEncoding = NULL};
 
 	LinkedListTreeNodeItem* root = NULL;
-	EncodingText encodingText = {.nr_of_pos = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .positions = NULL, .encodedText = NULL};
+	EncodingText encodingText = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
 
 	// send the character frequencies to the master process
 	if (pid != 0) {
@@ -117,7 +117,7 @@ int main() {
 			// eventually print an error message
 			printf("Error while sending encoded text to process 0\n");
 
-		freeBuffer(encodingText.positions);
+		freeBuffer(encodingText.dimensions);
 		freeBuffer(encodingText.encodedText);
 
 		for (int i = 0; i < encodingsDict.number_of_chars; i++)
@@ -161,7 +161,7 @@ int main() {
 			mergeEncodedText(&encodingText, &temp);
 			printf("Number of bytes: %d\n", encodingText.nr_of_bytes);
 
-			freeBuffer(temp.positions);
+			freeBuffer(temp.dimensions);
 			freeBuffer(temp.encodedText);
 			freeBuffer(buffer);
 		}
@@ -171,20 +171,20 @@ int main() {
 		printf("Encoded text size: %d\n", encodingText.nr_of_bytes);
 
 		// write the positions array to file
-		BYTE* positions = (BYTE*)&encodingText.positions;
-		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_pos * sizeof(unsigned short), APPEND_B, 0);
-		printf("Dimension array size: %ld\n", encodingText.nr_of_pos * sizeof(short));
+		BYTE* positions = (BYTE*)&encodingText.dimensions;
+		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_dim * sizeof(unsigned short), APPEND_B, 0);
+		printf("Dimension array size: %ld\n", encodingText.nr_of_dim * sizeof(short));
 
 		// write header to file
 		unsigned int totalNrOfBytes = encodingText.nr_of_bytes+ sizeof(FileHeader)+ byteSizeOfTree;
 		startPos = (BYTE*)&totalNrOfBytes;
-		printf("Total number of blocks: %d\n", encodingText.nr_of_pos);
+		printf("Total number of blocks: %d\n", encodingText.nr_of_dim);
 		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int), WRITE_B_AT, 0);
 
 		printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));
 
-		freeBuffer(encodingText.positions);
+		freeBuffer(encodingText.dimensions);
 		freeBuffer(encodingText.encodedText);
 
 		takeTime();

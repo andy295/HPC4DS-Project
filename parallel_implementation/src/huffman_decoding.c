@@ -73,19 +73,22 @@ int main() {
 		FILE *fp2;
 		fp2 = openFile(ENCODED_FILE, READ_B, 0);
 
-		FileHeader *header = parseHeader(fp2);
-		printf("Encoded arrayPosStartPos: %d\n", header->byteSizeOfPositionArray);
-		int number_of_blocks = (getFileSize(ENCODED_FILE) - header->byteSizeOfPositionArray) / sizeof(unsigned short);
+		FileHeader header = {.byteStartOfDimensionArray = 0};
+		parseHeader(&header, fp2);
+		printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
+		int number_of_blocks = (getFileSize(ENCODED_FILE) - header.byteStartOfDimensionArray) / sizeof(unsigned short);
 		printf("Number of blocks: %d\n", number_of_blocks); 
 
-		fseek(fp2, 0, SEEK_SET);
-		fseek(fp2, sizeof(FileHeader), SEEK_SET);
-		TreeNode* root = parseHuffmanTree(fp2);
+		TreeNode* root = malloc(sizeof(TreeNode));
+		parseHuffmanTree(root, fp2);
 		int nodes = countTreeNodes(root);
 		int treeByteSize = nodes * sizeof(TreeArrayItem);
+		printf("Encoded tree size: %d\n", treeByteSize);
+		printf("Huffman tree nodes number: %d\n", nodes);
+		printHuffmanTree(root, 0);
 
 		fseek(fp2, 0, SEEK_SET);
-		fseek(fp2, header->byteSizeOfPositionArray, SEEK_SET);
+		fseek(fp2, header.byteStartOfDimensionArray, SEEK_SET);
 		unsigned short *blockLengths = parseBlockLengths(fp2, number_of_blocks);
 
 		if (pid == 0) {

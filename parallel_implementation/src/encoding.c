@@ -177,7 +177,8 @@ void appendToEncodingText(EncodingText *encodingText, CharEncoding *charEncoding
 		encodingText->encodedText = realloc(encodingText->encodedText, sizeof(BYTE) * (encodingText->nr_of_bytes + bytesNr));
 	}
 
-	appendStringToByteArray(charEncoding, encodingText, &encodingText->encodedText[encodingText->nr_of_bytes-1]);
+	character = (char)encodingText->encodedText[encodingText->nr_of_bytes-1];
+	appendStringToByteArray(charEncoding, encodingText, &character);
 
 	if (encodingText->nr_of_bits == 0)
 		--encodingText->nr_of_bytes;

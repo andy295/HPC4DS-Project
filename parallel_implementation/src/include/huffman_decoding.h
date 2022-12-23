@@ -7,3 +7,5 @@
 #include "encoding.h"
 
 #include "../utils/file_utils.h"
+
+void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int *end);
