@@ -45,13 +45,9 @@ void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int
 
     // printf("result: %d - rest: %d\n", result, rest);
 
-	*start = (pid * quotient) + 1;
-	if (quoto != 0 && pid > 0) {
-		if (pid > quoto)
-			++(*start);
-		else
-			*start += pid;
-	}
+	*start = (pid * quotient);
+	if (quoto != 0 && pid > 0)
+		*start += (pid > quoto) ? quoto : pid;
 
 	*end = *start + quotient;
 	if (quoto != 0 && (pid == 0 || pid < quoto))
