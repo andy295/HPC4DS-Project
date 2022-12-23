@@ -69,66 +69,81 @@ int main() {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 	
+	// just for pid of in order to test the function
 	if (pid == 0) {
-		FILE *fp2;
-		fp2 = openFile(ENCODED_FILE, READ_B, 0);
+		FILE *fp;
+		fp = openFile(ENCODED_FILE, READ_B, 0);
 
 		FileHeader header = {.byteStartOfDimensionArray = 0};
-		parseHeader(&header, fp2);
+		parseHeader(&header, fp);
+		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(unsigned int));
 		printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
-		int number_of_blocks = (getFileSize(ENCODED_FILE) - header.byteStartOfDimensionArray) / sizeof(unsigned short);
-		printf("Number of blocks: %d\n", number_of_blocks); 
 
-		TreeNode* root = malloc(sizeof(TreeNode));
-		parseHuffmanTree(root, fp2);
+		TreeNode *root = malloc(sizeof(TreeNode));
+		parseHuffmanTree(root, fp);
 		int nodes = countTreeNodes(root);
 		int treeByteSize = nodes * sizeof(TreeArrayItem);
 		printf("Encoded tree size: %d\n", treeByteSize);
 		printf("Huffman tree nodes number: %d\n", nodes);
 		printHuffmanTree(root, 0);
 
-		fseek(fp2, 0, SEEK_SET);
-		fseek(fp2, header.byteStartOfDimensionArray, SEEK_SET);
-		unsigned short *blockLengths = parseBlockLengths(fp2, number_of_blocks);
+		int number_of_blocks = (getFileSize(ENCODED_FILE) - header.byteStartOfDimensionArray) / sizeof(unsigned short);
+		unsigned short *blockLengths = malloc(sizeof(unsigned short) * number_of_blocks);
+		parseBlockLengths(blockLengths, fp, number_of_blocks, header.byteStartOfDimensionArray);
+		printf("Dimension array size: %ld\n", number_of_blocks * sizeof(short));
 
-		if (pid == 0) {
-			for (int i = 0; i < number_of_blocks; i++) {
-				printf("Block %d: %d byte\n", i, blockLengths[i]);
-			}
-		}
+		for (int i = 0; i < number_of_blocks; i++)
+			printf("\tdimension [%d] = %d\n", i, blockLengths[i]);
 
-		float partBlockPerProcess = ((float)number_of_blocks) / proc_number;
-		int idealBlocksPerProcess = (int)partBlockPerProcess + (partBlockPerProcess - (int)partBlockPerProcess > 0 ? 1 : 0); // ceil
-		if (pid == proc_number - 1) {
-			idealBlocksPerProcess = number_of_blocks - (proc_number-1)*idealBlocksPerProcess; // last process gets the remainder
-		}
-		printf("Process %d: %d blocks\n", pid, idealBlocksPerProcess);
+		printf("\nTotal number of blocks: %d\n", number_of_blocks);
 
-		int bitsToProcess = 0;
-		for (int i = 0; i < idealBlocksPerProcess; i++) {
-			bitsToProcess += blockLengths[pid * idealBlocksPerProcess + i];
-		}
-		int bitsToSkip = 0;
-		for (int i = 0; i < pid * idealBlocksPerProcess; i++) {
-			bitsToSkip += blockLengths[i];
-		}
-		int startBit = treeByteSize*8 + sizeof(FileHeader)*8 + bitsToSkip; 
-		int endBit = treeByteSize*8 + sizeof(FileHeader)*8 + bitsToSkip + bitsToProcess;
+		// fseek(fp2, 0, SEEK_SET);
+		// fseek(fp2, header.byteStartOfDimensionArray, SEEK_SET);
+		// unsigned short *blockLengths = parseBlockLengths(fp2, number_of_blocks);
 
-		printf("Process %d: %d - %d\n", pid, startBit, endBit);
+		// if (pid == 0) {
+		// 		for (int i = 0; i < number_of_blocks; i++) {
+		// 			printf("Block %d: %d byte\n", i, blockLengths[i]);
+		// 		}
+		// }
 
-		// fseek works with bytes, not bits,
-		// so we first adjust the file cursor to the nearest byte, then to the bit
-		int startByte = startBit / 8;
-		int remainderBits = startBit % 8;
-		fseek(fp2, 0, SEEK_SET);
-		fseek(fp2, startByte, SEEK_SET);
-		int numberOfChars = 0;
-		char* decodedText = decode_from_file(fp2, root, endBit - startBit, remainderBits, &numberOfChars);
+		// float partBlockPerProcess = ((float)number_of_blocks) / proc_number;
+		// int idealBlocksPerProcess = (int)partBlockPerProcess + (partBlockPerProcess - (int)partBlockPerProcess > 0 ? 1 : 0); // ceil
+		// if (pid == proc_number - 1) {
+		// 		idealBlocksPerProcess = number_of_blocks - (proc_number-1)*idealBlocksPerProcess; // last process gets the remainder
+		// }
+		// printf("Process %d: %d blocks\n", pid, idealBlocksPerProcess);
 
-		//printf("Process %d: %d chars\n", pid, numberOfChars);
-		//printf("Process %d: %s\n", pid, decodedText);
+		// int bitsToProcess = 0;
+		// for (int i = 0; i < idealBlocksPerProcess; i++) {
+		// 	bitsToProcess += blockLengths[pid * idealBlocksPerProcess + i];
+		// }
+		// int bitsToSkip = 0;
+		// for (int i = 0; i < pid * idealBlocksPerProcess; i++) {
+		// 	bitsToSkip += blockLengths[i];
+		// 	}
+		// int startBit = treeByteSize*8 + sizeof(FileHeader)*8 + bitsToSkip; 
+		// int endBit = treeByteSize*8 + sizeof(FileHeader)*8 + bitsToSkip + bitsToProcess;
 
+		// printf("Process %d: %d - %d\n", pid, startBit, endBit);
+
+		// // fseek works with bytes, not bits,
+		// // so we first adjust the file cursor to the nearest byte, then to the bit
+		// int startByte = startBit / 8;
+		// int remainderBits = startBit % 8;
+		// fseek(fp2, 0, SEEK_SET);
+		// fseek(fp2, startByte, SEEK_SET);
+		// int numberOfChars = 0;
+		// char* decodedText = decode_from_file(fp2, root, endBit - startBit, remainderBits, &numberOfChars);
+
+		// printf("Process %d: %d chars\n", pid, numberOfChars);
+		// printf("Process %d: %s\n", pid, decodedText);
+
+		// we need to free the memory allocated for the tree
+
+		freeBuffer(blockLengths);
+
+		fclose(fp);
 	}
 
 	MPI_Finalize();
