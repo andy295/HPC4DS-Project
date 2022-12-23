@@ -33,14 +33,12 @@ typedef struct DecodingText {
 
 bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int depth);
 void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char* currentChar);
+void copyEncodedText(EncodingText *encodingText, char *currentChar);
 
 extern CharEncoding* getEncoding(CharEncodingDictionary *dict, char character);
 extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionary *charFreqDict, TreeNode *root); 
 extern void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_chars);
 extern void mergeEncodedText(EncodingText *dst, EncodingText *src);
-
-// maybe we don't need if we use the dimensions instead of the positions
-extern void appendToEncodingText(EncodingText *encodingText, CharEncoding *charEncoding, char character);
 
 extern char* decodeFromFile(FILE *fp, TreeNode *root, int bytesToProcess, int numberOfChars);
 

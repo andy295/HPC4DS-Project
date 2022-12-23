@@ -146,7 +146,7 @@ int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned sho
 
 	fseek(fp, 0, SEEK_SET);
 	fseek(fp, header.byteStartOfDimensionArray, SEEK_SET);
-	parseBlockLengths(blockLengths, fp, number_of_blocks, header.byteStartOfDimensionArray);
+	parseBlockLengths(blockLengths, fp, number_of_blocks, 0);
 
 	return number_of_blocks;
 }
