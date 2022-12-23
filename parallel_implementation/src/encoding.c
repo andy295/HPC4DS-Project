@@ -121,59 +121,95 @@ void mergeEncodedText(EncodingText *dst, EncodingText *src) {
 	dst->nr_of_dim += src->nr_of_dim;
 }
 
-char* decodeFromFile(FILE *fp, TreeNode *root, int bytesToProcess, int numberOfChars) {
-	char byte;
-	bool found = false;
-	bool updateByte = true;
-	int bit = 0;
+bool isLeaf(TreeNode *node) {
+	return node->leftChild == NULL && node->rightChild == NULL;
+}
 
+void appendCharacter(char *text, char c, int *idx) {
+	text = realloc(text, sizeof(char) * (*idx + 1));
+	text[*idx] = c;
+	++(*idx);
+	printf("%c\n", text[*idx - 1]);
+}
+
+char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, int blockNr, FILE *fp, TreeNode *root) {
+	char *decodedText = malloc(sizeof(char));
+	int idx = 0;
+
+	BYTE byte;
 	TreeNode *intermediateNode = root;
-	char *decodedText = malloc(sizeof(char) * numberOfChars);
 
-	for (int i; i < numberOfChars;) {
-		if (updateByte) {
-			fread(&byte, sizeof(char), 1, fp);
-			updateByte = false;
-		}
+	// maybe we can move it inot file_utils.c
+	fseek(fp, 0, SEEK_SET);
+	fseek(fp, startByte, SEEK_SET);
+	
+	if (isLeaf(root)) {
+		decodedText[0] = root->character;
+		return decodedText;
+	}
 
-		for (; bit < BIT_8 && !found; bit++) {
+	for (int i = blockStart; i < blockStart + blockNr; i++) {
+		int bit = 0;
+		bool update_byte = true;
+		bool found = false;
+
+		for (int j = 0; j < dimensions[i]; ++j) {
+
+			if (update_byte) {
+				fread(&byte, sizeof(BYTE), 1, fp);
+				update_byte = false;
+
+				printEncodedText(&byte, sizeof(BYTE));
+			}
+
 			if (IsBit(byte, bit)) {
-				if (intermediateNode->rightChild != NULL)
+				if (intermediateNode->rightChild != NULL) {
 					intermediateNode = intermediateNode->rightChild;
-				else {
-					found = true;
-					decodedText[i] = intermediateNode->character;
+
+					if (isLeaf(intermediateNode)) {
+						printf("%d. ", i);
+						appendCharacter(decodedText, intermediateNode->character, &idx);
+						found = true;
+					}
+					else
+						printf("bit: %d - %c\n", bit, intermediateNode->character);
 				}
 			} else {
-				if (intermediateNode->leftChild != NULL)
+				if (intermediateNode->leftChild != NULL) {
 					intermediateNode = intermediateNode->leftChild;
-				else {
-					found = true;
-					decodedText[i] = intermediateNode->character;
+
+					if (isLeaf(intermediateNode)) {
+						printf("%d. ", i);
+						appendCharacter(decodedText, intermediateNode->character, &idx);
+						found = true;
+					}
+					else
+						printf("bit: %d - %c\n", bit, intermediateNode->character);
 				}
-			} 
-		}
+			}
 
-		if (bit >= BIT_8) {
-			bit = 0;
-			updateByte = true;
-		}
+			if (bit + 1 == BIT_8) {
+				bit = 0;
+				update_byte = true;
+			}
+			else
+				++bit;
 
-		if (found) {
-			++i;
-			intermediateNode = root;
-			found = false;
+			if (found) {
+				intermediateNode = root;
+				found = false;
+			}
 		}
 	}
 
+	decodedText[idx] = ENDTEXT;
 	return decodedText;
 }
 
 CharEncoding* getEncoding(CharEncodingDictionary *dict, char character) {
-	for (int i = 0; i < dict->number_of_chars; i++) {
+	for (int i = 0; i < dict->number_of_chars; i++)
 		if (dict->charEncoding[i].character == character)
 			return &dict->charEncoding[i];
-	}
 
 	return NULL;
 }
@@ -184,7 +220,6 @@ void printEncodings(CharEncodingDictionary* dict) {
 		printf(": %s\t\nlength: %d\n", dict->charEncoding[i].encoding, dict->charEncoding[i].length);
 	}
 }
-
 
 void printEncodedText(BYTE *text, int length) {
 	for (int i = 0; i < length; i++) {
