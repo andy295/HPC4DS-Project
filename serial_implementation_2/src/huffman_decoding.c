@@ -2,45 +2,6 @@
 
 static const int NUM_OF_PROCESSES_DEC = 3;
 
-char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToSkip, int* numberOfChars){
-	char c;
-	TreeNode* intermediateNode = root;
-
-	char* decodedText = malloc(sizeof(char) * bitsToProcess);
-
-	int bitsProcessed = 0;
-	while (fread(&c, sizeof(char), 1, fp2)) {
-		for (int i = 0; i < 8; i++) {
-			if (bitsToSkip > 0) { // skip the initial bits, if any
-				bitsToSkip--;
-				continue;
-			}
-
-			if (bitsProcessed >= bitsToProcess) {
-				break;
-			}
-			bitsProcessed++;
-
-			if (intermediateNode->character != '$') {
-
-				//printf("%c", intermediateNode->character);
-				decodedText[(*numberOfChars)++] = intermediateNode->character;
-
-				intermediateNode = root;
-			}
-
-			if (c & (1 << i)) {
-				intermediateNode = intermediateNode->rightChild;
-			} else {
-				intermediateNode = intermediateNode->leftChild;
-			}
-		}
-	}
-
-	fclose(fp2);
-	return decodedText;
-}
-
 void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int *end) {
     int quotient = nrOfBlocks / nrOfProcs;
     int quoto =	nrOfBlocks % nrOfProcs;
@@ -91,23 +52,44 @@ int huffman_decoding() {
 				calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 0, &start, &end);
 				printf("Process 0 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
 
+				char *decodedText = decodeFromFile(
+					sizeof(FileHeader) + treeByteSize,
+					dimensions,
+					start,
+					end - start,
+					fp,
+					root);
+
+				printf("decoded string: %s\n", decodedText);
+
 				start = 0;
 				end = 0;
 				calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 1, &start, &end);
 				printf("Process 1 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
 
+				freeBuffer(decodedText);
 
-				start = 0;
-				end = 0;
-				calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 2, &start, &end);
-				printf("Process 2 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
+				decodedText = decodeFromFile(
+					sizeof(FileHeader) + treeByteSize,
+					dimensions,
+					start,
+					end - start,
+					fp,
+					root);
 
-				if (NUM_OF_PROCESSES_DEC == 4) {
-					start = 0;
-					end = 0;
-					calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 3, &start, &end);
-					printf("Process 3 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
-				}
+				printf("decoded string: %s\n", decodedText);
+
+				// start = 0;
+				// end = 0;
+				// calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 2, &start, &end);
+				// printf("Process 2 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
+
+				// if (NUM_OF_PROCESSES_DEC == 4) {
+				// 	start = 0;
+				// 	end = 0;
+				// 	calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 3, &start, &end);
+				// 	printf("Process 3 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
+				// }
 
 				// unsigned short *blockLengths = malloc(sizeof(unsigned short) * number_of_blocks);
 				// parseBlockLengths(blockLengths, fp, number_of_blocks, sizeof(FileHeader) + treeByteSize);
