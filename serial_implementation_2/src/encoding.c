@@ -39,30 +39,30 @@ void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionar
 	}
 }
 
-void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char* currentChar) {
-	BYTE *byte_array = encodingText->encodedText;
-	unsigned int *byteArrayIndex = &encodingText->nr_of_bytes;
+void copyEncodedText(EncodingText *encodingText, char *currentChar) {
+	encodingText->encodedText[encodingText->nr_of_bytes] = *currentChar;
+	++encodingText->nr_of_bytes;
+	encodingText->nr_of_bits = 0;
+	*currentChar = 0;
+}
+
+void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char *currentChar) {
+	for (int k = 0; k < charEncoding->length; k++) {
+		
+		if (charEncoding->encoding[k] == '1')
+			SetBit(*currentChar, encodingText->nr_of_bits);
+		
+		if (encodingText->nr_of_bits == 7)
+			copyEncodedText(encodingText, currentChar);
+		else
+			++encodingText->nr_of_bits;
+	}
 
 	#if VERBOSE <= 2
 		printf("char: ");
 		printFormattedChar(charEncoding->character);
 		printf(" encoding: %s\n", charEncoding->encoding);
 	#endif
-
-	for (int k = 0; k < charEncoding->length; k++) {
-		
-		if (charEncoding->encoding[k] == '1')
-			SetBit(*currentChar, encodingText->nr_of_bits);
-		
-		if (encodingText->nr_of_bits == 7) {
-			byte_array[*byteArrayIndex] = *currentChar;
-			++(*byteArrayIndex);
-			encodingText->nr_of_bits = 0;
-			*currentChar = 0;
-		}
-		else
-			++encodingText->nr_of_bits;
-	}
 }
 
 void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_chars) {
@@ -89,6 +89,9 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary*
 			int idx = ((i+1) / CHARS_PER_BLOCK) - 1;
 			encodingText->dimensions[idx] = bitSizeOfBlock;
 			bitSizeOfBlock = 0;
+
+			if (encodingText->nr_of_bits > 0 && encodingText->nr_of_bits % BIT_8 != 0)
+				copyEncodedText(encodingText, &c);
 		}
 	}
 
@@ -164,24 +167,6 @@ char* decodeFromFile(FILE *fp, TreeNode *root, int bytesToProcess, int numberOfC
 	}
 
 	return decodedText;
-}
-
-// maybe we don't need if we use the dimensions instead of the positions
-void appendToEncodingText(EncodingText *encodingText, CharEncoding *charEncoding, char character) {
-	int freeBits = BIT_8 - encodingText->nr_of_bits;
-
-	if (freeBits < charEncoding->length) {
-		int bytesNr = charEncoding->length / BIT_8;
-		bytesNr += ((charEncoding->length % BIT_8) > freeBits) ? 1 : 0;
-
-		encodingText->encodedText = realloc(encodingText->encodedText, sizeof(BYTE) * (encodingText->nr_of_bytes + bytesNr));
-	}
-
-	character = (char)encodingText->encodedText[encodingText->nr_of_bytes-1];
-	appendStringToByteArray(charEncoding, encodingText, &character);
-
-	if (encodingText->nr_of_bits == 0)
-		--encodingText->nr_of_bytes;
 }
 
 CharEncoding* getEncoding(CharEncodingDictionary *dict, char character) {

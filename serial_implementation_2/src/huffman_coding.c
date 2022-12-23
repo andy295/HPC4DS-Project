@@ -196,13 +196,13 @@ int huffman_coding() {
 	// process 0 encodes its piece of text
 	encodeStringToByteArray(&encodingText0, &encodingsDict0, text0, total_text_length0);
 
-	// printf("\nProcess 0 encoded text:\n\t");
+	printf("\nProcess 0 encoded text:\n\t");
 	// printf("number of bits: %hu\n\t", encodingText0.nr_of_bits);
 	// printf("number of bytes: %hu\n\t", encodingText0.nr_of_bytes);
 	// printf("number of dimensions: %hu\n", encodingText0.nr_of_dim);
 	// for (int i = 0; i < encodingText0.nr_of_dim; i++)
 	// 	printf("\tdimension[%d] = %d\n", i, encodingText0.dimensions[i]);
-	// printEncodedText(encodingText0.encodedText, encodingText0.nr_of_bytes);
+	printEncodedText(encodingText0.encodedText, encodingText0.nr_of_bytes);
 	// printf("\n");
 
 	freeBuffer(acp0.charFreqs);
@@ -216,13 +216,13 @@ int huffman_coding() {
 
 			freeBuffer(buffer1);
 
-			// printf("\nProcess 1 encoded text:\n\t");
+			printf("\nProcess 1 encoded text:\n\t");
 			// printf("number of bits: %hu\n\t", encodingText1.nr_of_bits);
 			// printf("number of bytes: %hu\n\t", encodingText1.nr_of_bytes);
 			// printf("number of dimensions: %hu\n", encodingText1.nr_of_dim);
 			// for (int i = 0; i < encodingText1.nr_of_dim; i++)
 			// 	printf("\tdimension[%d] = %d\n", i, encodingText1.dimensions[i]);
-			// printEncodedText(encodingText1.encodedText, encodingText1.nr_of_bytes);
+			printEncodedText(encodingText1.encodedText, encodingText1.nr_of_bytes);
 			// printf("\n");
 
 			bufferSize = 0;
@@ -245,13 +245,13 @@ int huffman_coding() {
 			bufferSize = 0;
 			buffer2 = getMessage(&encodingText2, MSG_ENCODING_TEXT, &bufferSize);
 
-			// printf("\nProcess 2 encoded text:\n\t");
+			printf("\nProcess 2 encoded text:\n\t");
 			// printf("number of bits: %hu\n\t", encodingText2.nr_of_bits);
 			// printf("number of bytes: %hu\n\t", encodingText2.nr_of_bytes);
 			// printf("number of dimensions: %hu\n", encodingText2.nr_of_dim);
 			// for (int i = 0; i < encodingText2.nr_of_dim; i++)
 			// 	printf("\tdimension[%d] = %d\n", i, encodingText2.dimensions[i]);
-			// printEncodedText(encodingText2.encodedText, encodingText2.nr_of_bytes);
+			printEncodedText(encodingText2.encodedText, encodingText2.nr_of_bytes);
 			// printf("\n");
 
 			freeBuffer(encodingText2.dimensions);
@@ -279,13 +279,13 @@ int huffman_coding() {
 			bufferSize = 0;
 			buffer3 = getMessage(&encodingText3, MSG_ENCODING_TEXT, &bufferSize);
 
-			// printf("\nProcess 3 encoded text:\n\t");
+			printf("\nProcess 3 encoded text:\n\t");
 			// printf("number of bits: %hu\n\t", encodingText3.nr_of_bits);
 			// printf("number of bytes: %hu\n\t", encodingText3.nr_of_bytes);
 			// printf("number of dimensions: %hu\n", encodingText3.nr_of_dim);
 			// for (int i = 0; i < encodingText3.nr_of_dim; i++)
 			// 	printf("\tdimension[%d] = %d\n", i, encodingText3.dimensions[i]);
-			// printEncodedText(encodingText3.encodedText, encodingText3.nr_of_bytes);
+			printEncodedText(encodingText3.encodedText, encodingText3.nr_of_bytes);
 			// printf("\n");
 
 			freeBuffer(encodingText3.dimensions);
@@ -327,9 +327,9 @@ int huffman_coding() {
 
 	int nodes = countTreeNodes(root->item);
 	printf("Huffman tree nodes number: %d\n", nodes);
-	printHuffmanTree(root->item, 0);
+	// printHuffmanTree(root->item, 0);
 
-//	printf("Number of bytes: %d\n", encodingText0.nr_of_bytes);
+	printf("Process 0 - number of bytes: %d\n", encodingText0.nr_of_bytes);
 
 	// receive the encoded text from each process
 	// store in unique buffer
@@ -343,7 +343,8 @@ int huffman_coding() {
 			// not sure if this leaves spaces between bytes... probably yes
 			// but we may make it work with the block sizes	
 			mergeEncodedText(&encodingText0, &temp);
-	//		printf("Number of bytes: %d\n", encodingText0.nr_of_bytes);
+		
+			printf("\nProcess 1 - number of bytes: %d\n", temp.nr_of_bytes);
 
 			freeBuffer(temp.dimensions);
 			freeBuffer(temp.encodedText);
@@ -355,7 +356,8 @@ int huffman_coding() {
 			// not sure if this leaves spaces between bytes... probably yes
 			// but we may make it work with the block sizes	
 			mergeEncodedText(&encodingText0, &temp);
-		//	printf("Number of bytes: %d\n", encodingText0.nr_of_bytes);
+
+			printf("\nProcess 2 - number of bytes: %d\n", temp.nr_of_bytes);
 
 			freeBuffer(temp.dimensions);
 			freeBuffer(temp.encodedText);
@@ -367,7 +369,8 @@ int huffman_coding() {
 			// not sure if this leaves spaces between bytes... probably yes
 			// but we may make it work with the block sizes	
 			mergeEncodedText(&encodingText0, &temp);
-		//	printf("Number of bytes: %d\n", encodingText0.nr_of_bytes);
+
+			printf("\nProcess 3 - number of bytes: %d\n", temp.nr_of_bytes);
 
 			freeBuffer(temp.dimensions);
 			freeBuffer(temp.encodedText);
@@ -379,13 +382,12 @@ int huffman_coding() {
 		}
 	}
 
-	// printf("\nProcess 0 complete encoded text:\n\t");
-	// printf("number of bytes: %hu\n\t", encodingText0.nr_of_bytes);
-	// printf("number of dimensions: %hu\n", encodingText0.nr_of_dim);
+	printf("\nProcess 0 complete encoded text:\n\n");
+	printEncodedText(encodingText0.encodedText, encodingText0.nr_of_bytes);
 
-	// // write all the encoded text to file
-	// writeBufferToFile(encodedFileName, encodingText0.encodedText, encodingText0.nr_of_bytes, APPEND_B, 0);
-	// printf("Encoded text size: %d\n", encodingText0.nr_of_bytes);
+	// write all the encoded text to file
+	writeBufferToFile(encodedFileName, encodingText0.encodedText, encodingText0.nr_of_bytes, APPEND_B, 0);
+	printf("Encoded text size: %d\n", encodingText0.nr_of_bytes);
 
 	// write the dimensions array to file
 	BYTE* dimensions = (BYTE*)&encodingText0.dimensions;
@@ -394,14 +396,14 @@ int huffman_coding() {
 
 	for (int i = 0; i < encodingText0.nr_of_dim; i++)
 		printf("\tdimension[%d] = %d\n", i, encodingText0.dimensions[i]);
-	// printEncodedText(encodingText0.encodedText, encodingText0.nr_of_bytes);
+
 	printf("\n");
 
 	// write header to file
-    // fileHeader.byteStartOfDimensionArray = encodingText0.nr_of_bytes + sizeof(FileHeader) + byteSizeOfTree;
-	// startPos = (BYTE*)&fileHeader; 
-	// printf("Total number of blocks: %d\n", encodingText0.nr_of_dim);
-    // writeBufferToFile(encodedFileName, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B_AT, 0);
+    fileHeader.byteStartOfDimensionArray = sizeof(FileHeader) + byteSizeOfTree + encodingText0.nr_of_bytes;
+	startPos = (BYTE*)&fileHeader; 
+	printf("Total number of blocks: %d\n", encodingText0.nr_of_dim);
+    writeBufferToFile(encodedFileName, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B_AT, 0);
 
 	printf("\nEncoded file size: %d\n", getFileSize(encodedFileName));
 	printf("Original file size: %d\n", getFileSize(fileName));

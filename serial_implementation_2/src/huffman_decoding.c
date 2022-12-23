@@ -1,5 +1,7 @@
 #include "include/huffman_decoding.h"
 
+static const int NUM_OF_PROCESSES_DEC = 3;
+
 char* decode_from_file(FILE* fp2, TreeNode* root, int bitsToProcess, int bitsToSkip, int* numberOfChars){
 	char c;
 	TreeNode* intermediateNode = root;
@@ -45,13 +47,9 @@ void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int
 
     // printf("result: %d - rest: %d\n", result, rest);
 
-	*start = (pid * quotient) + 1;
-	if (quoto != 0 && pid > 0) {
-		if (pid > quoto)
-			++(*start);
-		else
-			*start += pid;
-	}
+	*start = (pid * quotient);
+	if (quoto != 0 && pid > 0)
+		*start += (pid > quoto) ? quoto : pid;
 
 	*end = *start + quotient;
 	if (quoto != 0 && (pid == 0 || pid < quoto))
@@ -64,6 +62,8 @@ int huffman_decoding() {
 	FILE *fp;
 
 	printf("\nDecoding\n");
+
+	unsigned short dimensions[10] = {8, 7, 8, 6, 7, 7, 6, 6, 7, 4};
 
 	for (int i = 0; i < NUM_OF_PROCESSES; i++) {
 		switch (i) {
@@ -81,15 +81,40 @@ int huffman_decoding() {
 				int treeByteSize = nodes * sizeof(TreeArrayItem);
 				printf("Encoded tree size: %d\n", treeByteSize);
 				printf("Huffman tree nodes number: %d\n", nodes);
-				printHuffmanTree(root, 0);
+				// printHuffmanTree(root, 0);
 
-				int number_of_blocks = (getFileSize(inputFile) - (sizeof(FileHeader) + treeByteSize)) / sizeof(unsigned short);
-				unsigned short *blockLengths = malloc(sizeof(unsigned short) * number_of_blocks);
-				parseBlockLengths(blockLengths, fp, number_of_blocks, sizeof(FileHeader) + treeByteSize);
-				printf("Dimension array size: %ld\n", number_of_blocks * sizeof(short));
+				int fileSize = getFileSize(inputFile);
+				int number_of_blocks = (fileSize - header.byteStartOfDimensionArray) / sizeof(unsigned short);
 
-				for (int i = 0; i < number_of_blocks; i++)
-					printf("\tdimension [%d] = %d\n", i, blockLengths[i]);
+				int start = 0;
+				int end = 0;
+				calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 0, &start, &end);
+				printf("Process 0 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
+
+				start = 0;
+				end = 0;
+				calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 1, &start, &end);
+				printf("Process 1 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
+
+
+				start = 0;
+				end = 0;
+				calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 2, &start, &end);
+				printf("Process 2 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
+
+				if (NUM_OF_PROCESSES_DEC == 4) {
+					start = 0;
+					end = 0;
+					calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 3, &start, &end);
+					printf("Process 3 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
+				}
+
+				// unsigned short *blockLengths = malloc(sizeof(unsigned short) * number_of_blocks);
+				// parseBlockLengths(blockLengths, fp, number_of_blocks, sizeof(FileHeader) + treeByteSize);
+				// printf("Dimension array size: %ld\n", number_of_blocks * sizeof(short));
+
+				// for (int i = 0; i < number_of_blocks; i++)
+				// 	printf("\tdimension [%d] = %d\n", i, blockLengths[i]);
 
 				printf("\nTotal number of blocks: %d\n", number_of_blocks);
 
@@ -118,12 +143,6 @@ int huffman_decoding() {
 				break;
 		}
 	}
-
-	// if (pid == 0) {
-	// 	for (int i = 0; i < number_of_blocks; i++) {
-	// 		printf("Block %d: %d byte\n", i, blockLengths[i]);
-	// 	}
-	// }
 
 	// float partBlockPerProcess = ((float)number_of_blocks) / proc_number;
 	// int idealBlocksPerProcess = (int)partBlockPerProcess + (partBlockPerProcess - (int)partBlockPerProcess > 0 ? 1 : 0); // ceil

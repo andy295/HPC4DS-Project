@@ -91,13 +91,20 @@ LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary *dict) {
 }
 
 void printHuffmanTree(TreeNode *root, int depth) {
-	if (TREE_PRINT_TYPE == 0)
-		print(root, depth);
-	else
-		print2D(root);
+	switch (TREE_PRINT_TYPE) {
+		case 0:
+			print(root, depth, true);
+			break;
+		case 1:
+			print(root, depth, false);
+			break;
+		case 2:
+			print2D(root);
+			break;
+	}
 }
 
-void print(TreeNode *root, int depth) {
+void print(TreeNode *root, int depth,  bool printFreq) {
 	if (root == NULL)
 		return; 
 
@@ -105,7 +112,11 @@ void print(TreeNode *root, int depth) {
 		printf(" ");
 
 	printFormattedChar(root->character); 
-	printf(": %d\n", root->frequency);
+
+	if (printFreq)
+		printf(": %d\n", root->frequency);
+	else
+		printf("\n");
 
 	printHuffmanTree(root->leftChild, depth+1);	
 	printHuffmanTree(root->rightChild, depth+1);

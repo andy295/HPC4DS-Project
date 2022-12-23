@@ -39,7 +39,7 @@ LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary *dict);
 int countTreeNodes(TreeNode *root);
 void encodeTree(TreeNode *root, TreeArrayItem *treeArray, int *globalIndex);
 
-void print(TreeNode *root, int depth);
+void print(TreeNode *root, int depth, bool printFreq);
 void print2D(TreeNode *root);
 void print2DUtil(TreeNode *root, int space);
 
