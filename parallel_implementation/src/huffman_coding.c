@@ -68,6 +68,8 @@ int main() {
 		}
 
 		sortCharFreqs(&allChars);
+
+		// maybe by using the dimension of the text we can avoid this
 		// appendToCharFreqs(&allChars, ENDTEXT, FIRST);
 
 		// creates the huffman tree
@@ -135,14 +137,19 @@ int main() {
 		// write an empty header to the file
 		FileHeader fileHeader = {.byteStartOfDimensionArray = 0};
 		BYTE *startPos = (BYTE*)&fileHeader;
-		writeBufferToFile(ENCODED_FILE, startPos, sizeof(int) * FILE_HEADER_ELEMENTS, WRITE_B, 0);
-		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(int));
+		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B, 0);
+		printf("Header size: %lu\n", sizeof(unsigned int) * FILE_HEADER_ELEMENTS);
+		printf("Encoded arrayPosStartPos: %d\n", fileHeader.byteStartOfDimensionArray);
 
 		// write the encoded tree to the file
 		int byteSizeOfTree; 
 		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
 		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, APPEND_B, 0);
 		printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
+
+		int nodes = countTreeNodes(root->item);
+		printf("Huffman tree nodes number: %d\n", nodes);
+		printHuffmanTree(root->item, 0);
 
 		// receive the encoded text from each process
 		// store in unique buffer
@@ -170,16 +177,21 @@ int main() {
 		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, APPEND_B, 0);
 		printf("Encoded text size: %d\n", encodingText.nr_of_bytes);
 
-		// write the positions array to file
-		BYTE* positions = (BYTE*)&encodingText.dimensions;
-		writeBufferToFile(ENCODED_FILE, positions, encodingText.nr_of_dim * sizeof(unsigned short), APPEND_B, 0);
+		// write the dimensions array to file
+		BYTE* dimensions = (BYTE*)&encodingText.dimensions;
+		writeBufferToFile(ENCODED_FILE, dimensions, encodingText.nr_of_dim * sizeof(unsigned short), APPEND_B, 0);
 		printf("Dimension array size: %ld\n", encodingText.nr_of_dim * sizeof(short));
 
+		for (int i = 0; i < encodingText.nr_of_dim; i++)
+			printf("\tdimension[%d] = %d\n", i, encodingText.dimensions[i]);
+		// printEncodedText(encodingText0.encodedText, encodingText0.nr_of_bytes);
+		printf("\n");
+
 		// write header to file
-		unsigned int totalNrOfBytes = encodingText.nr_of_bytes+ sizeof(FileHeader)+ byteSizeOfTree;
-		startPos = (BYTE*)&totalNrOfBytes;
+		fileHeader.byteStartOfDimensionArray = sizeof(FileHeader) + byteSizeOfTree + encodingText.nr_of_bytes;
+		startPos = (BYTE*)&fileHeader;
 		printf("Total number of blocks: %d\n", encodingText.nr_of_dim);
-		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int), WRITE_B_AT, 0);
+		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B_AT, 0);
 
 		printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));
