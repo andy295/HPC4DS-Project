@@ -178,7 +178,7 @@ int main() {
 		printf("Encoded text size: %d\n", encodingText.nr_of_bytes);
 
 		// write the dimensions array to file
-		BYTE* dimensions = (BYTE*)&encodingText.dimensions;
+		BYTE* dimensions = (BYTE*)encodingText.dimensions;
 		writeBufferToFile(ENCODED_FILE, dimensions, encodingText.nr_of_dim * sizeof(unsigned short), APPEND_B, 0);
 		printf("Dimension array size: %ld\n", encodingText.nr_of_dim * sizeof(short));
 
