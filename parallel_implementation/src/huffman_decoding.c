@@ -3,6 +3,21 @@
 // just for testing
 static const int NUM_OF_PROCESSES_DEC = 3;
 
+int roundUp(int numToRound, int multiple)
+{
+    if (multiple == 0)
+        return numToRound;
+
+    int remainder = abs(numToRound) % multiple;
+    if (remainder == 0)
+        return numToRound;
+
+    if (numToRound < 0)
+        return -(abs(numToRound) - remainder);
+    else
+        return numToRound + multiple - remainder;
+}
+
 void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int *end) {
     int quotient = nrOfBlocks / nrOfProcs;
     int quoto =	nrOfBlocks % nrOfProcs;
@@ -20,6 +35,20 @@ void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int
 	// printf("cycle %d: start: %d - end: %d = %d\n", i, *start, *end - 1, *end - *start);
 }
 
+BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag) {
+	MPI_Probe(pid, tag, MPI_COMM_WORLD, status);
+
+	// when probe returns, the status object has the size and other
+	// attributes of the incoming message
+	// get the message size
+	MPI_Get_count(status, MPI_BYTE, bufferSize);
+
+	// now receive the message with the allocated buffer
+	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
+
+	return buffer;
+}
+
 int main() {
 	MPI_Init(NULL, NULL);
 
@@ -32,10 +61,15 @@ int main() {
 	// just for pid of in order to test the function
 	if (pid == 0) {
 
-		// just for testing the function
-		unsigned short dimensions[10] = {8, 7, 8, 6, 7, 7, 6, 6, 7, 4};
-
 		FILE *fp;
+		char *decodedText = NULL;
+		char *tempText = NULL; 
+		int decodedTextSize = 0;
+
+		int oldDecodedTextSize = 0;
+		int prevSize = 0;
+		int startPoint = 0;
+
 		fp = openFile(ENCODED_FILE, READ_B, 0);
 
 		FileHeader header = {.byteStartOfDimensionArray = 0};
@@ -49,10 +83,14 @@ int main() {
 		int treeByteSize = nodes * sizeof(TreeArrayItem);
 		printf("Encoded tree size: %d\n", treeByteSize);
 		printf("Huffman tree nodes number: %d\n", nodes);
-		printHuffmanTree(root, 0);
+		// printHuffmanTree(root, 0);
 
-		int fileSize = getFileSize(inputFile);
+		int fileSize = getFileSize(ENCODED_FILE);
 		int number_of_blocks = (fileSize - header.byteStartOfDimensionArray) / sizeof(unsigned short);
+		printf("\nTotal number of blocks: %d\n", number_of_blocks);
+		printf("File size: %d\n", fileSize);
+
+		unsigned short *dimensions = malloc(sizeof(unsigned short) * number_of_blocks);
 
 		int start = 0;
 		int end = 0;
@@ -76,8 +114,6 @@ int main() {
 
 		// for (int i = 0; i < number_of_blocks; i++)
 		// 	printf("\tdimension [%d] = %d\n", i, blockLengths[i]);
-
-		printf("\nTotal number of blocks: %d\n", number_of_blocks);
 
 		// fseek(fp2, 0, SEEK_SET);
 		// fseek(fp2, header.byteStartOfDimensionArray, SEEK_SET);
@@ -123,7 +159,8 @@ int main() {
 
 		// we need to free the memory allocated for the tree
 
-		freeBuffer(blockLengths);
+		freeBuffer(dimensions);
+		freeBuffer(decodedText);
 
 		fclose(fp);
 	}

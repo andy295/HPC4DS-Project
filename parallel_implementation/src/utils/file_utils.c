@@ -131,7 +131,7 @@ int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned sho
 	fp = openFile(ENCODED_FILE, READ_B, 0);
 	
 	if (fp == NULL)
-			// handle the error
+		// handle the error
 		return -1;
 
 	FileHeader header = {.byteStartOfDimensionArray = 0};
