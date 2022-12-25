@@ -198,6 +198,7 @@ int main() {
 
 		freeBuffer(encodingText.dimensions);
 		freeBuffer(encodingText.encodedText);
+		freeTree(root);
 
 		takeTime();
 		printTime("Time elapsed");

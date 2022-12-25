@@ -161,6 +161,7 @@ int main() {
 
 		freeBuffer(dimensions);
 		freeBuffer(decodedText);
+		freeTree(root);
 
 		fclose(fp);
 	}
