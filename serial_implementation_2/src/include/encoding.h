@@ -35,6 +35,7 @@ bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int
 void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char* currentChar);
 void copyEncodedText(EncodingText *encodingText, char *currentChar);
 bool isLeaf(TreeNode *node);
+char* appendCharacter(char *text, char c, int *idx);
 
 extern CharEncoding* getEncoding(CharEncodingDictionary *dict, char character);
 extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionary *charFreqDict, TreeNode *root); 
@@ -42,7 +43,6 @@ extern void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDict
 extern void mergeEncodedText(EncodingText *dst, EncodingText *src);
 
 extern char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, int blockNr, FILE *fp, TreeNode *root);
-// extern char* decodeFromFile(FILE *fp, TreeNode *root, int bytesToProcess, int numberOfChars);
 
 extern void printEncodings(CharEncodingDictionary* dict);
 extern void printEncodedText(BYTE *text, int length);

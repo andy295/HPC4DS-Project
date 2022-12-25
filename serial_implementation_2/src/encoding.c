@@ -125,11 +125,13 @@ bool isLeaf(TreeNode *node) {
 	return node->leftChild == NULL && node->rightChild == NULL;
 }
 
-void appendCharacter(char *text, char c, int *idx) {
+char* appendCharacter(char *text, char c, int *idx) {
 	text = realloc(text, sizeof(char) * (*idx + 1));
 	text[*idx] = c;
 	++(*idx);
-	printf("%c\n", text[*idx - 1]);
+	// printf("%c\n", text[*idx - 1]);
+
+	return text;
 }
 
 char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, int blockNr, FILE *fp, TreeNode *root) {
@@ -159,7 +161,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 				fread(&byte, sizeof(BYTE), 1, fp);
 				update_byte = false;
 
-				printEncodedText(&byte, sizeof(BYTE));
+				// printEncodedText(&byte, sizeof(BYTE));
 			}
 
 			if (IsBit(byte, bit)) {
@@ -167,24 +169,24 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 					intermediateNode = intermediateNode->rightChild;
 
 					if (isLeaf(intermediateNode)) {
-						printf("%d. ", i);
-						appendCharacter(decodedText, intermediateNode->character, &idx);
+						// printf("%d. ", i);
+						decodedText = appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;
 					}
-					else
-						printf("bit: %d - %c\n", bit, intermediateNode->character);
+					// else
+					// 	printf("bit: %d - %c\n", bit, intermediateNode->character);
 				}
 			} else {
 				if (intermediateNode->leftChild != NULL) {
 					intermediateNode = intermediateNode->leftChild;
 
 					if (isLeaf(intermediateNode)) {
-						printf("%d. ", i);
-						appendCharacter(decodedText, intermediateNode->character, &idx);
+						// printf("%d. ", i);
+						decodedText = appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;
 					}
-					else
-						printf("bit: %d - %c\n", bit, intermediateNode->character);
+				// 	else
+				// 		printf("bit: %d - %c\n", bit, intermediateNode->character);
 				}
 			}
 
