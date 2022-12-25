@@ -44,6 +44,7 @@ typedef struct MsgEncodingText {
 
 typedef struct MsgText {
     MsgHeader header;
+    int textLength;
     BYTE *text;
 } MsgText;
 
@@ -61,3 +62,5 @@ void deserializeMsgText(DecodingText *decodedText, BYTE *buffer);
 
 extern BYTE* getMessage(void *data, int msgType, int *bufferSize);
 extern void setMessage(void *data, BYTE *buffer);
+
+extern char* getMsgName(int msgType);
