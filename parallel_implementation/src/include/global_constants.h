@@ -12,7 +12,6 @@
 
 #define VERBOSE 3
 #define MAX_UNIQUE_LETTERS 100
-#define COUNT 3
 #define TREE_PRINT_TYPE 0
 #define BIT_8 8 // number of bits in a byte
 #define ENDTEXT '\0'

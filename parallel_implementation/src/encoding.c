@@ -121,10 +121,6 @@ void mergeEncodedText(EncodingText *dst, EncodingText *src) {
 	dst->nr_of_dim += src->nr_of_dim;
 }
 
-bool isLeaf(TreeNode *node) {
-	return node->leftChild == NULL && node->rightChild == NULL;
-}
-
 char* appendCharacter(char *text, char c, int *idx) {
 	text = realloc(text, sizeof(char) * (*idx + 1));
 	text[*idx] = c;
@@ -168,7 +164,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 				if (intermediateNode->rightChild != NULL) {
 					intermediateNode = intermediateNode->rightChild;
 
-					if (isLeaf(intermediateNode)) {
+					if (isNodeALeaf(intermediateNode)) {
 						printf("%d. ", i);
 						appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;
@@ -180,7 +176,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 				if (intermediateNode->leftChild != NULL) {
 					intermediateNode = intermediateNode->leftChild;
 
-					if (isLeaf(intermediateNode)) {
+					if (isNodeALeaf(intermediateNode)) {
 						printf("%d. ", i);
 						appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;

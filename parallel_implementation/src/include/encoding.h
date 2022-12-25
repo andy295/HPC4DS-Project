@@ -34,7 +34,6 @@ typedef struct DecodingText {
 bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int depth);
 void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char* currentChar);
 void copyEncodedText(EncodingText *encodingText, char *currentChar);
-bool isLeaf(TreeNode *node);
 char* appendCharacter(char *text, char c, int *idx);
 
 extern CharEncoding* getEncoding(CharEncodingDictionary *dict, char character);

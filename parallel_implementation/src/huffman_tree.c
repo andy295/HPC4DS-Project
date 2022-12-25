@@ -90,73 +90,10 @@ LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary *dict) {
 	return start; 
 }
 
-void printHuffmanTree(TreeNode *root, int depth) {
-	switch (TREE_PRINT_TYPE) {
-		case 0:
-			print(root, depth, true);
-			break;
-		case 1:
-			print(root, depth, false);
-			break;
-		case 2:
-			print2D(root);
-			break;
-	}
-}
-
-void print(TreeNode *root, int depth,  bool printFreq) {
-	if (root == NULL)
-		return; 
-
-	for (int i = 0; i < depth; i++)
-		printf(" ");
-
-	printFormattedChar(root->character); 
-
-	if (printFreq)
-		printf(": %d\n", root->frequency);
-	else
-		printf("\n");
-
-	printHuffmanTree(root->leftChild, depth+1);	
-	printHuffmanTree(root->rightChild, depth+1);
-}
-
-// Wrapper over print2DUtil()
-void print2D(TreeNode *root)
-{
-	// Pass initial space count as 0
-	print2DUtil(root, 0);
-}
-
-// Function to print binary tree in 2D
-// It does reverse inorder traversal
-void print2DUtil(TreeNode *root, int space)
-{
-	// Base case
-	if (root == NULL)
-		return;
-
-	// Increase distance between levels
-	space += COUNT;
-
-	// Process right child first
-	print2DUtil(root->rightChild, space);
-
-	// Print current node after space
-	// count
-	printf("\n");
-	for (int i = COUNT; i < space; i++)
-		printf(" ");
-	printf("%c - %d\n", root->character, root->frequency);
-
-	// Process left child
-	print2DUtil(root->leftChild, space);
-}
-
 int countTreeNodes(TreeNode *root) {
 	if (root == NULL)
 		return 0;
+
 	return 1 + countTreeNodes(root->leftChild) + countTreeNodes(root->rightChild);
 }
 
@@ -195,4 +132,47 @@ BYTE* encodeTreeToByteArray(TreeNode *root, int *byteSizeOfTree) {
 
 int getByteSizeOfTree(TreeNode *root) {
 	return sizeof(TreeArrayItem) * countTreeNodes(root);
+}
+
+void freeTree(TreeNode *root) {
+	if (root == NULL)
+		return;
+
+	freeTree(root->leftChild);
+	freeTree(root->rightChild);
+
+	free(root);
+}
+
+bool isNodeALeaf(TreeNode *node) {
+	return node->leftChild == NULL && node->rightChild == NULL;
+}
+
+void printHuffmanTree(TreeNode *root, int depth) {
+	switch (TREE_PRINT_TYPE) {
+		case 0:
+			print(root, depth, true);
+			break;
+		case 1:
+			print(root, depth, false);
+			break;
+	}
+}
+
+void print(TreeNode *root, int depth,  bool printFreq) {
+	if (root == NULL)
+		return; 
+
+	for (int i = 0; i < depth; i++)
+		printf(" ");
+
+	printFormattedChar(root->character); 
+
+	if (printFreq)
+		printf(": %d\n", root->frequency);
+	else
+		printf("\n");
+
+	printHuffmanTree(root->leftChild, depth+1);	
+	printHuffmanTree(root->rightChild, depth+1);
 }
