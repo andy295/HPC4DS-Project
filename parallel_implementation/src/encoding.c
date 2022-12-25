@@ -141,7 +141,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 	fseek(fp, 0, SEEK_SET);
 	fseek(fp, startByte, SEEK_SET);
 	
-	if (isLeaf(root)) {
+	if (isNodeALeaf(root)) {
 		decodedText[0] = root->character;
 		return decodedText;
 	}
@@ -214,10 +214,10 @@ CharEncoding* getEncoding(CharEncodingDictionary *dict, char character) {
 
 void mergeDecodedText(char *dst, DecodingText *src, int *dstLength) {
 	int oldLength = --(*dstLength);
-	*dstLength += src->nr_of_chars;
+	*dstLength += src->length;
 	dst = realloc(dst, sizeof(char) * (*dstLength));
 
-	memcpy(dst + oldLength, src->decodedText, src->nr_of_chars);
+	memcpy(dst + oldLength, src->decodedText, src->length);
 }
 
 void printEncodings(CharEncodingDictionary* dict) {

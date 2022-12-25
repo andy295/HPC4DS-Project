@@ -99,7 +99,7 @@ int main() {
 	printf("Process 0 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
 
 	int startPos = (sizeof(FileHeader) * FILE_HEADER_ELEMENTS) + treeByteSize;
-	startPos += (pid != 0) : calculatePrevTextSize(dimensions, start) : 0;
+	startPos += (pid != 0) ? calculatePrevTextSize(dimensions, start) : 0;
 
 	char *decodedText = decodeFromFile(
 		startPos,
@@ -117,7 +117,7 @@ int main() {
 			// in this way we can empty the msgDict.charFreqs without risks
 			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
 		else
-			fprintf(stderr, "Error while sending %d message to the master process\n", getMsgName(MSG_TEXT));
+			fprintf(stderr, "Error while sending %s message to the master process\n", getMsgName(MSG_TEXT));
 
 		freeBuffer(buffer);
 	} else {
@@ -133,7 +133,7 @@ int main() {
 			DecodingText rcvText = {.length = 0, .decodedText = NULL};
 			setMessage(&rcvText, buffer);
 
-			mergeDecodedText(decodedText, rcvText, &decodedTextLen);
+			mergeDecodedText(decodedText, &rcvText, &decodedTextLen);
 
 			freeBuffer(rcvText.decodedText);
 			freeBuffer(buffer);
