@@ -125,11 +125,13 @@ bool isLeaf(TreeNode *node) {
 	return node->leftChild == NULL && node->rightChild == NULL;
 }
 
-void appendCharacter(char *text, char c, int *idx) {
+char* appendCharacter(char *text, char c, int *idx) {
 	text = realloc(text, sizeof(char) * (*idx + 1));
 	text[*idx] = c;
 	++(*idx);
 	printf("%c\n", text[*idx - 1]);
+
+	return text;
 }
 
 char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, int blockNr, FILE *fp, TreeNode *root) {
