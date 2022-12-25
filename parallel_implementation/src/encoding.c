@@ -212,6 +212,14 @@ CharEncoding* getEncoding(CharEncodingDictionary *dict, char character) {
 	return NULL;
 }
 
+void mergeDecodedText(char *dst, DecodingText *src, int *dstLength) {
+	int oldLength = --(*dstLength);
+	*dstLength += src->nr_of_chars;
+	dst = realloc(dst, sizeof(char) * (*dstLength));
+
+	memcpy(dst + oldLength, src->decodedText, src->nr_of_chars);
+}
+
 void printEncodings(CharEncodingDictionary* dict) {
 	for (int i = 0; i < dict->number_of_chars; i++) {
 		printFormattedChar(dict->charEncoding[i].character);

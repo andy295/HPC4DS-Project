@@ -42,6 +42,7 @@ extern void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDict
 extern void mergeEncodedText(EncodingText *dst, EncodingText *src);
 
 extern char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, int blockNr, FILE *fp, TreeNode *root);
+extern void mergeDecodedText(char *dst, DecodingText *src, int *dstLength);
 
 extern void printEncodings(CharEncodingDictionary* dict);
 extern void printEncodedText(BYTE *text, int length);
