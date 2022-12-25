@@ -134,6 +134,10 @@ int getByteSizeOfTree(TreeNode *root) {
 	return sizeof(TreeArrayItem) * countTreeNodes(root);
 }
 
+bool isNodeALeaf(TreeNode *node) {
+	return node->leftChild == NULL && node->rightChild == NULL;
+}
+
 void freeTree(TreeNode *root) {
 	if (root == NULL)
 		return;
@@ -144,8 +148,13 @@ void freeTree(TreeNode *root) {
 	free(root);
 }
 
-bool isNodeALeaf(TreeNode *node) {
-	return node->leftChild == NULL && node->rightChild == NULL;
+void freeLinkedList(LinkedListTreeNodeItem *root) {
+	if (root == NULL)
+		return;
+
+	freeLinkedList(root->next);
+	freeTree(root->item);
+	free(root);
 }
 
 void printHuffmanTree(TreeNode *root, int depth) {

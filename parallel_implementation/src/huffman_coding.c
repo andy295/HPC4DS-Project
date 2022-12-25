@@ -198,7 +198,7 @@ int main() {
 
 		freeBuffer(encodingText.dimensions);
 		freeBuffer(encodingText.encodedText);
-		freeTree(root);
+		freeLinkedList(root);
 
 		takeTime();
 		printTime("Time elapsed");

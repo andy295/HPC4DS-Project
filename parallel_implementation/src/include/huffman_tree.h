@@ -47,3 +47,4 @@ extern void printHuffmanTree(TreeNode *root, int depth);
 extern int getByteSizeOfTree(TreeNode *root);
 extern bool isNodeALeaf(TreeNode *node);
 extern void freeTree(TreeNode *root);
+extern void freeLinkedList(LinkedListTreeNodeItem *root);
