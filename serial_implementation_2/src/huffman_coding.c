@@ -390,7 +390,7 @@ int huffman_coding() {
 	printf("Encoded text size: %d\n", encodingText0.nr_of_bytes);
 
 	// write the dimensions array to file
-	BYTE* dimensions = (BYTE*)&encodingText0.dimensions;
+	BYTE* dimensions = (BYTE*)encodingText0.dimensions;
 	writeBufferToFile(encodedFileName, dimensions, encodingText0.nr_of_dim * sizeof(unsigned short), APPEND_B, 0);
 	printf("Dimension array size: %ld\n", encodingText0.nr_of_dim * sizeof(short));
 
