@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <unistd.h> // get current directory
 #include <math.h>
+#include <setjmp.h>
 
 #define VERBOSE 3
 #define MAX_UNIQUE_LETTERS 100
@@ -16,7 +17,7 @@
 #define ENDTEXT '\0'
 #define TREENODE '$'
 #define ENDBLOCK '#'
-#define CHARS_PER_BLOCK 2 // just for test
+#define CHARS_PER_BLOCK 15 // just for test
 
 #define NUM_OF_PROCESSES 4
 

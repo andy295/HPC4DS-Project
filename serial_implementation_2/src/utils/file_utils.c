@@ -118,7 +118,7 @@ FILE* openFile(const char *filename, int openMode, int bytePosition) {
 
 void parseHeader(FileHeader *header, FILE *fp) {
 	fread(header, sizeof(unsigned int), 1, fp);
-	//printf("Encoded text byte size: %d\n", header->byteStartOfDimensionArray - 1);
+	printf("Encoded text byte size: %d\n", header->byteStartOfDimensionArray - 1);
 }
 
 void parseBlockLengths(unsigned short *blockLengths, FILE *fp, int numberOfBlocks, int startPos) {
@@ -131,7 +131,7 @@ int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned sho
 	fp = openFile(ENCODED_FILE, READ_B, 0);
 	
 	if (fp == NULL)
-			// handle the error
+		// handle the error
 		return -1;
 
 	FileHeader header = {.byteStartOfDimensionArray = 0};
