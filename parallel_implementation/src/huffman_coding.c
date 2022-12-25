@@ -55,9 +55,6 @@ int main() {
 
 		sortCharFreqs(&allChars);
 
-		// maybe by using the dimension of the text we can avoid this
-		// appendToCharFreqs(&allChars, ENDTEXT, FIRST);
-
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);
 		getEncodingFromTree(&encodingsDict, &allChars, root->item);
