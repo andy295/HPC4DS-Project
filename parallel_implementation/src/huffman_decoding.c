@@ -1,8 +1,5 @@
 #include "include/huffman_decoding.h"
 
-// just for testing
-static const int NUM_OF_PROCESSES_DEC = 3;
-
 int roundUp(int numToRound, int multiple)
 {
     if (multiple == 0)
@@ -81,8 +78,8 @@ int main() {
 
 	int start = 0;
 	int end = 0;
-	calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 0, &start, &end);
-	printf("Process 0 - Block range: %d - %d - Blocks nr: %d\n", start, end - 1, end - start);
+	calculateBlockRange(number_of_blocks, proc_number, pid, &start, &end);
+	printf("Process %d - Block range: %d - %d - Blocks nr: %d\n", pid, start, end - 1, end - start);
 
 	int startPos = (sizeof(FileHeader) * FILE_HEADER_ELEMENTS) + treeByteSize;
 	startPos += (pid != 0) ? calculatePrevTextSize(dimensions, start) : 0;
