@@ -166,7 +166,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 
 					if (isNodeALeaf(intermediateNode)) {
 						printf("%d. ", i);
-						appendCharacter(decodedText, intermediateNode->character, &idx);
+						decodedText = appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;
 					}
 					else
@@ -178,7 +178,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 
 					if (isNodeALeaf(intermediateNode)) {
 						printf("%d. ", i);
-						appendCharacter(decodedText, intermediateNode->character, &idx);
+						decodedText = appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;
 					}
 					else
