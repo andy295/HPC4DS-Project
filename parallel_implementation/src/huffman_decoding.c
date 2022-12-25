@@ -44,20 +44,6 @@ void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int
 		++(*end);
 }
 
-BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag) {
-	MPI_Probe(pid, tag, MPI_COMM_WORLD, status);
-
-	// when probe returns, the status object has the size and other
-	// attributes of the incoming message
-	// get the message size
-	MPI_Get_count(status, MPI_BYTE, bufferSize);
-
-	// now receive the message with the allocated buffer
-	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
-
-	return buffer;
-}
-
 int main() {
 	MPI_Init(NULL, NULL);
 

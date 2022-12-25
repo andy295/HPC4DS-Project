@@ -9,6 +9,3 @@
 
 #include "../utils/file_utils.h"
 #include "../utils/time_utils.h"
-// #include "../utils/print_utils.c"
-
-BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag);

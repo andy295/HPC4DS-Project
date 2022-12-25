@@ -60,6 +60,8 @@ void deserializeMsgEncodingText(EncodingText *data, BYTE *buffer);
 BYTE *serializeMsgText(char *data, int *bufferSize);
 void deserializeMsgText(DecodingText *decodedText, BYTE *buffer);
 
+extern BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag);
+
 extern BYTE* getMessage(void *data, int msgType, int *bufferSize);
 extern void setMessage(void *data, BYTE *buffer);
 
