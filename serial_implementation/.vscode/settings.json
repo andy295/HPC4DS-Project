@@ -1,0 +1,24 @@
+{
+    "files.associations": {
+        "huffman_coding.h": "c",
+        "file_utils.h": "c",
+        "global_constants.h": "c",
+        "limits": "c",
+        "cmath": "c",
+        "compare": "c",
+        "concepts": "c",
+        "cstdarg": "c",
+        "cstdio": "c",
+        "cstdlib": "c",
+        "type_traits": "c",
+        "new": "c",
+        "*.tcc": "c",
+        "cstdbool": "c",
+        "cstdint": "c",
+        "typeinfo": "c",
+        "stdlib.h": "c",
+        "huffman_tree.h": "c",
+        "math.h": "c",
+        "encoding.h": "c"
+    }
+}
