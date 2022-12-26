@@ -46,6 +46,12 @@ void copyEncodedText(EncodingText *encodingText, char *currentChar) {
 	*currentChar = 0;
 }
 
+void updateDimensions(int nrOfChars, unsigned short *dimensions, unsigned short *bitSizeOfBlock, int index) {
+	int idx = (nrOfChars > 0) ? ((nrOfChars+1) / CHARS_PER_BLOCK) - 1 : index;
+	dimensions[idx] = *bitSizeOfBlock;
+	*bitSizeOfBlock = 0;
+}
+
 void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char *currentChar) {
 	for (int k = 0; k < charEncoding->length; k++) {
 		
@@ -86,24 +92,21 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary*
 		}
 
 		if ((i+1) % CHARS_PER_BLOCK == 0 && i > 0) {
-			int idx = ((i+1) / CHARS_PER_BLOCK) - 1;
-			encodingText->dimensions[idx] = bitSizeOfBlock;
-			bitSizeOfBlock = 0;
+			updateDimensions(i, encodingText->dimensions, &bitSizeOfBlock, 0);
 
 			if (encodingText->nr_of_bits > 0 && encodingText->nr_of_bits % BIT_8 != 0)
 				copyEncodedText(encodingText, &c);
 		}
 	}
 
-	if (encodingText->nr_of_bits > 0) {
-		encodingText->encodedText[encodingText->nr_of_bytes] = c;
-		++encodingText->nr_of_bytes;
+	// after the end of the loop, we could have some pending data
+	// it is necessarily to add those information otherwise the decoding phase will fail
+	if (bitSizeOfBlock > 0 || (encodingText->nr_of_bits > 0 && encodingText->nr_of_bits % BIT_8 != 0)) {
+		if (encodingText->nr_of_bits > 0)
+			copyEncodedText(encodingText, &c);
 
 		if (bitSizeOfBlock > 0)
-			encodingText->dimensions[encodingText->nr_of_dim-1] = bitSizeOfBlock;
-	} else if (encodingText->dimensions[encodingText->nr_of_dim-1] == 0) {
-		--encodingText->nr_of_dim;
-		encodingText->dimensions = realloc(encodingText->dimensions, sizeof(short) * encodingText->nr_of_dim);
+			updateDimensions(0, encodingText->dimensions, &bitSizeOfBlock, encodingText->nr_of_dim-1);
 	}
 
 	// reduce encoded text size if this last is smaller than the allocated one
@@ -119,10 +122,6 @@ void mergeEncodedText(EncodingText *dst, EncodingText *src) {
 	dst->dimensions = realloc(dst->dimensions, sizeof(unsigned short) * (dst->nr_of_dim + src->nr_of_dim));
 	memcpy(dst->dimensions + dst->nr_of_dim, src->dimensions, src->nr_of_dim * sizeof(unsigned short));
 	dst->nr_of_dim += src->nr_of_dim;
-}
-
-bool isLeaf(TreeNode *node) {
-	return node->leftChild == NULL && node->rightChild == NULL;
 }
 
 char* appendCharacter(char *text, char c, int *idx) {
@@ -141,11 +140,11 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 	BYTE byte;
 	TreeNode *intermediateNode = root;
 
-	// maybe we can move it inot file_utils.c
+	// maybe we can move it into file_utils.c
 	fseek(fp, 0, SEEK_SET);
 	fseek(fp, startByte, SEEK_SET);
 	
-	if (isLeaf(root)) {
+	if (isNodeALeaf(root)) {
 		decodedText[0] = root->character;
 		return decodedText;
 	}
@@ -168,7 +167,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 				if (intermediateNode->rightChild != NULL) {
 					intermediateNode = intermediateNode->rightChild;
 
-					if (isLeaf(intermediateNode)) {
+					if (isNodeALeaf(intermediateNode)) {
 						// printf("%d. ", i);
 						decodedText = appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;
@@ -180,7 +179,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 				if (intermediateNode->leftChild != NULL) {
 					intermediateNode = intermediateNode->leftChild;
 
-					if (isLeaf(intermediateNode)) {
+					if (isNodeALeaf(intermediateNode)) {
 						// printf("%d. ", i);
 						decodedText = appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;
@@ -214,6 +213,14 @@ CharEncoding* getEncoding(CharEncodingDictionary *dict, char character) {
 			return &dict->charEncoding[i];
 
 	return NULL;
+}
+
+void mergeDecodedText(DecodingText *dst, DecodingText *src) {
+	int oldLength = --(dst->length);
+	dst->length += src->length;
+	dst->decodedText = realloc(dst->decodedText, sizeof(char) * dst->length);
+
+	memcpy(dst->decodedText + oldLength, src->decodedText, src->length);
 }
 
 void printEncodings(CharEncodingDictionary* dict) {
