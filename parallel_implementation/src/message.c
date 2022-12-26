@@ -208,6 +208,7 @@ void deserializeMsgText(DecodingText *decodedText, BYTE *buffer) {
 
 	int textLen = sizeof(char) * msg.textLength;
 
+	decodedText->length = msg.textLength;
 	decodedText->decodedText = malloc(textLen);
 	memcpy(decodedText->decodedText, buffer + sizeof(MsgText), textLen);
 }
