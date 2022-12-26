@@ -9,7 +9,7 @@ int main() {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	takeTime();
+	takeTime(pid);
 
 	char *text = NULL;
 	long processes_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
@@ -200,9 +200,9 @@ int main() {
 		freeBuffer(encodingText.encodedText);
 		freeLinkedList(root);
 
-		takeTime();
-		printTime("Time elapsed");
-		saveTime(LOG_FILE, "Time elapsed");
+		takeTime(pid);
+		printTime(pid, "Time elapsed");
+		saveTime(pid, LOG_FILE, "Time elapsed");
 	}
 
 	MPI_Finalize();

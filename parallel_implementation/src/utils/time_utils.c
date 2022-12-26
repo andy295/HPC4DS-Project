@@ -5,22 +5,26 @@ double TimeUtils_lastElapsedTime = 0;
 int TimeUtils_indexOfFile = -1;
 char* TimeUtils_lastFilename;
 
-void takeTime() {
-    double end = MPI_Wtime();
-    TimeUtils_lastElapsedTime = end - TimeUtils_lastTimeStamp;
-    TimeUtils_lastTimeStamp = end;
+void takeTime(int pid) {
+    if (pid == 0){
+        double end = MPI_Wtime();
+        TimeUtils_lastElapsedTime = end - TimeUtils_lastTimeStamp;
+        TimeUtils_lastTimeStamp = end;
+    }
 }
 
-void printTime(char* label) {
-    printf("%s: %f\n", label, TimeUtils_lastElapsedTime);
+void printTime(int pid, char* label) {
+    if (pid == 0)
+        printf("%s: %f\n", label, TimeUtils_lastElapsedTime);
 }
 
 double getTime() {
     return TimeUtils_lastElapsedTime;
 }
 
-void setTime(double time) {
-    TimeUtils_lastElapsedTime = time;
+void setTime(int pid, double time) {
+    if (pid == 0)
+        TimeUtils_lastElapsedTime = time;
 }
 
 // function to get number of lines in a file
@@ -35,7 +39,10 @@ int getNumberOfLines(FILE *fp) {
     return lines;
 }
 
-void saveTime(char* filename, char* label) {
+void saveTime(int pid, char* filename, char* label) {
+    if (pid != 0)
+        return;
+        
     if (TimeUtils_lastFilename != filename) {
         TimeUtils_indexOfFile = -1;
         TimeUtils_lastFilename = filename;
@@ -44,8 +51,6 @@ void saveTime(char* filename, char* label) {
     // open csv file
     FILE *fp = fopen(filename, "a+");
     if (fp == NULL) {
-        // create file if it doesn't exist
-        printf("Creating file\n");
         fp = fopen(filename, "w");
         TimeUtils_indexOfFile = 0;
         if (fp == NULL) {

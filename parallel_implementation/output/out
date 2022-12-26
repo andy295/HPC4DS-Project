@@ -1,13 +1,10 @@
-Process 4 - Block range: 68 - 84 - Blocks nr: 17
-Process 0 - Block range: 0 - 16 - Blocks nr: 17
-Time elapsed: 0.006021
-Process 3 - Block range: 51 - 67 - Blocks nr: 17
-Process 1 - Block range: 17 - 33 - Blocks nr: 17
 Process 5 - Block range: 85 - 101 - Blocks nr: 17
+Process 3 - Block range: 51 - 67 - Blocks nr: 17
 Process 6 - Block range: 102 - 118 - Blocks nr: 17
 Process 2 - Block range: 34 - 50 - Blocks nr: 17
-Time elapsed: 0.006637
-Time elapsed: 0.007915
+Process 1 - Block range: 17 - 33 - Blocks nr: 17
+Process 0 - Block range: 0 - 16 - Blocks nr: 17
+Process 4 - Block range: 68 - 84 - Blocks nr: 17
 
 Decoded text:
 Several years ago
@@ -122,7 +119,4 @@ Of course you're free to go
 Go and tell the world my story
 Tell about my brother, tell them about me
 The Count of Tuscany
-Time elapsed: 0.009603
-Time elapsed: 0.009624
-Time elapsed: 0.010374
-Time elapsed: 0.013371
+Time elapsed: 0.015390

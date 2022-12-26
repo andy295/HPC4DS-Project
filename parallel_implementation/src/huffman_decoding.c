@@ -54,7 +54,7 @@ int main() {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	takeTime();
+	takeTime(pid);
 	
 	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
 	if (fp == NULL) {
@@ -147,9 +147,9 @@ int main() {
 
 	fclose(fp);
 
-	takeTime();
-	printTime("Time elapsed");
-	saveTime(LOG_FILE, "Time elapsed");
+	takeTime(pid);
+	printTime(pid, "Time elapsed");
+	saveTime(pid, LOG_FILE, "Time elapsed");
 
 	MPI_Finalize();
 

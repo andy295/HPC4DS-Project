@@ -6,8 +6,8 @@
 
 int getNumberOfLines(FILE *fp); 
 
-extern void takeTime(); 
-extern void printTime(char* label);
+extern void takeTime(int pid); 
+extern void printTime(int pid, char* label);
 extern double getTime(); 
-extern void setTime(double time);
-extern void saveTime(char* filename, char* label); 
+extern void setTime(int pid, double time);
+extern void saveTime(int pid, char* filename, char* label); 
