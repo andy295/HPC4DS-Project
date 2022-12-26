@@ -90,15 +90,17 @@ BYTE *serializeMsgEncodingText(EncodingText *encodingText, int *bufferSize) {
 }
 
 BYTE *serializeMsgText(char *text, int *bufferSize) {
-	*bufferSize = sizeof(MsgText) + (sizeof(char) * (strlen(text)+1));
+	int textLen = (strlen(text) + 1);
+	*bufferSize = sizeof(MsgText) + (sizeof(char) * textLen);
 	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
 
 	MsgText msg = {
 		.header.id = MSG_TEXT,
 		.header.size = *bufferSize,
+		.textLength = textLen,
 		.text = NULL};
 	memcpy(buffer, &msg, sizeof(MsgText));
-	memcpy(buffer + sizeof(MsgText), text, sizeof(char) * (strlen(text)+1));
+	memcpy(buffer + sizeof(MsgText), text, sizeof(char) * textLen);
 
 	return buffer;
 }
@@ -186,10 +188,29 @@ void deserializeMsgEncodingText(EncodingText *encodingText, BYTE *buffer) {
 	memcpy(encodingText->encodedText, buffer + sizeof(MsgEncodingText) + posSize, encTextSize);
 }
 
-// to check if it works
 void deserializeMsgText(DecodingText *decodedText, BYTE *buffer) {
-	// MsgText msg;
-	// memcpy(&msg, buffer, sizeof(MsgText));
+	MsgText msg;
+	memcpy(&msg, buffer, sizeof(MsgText));
 
-	// memcpy(decodedText.text, buffer + sizeof(MsgText), sizeof(char) * (strlen(msg.text)+1));
+	int textLen = sizeof(char) * msg.textLength;
+
+	decodedText->length = msg.textLength;
+	decodedText->decodedText = malloc(textLen);
+	memcpy(decodedText->decodedText, buffer + sizeof(MsgText), textLen);
+}
+
+char* getMsgName(int msgType) {
+	switch (msgType)
+	{
+	case MSG_DICTIONARY:
+		return "DICTIONARY";
+	case MSG_ENCODING_DICTIONARY:
+		return "ENCODING DICTIONARY";
+	case MSG_ENCODING_TEXT:
+		return "ENCODING TEXT";
+	case MSG_TEXT:
+		return "TEXT";
+	default:
+		return "UNKNOWN";
+	}
 }
