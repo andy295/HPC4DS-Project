@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int getNumberOfLines(FILE *fp); 
+#include "file_utils.h"
 
 extern void takeTime(int pid); 
 extern void printTime(int pid, char* label);

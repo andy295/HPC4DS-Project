@@ -29,18 +29,6 @@ void setTime(int pid, double time) {
         TimeUtils_lastElapsedTime = time;
 }
 
-// function to get number of lines in a file
-int getNumberOfLines(FILE *fp) {
-    int lines = 0;
-    char * line = NULL;
-    size_t len = 0;
-
-    while (getline(&line, &len, fp) != -1)
-        lines++;
-
-    return lines;
-}
-
 void saveTime(int pid, char* filename, char* label) {
     if (pid != ReferenceProcess)
         return;

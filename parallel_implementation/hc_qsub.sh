@@ -5,4 +5,4 @@
 #PBS -q short_cpuQ
 
 module load mpich-3.2
-mpirun.actual -n 32 ./HPC4DS-Project/parallel_implementation/output/huffman_coding
+mpirun.actual -n 4 ./HPC4DS-Project/parallel_implementation/output/huffman_coding

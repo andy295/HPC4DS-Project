@@ -1,35 +1,7 @@
-Process 1 - Block range: 78 - 155 - Blocks nr: 78
-Process 17 - Block range: 1326 - 1403 - Blocks nr: 78
-Process 21 - Block range: 1638 - 1715 - Blocks nr: 78
-Process 25 - Block range: 1950 - 2027 - Blocks nr: 78
-Process 5 - Block range: 390 - 467 - Blocks nr: 78
-Process 9 - Block range: 702 - 779 - Blocks nr: 78
-Process 13 - Block range: 1014 - 1091 - Blocks nr: 78
-Process 29 - Block range: 2259 - 2335 - Blocks nr: 77
-Process 12 - Block range: 936 - 1013 - Blocks nr: 78
-Process 4 - Block range: 312 - 389 - Blocks nr: 78
-Process 16 - Block range: 1248 - 1325 - Blocks nr: 78
-Process 0 - Block range: 0 - 77 - Blocks nr: 78
-Process 8 - Block range: 624 - 701 - Blocks nr: 78
-Process 24 - Block range: 1872 - 1949 - Blocks nr: 78
-Process 20 - Block range: 1560 - 1637 - Blocks nr: 78
-Process 28 - Block range: 2182 - 2258 - Blocks nr: 77
-Process 11 - Block range: 858 - 935 - Blocks nr: 78
-Process 15 - Block range: 1170 - 1247 - Blocks nr: 78
-Process 23 - Block range: 1794 - 1871 - Blocks nr: 78
-Process 27 - Block range: 2105 - 2181 - Blocks nr: 77
-Process 3 - Block range: 234 - 311 - Blocks nr: 78
-Process 7 - Block range: 546 - 623 - Blocks nr: 78
-Process 19 - Block range: 1482 - 1559 - Blocks nr: 78
-Process 31 - Block range: 2413 - 2489 - Blocks nr: 77
-Process 10 - Block range: 780 - 857 - Blocks nr: 78
-Process 22 - Block range: 1716 - 1793 - Blocks nr: 78
-Process 2 - Block range: 156 - 233 - Blocks nr: 78
-Process 18 - Block range: 1404 - 1481 - Blocks nr: 78
-Process 30 - Block range: 2336 - 2412 - Blocks nr: 77
-Process 14 - Block range: 1092 - 1169 - Blocks nr: 78
-Process 26 - Block range: 2028 - 2104 - Blocks nr: 77
-Process 6 - Block range: 468 - 545 - Blocks nr: 78
+Process 3 - Block range: 1868 - 2489 - Blocks nr: 622
+Process 1 - Block range: 623 - 1245 - Blocks nr: 623
+Process 0 - Block range: 0 - 622 - Blocks nr: 623
+Process 2 - Block range: 1246 - 1867 - Blocks nr: 622
 
 Decoded text:
 
@@ -2027,4 +1999,4 @@ o ver la mente dove altrove mira?
 
 Non ti rimembra di quelle parole
 con le quai la tua E
-Time elapsed: 0.018055
+Time elapsed: 0.008379

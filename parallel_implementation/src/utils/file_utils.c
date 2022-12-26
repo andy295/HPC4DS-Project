@@ -182,3 +182,14 @@ void extractNode(TreeNode* root, FILE* fp) {
 		extractNode(root->rightChild, fp);
 	}
 }
+
+int getNumberOfLines(FILE *fp) {
+    int lines = 0;
+    char * line = NULL;
+    size_t len = 0;
+
+    while (getline(&line, &len, fp) != -1)
+        lines++;
+
+    return lines;
+}
