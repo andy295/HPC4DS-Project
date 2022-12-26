@@ -64,11 +64,11 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 			++encodingText->nr_of_bits;
 	}
 
-	#if VERBOSE <= 2
-		printf("char: ");
-		printFormattedChar(charEncoding->character);
-		printf(" encoding: %s\n", charEncoding->encoding);
-	#endif
+	// #if VERBOSE <= 2
+	// 	printf("char: ");
+	// 	printFormattedChar(charEncoding->character);
+	// 	printf(" encoding: %s\n", charEncoding->encoding);
+	// #endif
 }
 
 void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_chars) {
@@ -94,14 +94,14 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary*
 		if ((i+1) % CHARS_PER_BLOCK == 0 && i > 0) {
 			updateDimensions(i, encodingText->dimensions, &bitSizeOfBlock, 0);
 
-			if (encodingText->nr_of_bits > 0 && encodingText->nr_of_bits % BIT_8 != 0)
+			if (encodingText->nr_of_bits > 0 && encodingText->nr_of_bits % BITS_IN_BYTE != 0)
 				copyEncodedText(encodingText, &c);
 		}
 	}
 
 	// after the end of the loop, we could have some pending data
 	// it is necessarily to add those information otherwise the decoding phase will fail
-	if (bitSizeOfBlock > 0 || (encodingText->nr_of_bits > 0 && encodingText->nr_of_bits % BIT_8 != 0)) {
+	if (bitSizeOfBlock > 0 || (encodingText->nr_of_bits > 0 && encodingText->nr_of_bits % BITS_IN_BYTE != 0)) {
 		if (encodingText->nr_of_bits > 0)
 			copyEncodedText(encodingText, &c);
 
@@ -189,7 +189,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 				}
 			}
 
-			if (bit + 1 == BIT_8) {
+			if (bit + 1 == BITS_IN_BYTE) {
 				bit = 0;
 				update_byte = true;
 			}
@@ -223,18 +223,18 @@ void mergeDecodedText(DecodingText *dst, DecodingText *src) {
 	memcpy(dst->decodedText + oldLength, src->decodedText, src->length);
 }
 
-void printEncodings(CharEncodingDictionary* dict) {
-	for (int i = 0; i < dict->number_of_chars; i++) {
-		printFormattedChar(dict->charEncoding[i].character);
-		printf(": %s\t\nlength: %d\n", dict->charEncoding[i].encoding, dict->charEncoding[i].length);
-	}
-}
+// void printEncodings(CharEncodingDictionary* dict) {
+// 	for (int i = 0; i < dict->number_of_chars; i++) {
+// 		printFormattedChar(dict->charEncoding[i].character);
+// 		printf(": %s\t\nlength: %d\n", dict->charEncoding[i].encoding, dict->charEncoding[i].length);
+// 	}
+// }
 
 void printEncodedText(BYTE *text, int length) {
 	for (int i = 0; i < length; i++) {
         printf("\t");
 
-		for (int j = 0; j < BIT_8; j++)
+		for (int j = 0; j < BITS_IN_BYTE; j++)
             printf("%d", !!((text[i] << j) & 0x80));
         
         printf("\n");

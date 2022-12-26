@@ -1,7 +1,6 @@
 #include "include/huffman_decoding.h"
 
-int roundUp(int numToRound, int multiple)
-{
+int roundUp(int numToRound, int multiple) {
     if (multiple == 0)
         return numToRound;
 
@@ -23,11 +22,11 @@ int calculatePrevTextSize(unsigned short *dimensions, int nrOfBlocks) {
 		int blockSize = dimensions[i]; 
 
 		// round up to multiple of 8
-		if (blockSize % BIT_8 != 0)
-			blockSize = roundUp(blockSize, BIT_8);
+		if (blockSize % BITS_IN_BYTE != 0)
+			blockSize = roundUp(blockSize, BITS_IN_BYTE);
 
 		// convert to bytes 
-		blockSize /= BIT_8;
+		blockSize /= BITS_IN_BYTE;
 		prevTextSize += blockSize;
 	}
 
@@ -52,7 +51,6 @@ int main() {
 
 	int proc_number;
 	int pid; 
-
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
@@ -66,27 +64,32 @@ int main() {
 
 	FileHeader header = {.byteStartOfDimensionArray = 0};
 	parseHeader(&header, fp);
-	printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(unsigned int));
-	printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
+
+	if(DEBUG(pid)){
+		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(unsigned int));
+		printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
+	}
 
 	TreeNode *root = malloc(sizeof(TreeNode));
 	parseHuffmanTree(root, fp);
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
-	printf("Encoded tree size: %d\n", treeByteSize);
-	printf("Huffman tree nodes number: %d\n", nodes);
-	// printHuffmanTree(root, 0);
+
+	if(DEBUG(pid)){
+		printf("Encoded tree size: %d\n", treeByteSize);
+		printf("Huffman tree nodes number: %d\n", nodes);
+		printHuffmanTree(root, 0);
+	}
 
 	int fileSize = getFileSize(ENCODED_FILE);
 	int number_of_blocks = (fileSize - header.byteStartOfDimensionArray) / sizeof(unsigned short);
-	printf("\nTotal number of blocks: %d\n", number_of_blocks);
-	printf("File size: %d\n", fileSize);
-
 	unsigned short *dimensions = malloc(sizeof(unsigned short) * number_of_blocks);
 	parseBlockLengths(dimensions, fp, number_of_blocks, header.byteStartOfDimensionArray);
 
-	for (int i = 0; i < number_of_blocks; i++)
-		printf("dimensions[%d]: %d\n", i, dimensions[i]);
+	if(DEBUG(pid)){
+		for (int i = 0; i < number_of_blocks; i++)
+			printf("dimensions[%d]: %d\n", i, dimensions[i]);
+	}
 
 	int start = 0;
 	int end = 0;

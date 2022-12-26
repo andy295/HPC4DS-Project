@@ -45,5 +45,5 @@ extern void mergeEncodedText(EncodingText *dst, EncodingText *src);
 extern char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, int blockNr, FILE *fp, TreeNode *root);
 extern void mergeDecodedText(DecodingText *dst, DecodingText *src);
 
-extern void printEncodings(CharEncodingDictionary* dict);
+// extern void printEncodings(CharEncodingDictionary* dict);
 extern void printEncodedText(BYTE *text, int length);

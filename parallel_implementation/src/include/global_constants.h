@@ -10,10 +10,11 @@
 #include <math.h>
 #include <setjmp.h>
 
-#define VERBOSE 3
-#define MAX_UNIQUE_LETTERS 100
-#define TREE_PRINT_TYPE 0
-#define BIT_8 8 // number of bits in a byte
+// enable only if 1 AND if PID == master, so only prints one time
+#define DEBUG(PID) (0 && PID == 0) 
+
+#define TREE_PRINT_WITH_FREQ 0
+#define BITS_IN_BYTE 8 
 #define ENDTEXT '\0'
 #define TREENODE '$'
 #define ENDBLOCK '#'
