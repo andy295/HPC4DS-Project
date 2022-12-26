@@ -55,6 +55,8 @@ int main() {
 
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+
+	takeTime();
 	
 	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
 	if (fp == NULL) {
@@ -126,21 +128,25 @@ int main() {
 			DecodingText rcvText = {.length = 0, .decodedText = NULL};
 			setMessage(&rcvText, buffer);
 
-			mergeDecodedText(&decodingText, &rcvText, &decodedTextLen);
+			mergeDecodedText(&decodingText, &rcvText);
 
 			freeBuffer(rcvText.decodedText);
 			freeBuffer(buffer);
 		}
 
+		printf("\nDecoded text:\n%s\n", decodingText.decodedText);
+		decodedText = decodingText.decodedText;
 	}
 
-	printf("\nDecoded text:\n %s\n", decodingText.decodedText);
-
-	freeBuffer(decodingText.decodedText);
+	freeBuffer(decodedText);
 	freeBuffer(dimensions);
 	freeTree(root);
 
 	fclose(fp);
+
+	takeTime();
+	printTime("Time elapsed");
+	saveTime(LOG_FILE, "Time elapsed");
 
 	MPI_Finalize();
 
