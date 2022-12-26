@@ -46,4 +46,4 @@ extern char* decodeFromFile(int startByte, unsigned short *dimensions, int block
 extern void mergeDecodedText(DecodingText *dst, DecodingText *src);
 
 // extern void printEncodings(CharEncodingDictionary* dict);
-extern void printEncodedText(BYTE *text, int length);
+// extern void printEncodedText(BYTE *text, int length);

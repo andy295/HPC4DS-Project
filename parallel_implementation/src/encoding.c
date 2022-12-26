@@ -230,15 +230,15 @@ void mergeDecodedText(DecodingText *dst, DecodingText *src) {
 // 	}
 // }
 
-void printEncodedText(BYTE *text, int length) {
-	for (int i = 0; i < length; i++) {
-        printf("\t");
+// void printEncodedText(BYTE *text, int length) {
+// 	for (int i = 0; i < length; i++) {
+//         printf("\t");
 
-		for (int j = 0; j < BITS_IN_BYTE; j++)
-            printf("%d", !!((text[i] << j) & 0x80));
+// 		for (int j = 0; j < BITS_IN_BYTE; j++)
+//             printf("%d", !!((text[i] << j) & 0x80));
         
-        printf("\n");
-    }
+//         printf("\n");
+//     }
     
-    printf("\n");
-}
+//     printf("\n");
+// }

@@ -16,8 +16,6 @@
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 
 #define ENDTEXT '\0'
-#define TREENODE '$'
-#define ENDBLOCK '#'
 #define CHARS_PER_BLOCK 23 // just for test
 
 #define ENCODED_FILE "HPC4DS-Project/parallel_implementation/output/encoded_file"
