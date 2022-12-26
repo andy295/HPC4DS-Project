@@ -13,7 +13,8 @@ int main() {
 
 	char *text = NULL;
 	long processes_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
-	printf("Process %d: %ld characters read in bytes \n", pid, processes_text_length);
+
+	printf("Process %d: %ld characters read\n", pid, processes_text_length);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
@@ -199,11 +200,11 @@ int main() {
 		freeBuffer(encodingText.dimensions);
 		freeBuffer(encodingText.encodedText);
 		freeLinkedList(root);
-
-		takeTime(pid);
-		printTime(pid, "Time elapsed");
-		saveTime(pid, LOG_FILE, "Time elapsed");
 	}
+
+	takeTime(pid);
+	printTime(pid, "Time elapsed");
+	saveTime(pid, LOG_FILE, "Time elapsed");
 
 	MPI_Finalize();
 
