@@ -11,15 +11,15 @@
 
 #define VERBOSE 3
 #define MAX_UNIQUE_LETTERS 100
-#define COUNT 3
-#define TREE_PRINT_TYPE 2
+#define TREE_PRINT_TYPE 0
 #define BIT_8 8 // number of bits in a byte
 #define ENDTEXT '\0'
 #define TREENODE '$'
 #define ENDBLOCK '#'
-#define CHARS_PER_BLOCK 15 // just for test
+#define CHARS_PER_BLOCK 23 // just for test
 
 #define NUM_OF_PROCESSES 4
+#define NUM_OF_PROCESSES_DEC 3
 
 #define ENCODED_FILE "HPC4DS-Project/parallel_implementation/output/encoded_file"
 #define SRC_FILE "HPC4DS-Project/parallel_implementation/text.txt"

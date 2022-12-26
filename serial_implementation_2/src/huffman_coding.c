@@ -134,15 +134,6 @@ int huffman_coding() {
 	// sort the LetterFreqDictionary only in the master process
 	sortCharFreqs(&acp0);
 
-	// printf("\nAfter merge and sort dictionary 0 with %d chars:\n", acp0.number_of_chars);
-	// printCharFreqs(&acp0);
-
-	// append the sync character to the LetterFreqDictionary
-	// appendToCharFreqs(&acp0, '\0', FIRST);
-
-	// printf("\nAfter \\0 addition dictionary 0 with %d chars:\n", acp0.number_of_chars);
-	// printCharFreqs(&acp0);
-
 	// create the Huffman tree
 	root = createHuffmanTree(&acp0);
 
@@ -265,14 +256,6 @@ int huffman_coding() {
 		case 3:
 			setMessage(&encodingsDict3, buffer3);
 			encodeStringToByteArray(&encodingText3, &encodingsDict3, text3, total_text_length3);
-
-			// we don't need it if we use the dimensions, instead of the positions
-			// if (i == NUM_OF_PROCESSES - 1)
-			// 	if (encodingText3.nr_of_bits != 0 && encodingText3. < CHARS_PER_BLOCK) {
-			// 		CharEncoding *charEncoding = getEncoding(&encodingsDict3, ENDTEXT);
-			// 		if (charEncoding !=	NULL)
-			// 		appendToEncodingText(&encodingText3, charEncoding, ENDTEXT);
-			// 	}
 
 			freeBuffer(buffer3);
 
@@ -410,6 +393,7 @@ int huffman_coding() {
 
 	freeBuffer(encodingText0.dimensions);
 	freeBuffer(encodingText0.encodedText);
+	freeLinkedList(root);
 
 	clock_t end = clock();
 

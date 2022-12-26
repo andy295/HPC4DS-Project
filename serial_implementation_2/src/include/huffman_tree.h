@@ -40,10 +40,11 @@ int countTreeNodes(TreeNode *root);
 void encodeTree(TreeNode *root, TreeArrayItem *treeArray, int *globalIndex);
 
 void print(TreeNode *root, int depth, bool printFreq);
-void print2D(TreeNode *root);
-void print2DUtil(TreeNode *root, int space);
 
 extern LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary *dict);
 extern BYTE* encodeTreeToByteArray(TreeNode *root, int *byteSizeOfTree);
 extern void printHuffmanTree(TreeNode *root, int depth);
 extern int getByteSizeOfTree(TreeNode *root);
+extern bool isNodeALeaf(TreeNode *node);
+extern void freeTree(TreeNode *root);
+extern void freeLinkedList(LinkedListTreeNodeItem *root);
