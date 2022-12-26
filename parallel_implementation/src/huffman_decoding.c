@@ -19,10 +19,16 @@ int calculatePrevTextSize(unsigned short *dimensions, int nrOfBlocks) {
 	int prevTextSize = 0;
 
 	for (int i = 0; i < nrOfBlocks; i++) {
-		prevTextSize += dimensions[i];
+		// size of block in bits
+		int blockSize = dimensions[i]; 
 
-		if (prevTextSize % BIT_8 != 0)
-			prevTextSize = roundUp(prevTextSize, BIT_8);
+		// round up to multiple of 8
+		if (blockSize % BIT_8 != 0)
+			blockSize = roundUp(blockSize, BIT_8);
+
+		// convert to bytes 
+		blockSize /= BIT_8;
+		prevTextSize += blockSize;
 	}
 
 	return prevTextSize;
@@ -75,6 +81,10 @@ int main() {
 	printf("File size: %d\n", fileSize);
 
 	unsigned short *dimensions = malloc(sizeof(unsigned short) * number_of_blocks);
+	parseBlockLengths(dimensions, fp, number_of_blocks, header.byteStartOfDimensionArray);
+
+	for (int i = 0; i < number_of_blocks; i++)
+		printf("dimensions[%d]: %d\n", i, dimensions[i]);
 
 	int start = 0;
 	int end = 0;
@@ -104,7 +114,7 @@ int main() {
 
 		freeBuffer(buffer);
 	} else {
-		int decodedTextLen = strlen(decodedText) + 1;
+		DecodingText decodingText = {.length = strlen(decodedText) + 1, .decodedText = decodedText};
 
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
@@ -116,7 +126,7 @@ int main() {
 			DecodingText rcvText = {.length = 0, .decodedText = NULL};
 			setMessage(&rcvText, buffer);
 
-			mergeDecodedText(decodedText, &rcvText, &decodedTextLen);
+			mergeDecodedText(&decodingText, &rcvText, &decodedTextLen);
 
 			freeBuffer(rcvText.decodedText);
 			freeBuffer(buffer);
@@ -124,9 +134,9 @@ int main() {
 
 	}
 
-	printf("\nDecoded text:\n %s\n", decodedText);
+	printf("\nDecoded text:\n %s\n", decodingText.decodedText);
 
-	freeBuffer(decodedText);
+	freeBuffer(decodingText.decodedText);
 	freeBuffer(dimensions);
 	freeTree(root);
 
