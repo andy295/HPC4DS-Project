@@ -2,62 +2,66 @@
 
 #include "data_logger.h"
 
-void initLogHeader(){
-    char* header = "Index,N. Processes";
+void initDataLogger(){
+    DataLoggerReferenceProcess = 0; 
     
-    itemsInHeader = 2;
+    itemsInHeader = 0;
     itemsInRow = 0;
-    numberOfRows = 0;
 
-    DataLogHeaderSize = strlen(header);
-    DataLogHeader = (char*)malloc(DataLogHeaderSize*sizeof(char));
-    strcpy(DataLogHeader, header);
+    MAX_DATA_LOGGER_ROW_SIZE = 1000;
 
-    DataLogRowSize = 0;
-    DataLogRow = (char*)malloc(DataLogRowSize*sizeof(char));
+    DataLogHeader = (char*)malloc(MAX_DATA_LOGGER_ROW_SIZE*sizeof(char));
+    DataLogRow = (char*)malloc(MAX_DATA_LOGGER_ROW_SIZE*sizeof(char));
 }
 
-void addLogColumn(const char* name){
-    DataLogHeaderSize += strlen(name);
+void addLogColumn(int pid, const char* name){
+    if (pid != DataLoggerReferenceProcess){
+        return;
+    }
+
     itemsInHeader++;
-    DataLogHeader = (char*)realloc(DataLogHeader, DataLogHeaderSize*sizeof(char));
     strcat(DataLogHeader, name);
+    strcat(DataLogHeader, ",");
 }
 
-void addLogData(const char *data){
-    DataLogRowSize += strlen(data);
-    DataLogRow = (char*)realloc(DataLogRow, DataLogRowSize*sizeof(char));
+void addLogData(int pid, const char *data){
+    if (pid != DataLoggerReferenceProcess){
+        return;
+    }
+
     strcat(DataLogRow, data);
+    strcat(DataLogRow, ",");
 
     itemsInRow++;
     if (itemsInRow == itemsInHeader){
         itemsInRow = 0;
-        numberOfRows++;
 
-        // write line to file
+        saveRowToFile(DATA_LOGGER_FILE);
     }
 }
 
 
 void saveRowToFile(char* filename) {        
     // open csv file
-    // FILE *fp = fopen(filename, "a+");
-    // if (fp == NULL) {
-    //     fp = fopen(filename, "w");
-    //     if (fp == NULL) {
-    //         printf("Error opening file\n");
-    //         exit(1);
-    //     }
-    // }
+    FILE *fp = fopen(filename, "a+");
+    if (fp == NULL) {
+        fp = fopen(filename, "w");
+        if (fp == NULL) {
+            printf("Error opening file\n");
+            exit(1);
+        }
+    }
 
-    // read index of last row from file
-    // if (TimeUtils_indexOfFile == -1)
-    //     TimeUtils_indexOfFile = getNumberOfLines(fp);
+    int indexOfFile = getNumberOfLines(fp);
+    if (indexOfFile == 0){
+        fprintf(fp, "%s,%s\n", "Index", DataLogHeader);
+        indexOfFile++;
+    }
 
-    // write to csv file
-    // fprintf(fp, "%d,%s,%f\n", TimeUtils_indexOfFile, label, TimeUtils_lastElapsedTime);
-    // TimeUtils_indexOfFile++; 
+    fprintf(fp, "%i,%s\n", indexOfFile, DataLogRow);
+    fclose(fp);
+}
 
-    // close csv file
-    // fclose(fp);
+void setDataLoggerReferenceProcess(int pid){
+    DataLoggerReferenceProcess = pid;
 }

@@ -5,10 +5,10 @@ double TimeUtils_lastElapsedTime = 0;
 int TimeUtils_indexOfFile = -1;
 char* TimeUtils_lastFilename;
 
-int ReferenceProcess = 0;
+int TimeUtils_ReferenceProcess = 0;
 
 void takeTime(int pid) {
-    if (pid == ReferenceProcess){
+    if (pid == TimeUtils_ReferenceProcess){
         double end = MPI_Wtime();
         TimeUtils_lastElapsedTime = end - TimeUtils_lastTimeStamp;
         TimeUtils_lastTimeStamp = end;
@@ -16,7 +16,7 @@ void takeTime(int pid) {
 }
 
 void printTime(int pid, char* label) {
-    if (pid == ReferenceProcess)
+    if (pid == TimeUtils_ReferenceProcess)
         printf("%s: %f\n", label, TimeUtils_lastElapsedTime);
 }
 
@@ -25,12 +25,12 @@ double getTime() {
 }
 
 void setTime(int pid, double time) {
-    if (pid == ReferenceProcess)
+    if (pid == TimeUtils_ReferenceProcess)
         TimeUtils_lastElapsedTime = time;
 }
 
 void saveTime(int pid, char* filename, char* label) {
-    if (pid != ReferenceProcess)
+    if (pid != TimeUtils_ReferenceProcess)
         return;
         
     if (TimeUtils_lastFilename != filename) {
@@ -61,8 +61,8 @@ void saveTime(int pid, char* filename, char* label) {
     fclose(fp);
 }
 
-void setReferenceProcess(int pid) {
-    ReferenceProcess = pid;
+void setTimeUtilsReferenceProcess(int pid) {
+    TimeUtils_ReferenceProcess = pid;
 
     // reset time
     TimeUtils_lastTimeStamp = 0;

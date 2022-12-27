@@ -1,19 +1,25 @@
+#pragma once
 
 #include <string.h>
 #include <stdlib.h>
 
-#define OUTPUT_FILE_NAME "../../output/data_log.csv"
+#include "../include/global_constants.h"
+#include "file_utils.h"
 
 char* DataLogHeader;
-int DataLogHeaderSize;
 int itemsInHeader;
 
 char* DataLogRow; 
-int DataLogRowSize; 
 int itemsInRow;
 
-int numberOfRows;
+int DataLoggerReferenceProcess; 
 
-extern void initLogHeader();
-extern void addLogColumn(const char *columnName);
-extern void addLogData(const char *data);
+int MAX_DATA_LOGGER_ROW_SIZE;
+
+extern void initDataLogger();
+extern void addLogColumn(int pid, const char *columnName);
+extern void addLogData(int pid, const char *data);
+
+extern void setDataLoggerReferenceProcess(int pid);
+
+void saveRowToFile(char* filename);

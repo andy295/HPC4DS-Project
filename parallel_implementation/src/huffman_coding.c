@@ -10,11 +10,18 @@ int main() {
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
 	takeTime(pid);
+	initDataLogger();
+	setDataLoggerReferenceProcess(0);
+	addLogColumn(pid, "N.Processes");
+	addLogColumn(pid, "N.Characters");
+	addLogColumn(pid, "Time");
 
 	char *text = NULL;
 	long processes_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
 
 	printf("Process %d: %ld characters read\n", pid, processes_text_length);
+	addLogData(pid, intToString(proc_number));
+	addLogData(pid, intToString(processes_text_length));
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
@@ -204,7 +211,10 @@ int main() {
 
 	takeTime(pid);
 	printTime(pid, "Time elapsed");
-	saveTime(pid, LOG_FILE, "Time elapsed");
+	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+
+	float time = getTime(pid, "Time elapsed");
+	addLogData(pid, floatToString(time));
 
 	MPI_Finalize();
 
