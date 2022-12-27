@@ -23,11 +23,11 @@ int calculatePrevTextSize(unsigned short *dimensions, int nrOfBlocks) {
 		int blockSize = dimensions[i]; 
 
 		// round up to multiple of 8
-		if (blockSize % BIT_8 != 0)
-			blockSize = roundUp(blockSize, BIT_8);
+		if (blockSize % BITS_IN_BYTE != 0)
+			blockSize = roundUp(blockSize, BITS_IN_BYTE);
 
 		// convert to bytes 
-		blockSize /= BIT_8;
+		blockSize /= BITS_IN_BYTE;
 		prevTextSize += blockSize;
 	}
 
@@ -53,11 +53,9 @@ int huffman_decoding() {
 
 	printf("\nDecoding\n");
 
-	int bufferSize = 0;
-
-	FILE *fp = openFile(inputFile, READ_B, 0);
+	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
 	if (fp == NULL) {
-		fprintf(stderr, "Error opening file %s\n", inputFile);
+		fprintf(stderr, "Error opening file %s\n", ENCODED_FILE);
 		return 1;
 	}
 
@@ -74,7 +72,7 @@ int huffman_decoding() {
 	printf("Huffman tree nodes number: %d\n", nodes);
 	// printHuffmanTree(root, 0);
 
-	int fileSize = getFileSize(inputFile);
+	int fileSize = getFileSize(ENCODED_FILE);
 	int number_of_blocks = (fileSize - header.byteStartOfDimensionArray) / sizeof(unsigned short);
 	printf("\nTotal number of blocks: %d\n", number_of_blocks);
 	printf("File size: %d\n", fileSize);
@@ -89,7 +87,7 @@ int huffman_decoding() {
 
 	int start = 0;
 	int end = 0;
-	calculateBlockRange(number_of_blocks, NUM_OF_PROCESSES_DEC, 0, &start, &end);
+	calculateBlockRange(number_of_blocks, 1, 0, &start, &end);
 	printf("Process %d - Block range: %d - %d - Blocks nr: %d\n", 0, start, end - 1, end - start);
 
 	int startPos = (sizeof(FileHeader) * FILE_HEADER_ELEMENTS) + treeByteSize;

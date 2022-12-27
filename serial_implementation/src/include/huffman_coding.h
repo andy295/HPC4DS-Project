@@ -9,9 +9,5 @@
 
 #include "../utils/file_utils.h"
 #include "../utils/time_utils.h"
-// #include "../utils/print_utils.c"
-
-static const char *fileName = "text.txt";
-static const char *encodedFileName = "encoded";
 
 extern int huffman_coding();

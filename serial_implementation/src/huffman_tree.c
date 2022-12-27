@@ -158,7 +158,7 @@ void freeLinkedList(LinkedListTreeNodeItem *root) {
 }
 
 void printHuffmanTree(TreeNode *root, int depth) {
-	switch (TREE_PRINT_TYPE) {
+	switch (TREE_PRINT_WITH_FREQ) {
 		case 0:
 			print(root, depth, true);
 			break;
