@@ -1,7 +1,6 @@
 #include "include/huffman_decoding.h"
 
-int roundUp(int numToRound, int multiple)
-{
+int roundUp(int numToRound, int multiple) {
     if (multiple == 0)
         return numToRound;
 
@@ -48,10 +47,14 @@ void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int
 }
 
 int huffman_decoding() {
-	double time_spent = 0.0;
-	clock_t t_begin = clock();
+	MPI_Init(NULL, NULL);
 
-	printf("\nDecoding\n");
+	int proc_number;
+	int pid; 
+	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
+	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+
+	takeTime(pid);
 
 	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
 	if (fp == NULL) {
@@ -61,38 +64,42 @@ int huffman_decoding() {
 
 	FileHeader header = {.byteStartOfDimensionArray = 0};
 	parseHeader(&header, fp);
-	printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(unsigned int));
-	printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
+
+	if(DEBUG(pid)){
+		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(unsigned int));
+		printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
+	}
 
 	TreeNode *root = malloc(sizeof(TreeNode));
 	parseHuffmanTree(root, fp);
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
-	printf("Encoded tree size: %d\n", treeByteSize);
-	printf("Huffman tree nodes number: %d\n", nodes);
-	// printHuffmanTree(root, 0);
+
+	if(DEBUG(pid)){
+		printf("Encoded tree size: %d\n", treeByteSize);
+		printf("Huffman tree nodes number: %d\n", nodes);
+		printHuffmanTree(root, 0);
+	}
 
 	int fileSize = getFileSize(ENCODED_FILE);
 	int number_of_blocks = (fileSize - header.byteStartOfDimensionArray) / sizeof(unsigned short);
-	printf("\nTotal number of blocks: %d\n", number_of_blocks);
-	printf("File size: %d\n", fileSize);
-
 	unsigned short *dimensions = malloc(sizeof(unsigned short) * number_of_blocks);
 	parseBlockLengths(dimensions, fp, number_of_blocks, header.byteStartOfDimensionArray);
 
-	for (int i = 0; i < number_of_blocks; i++)
-		printf("dimensions[%d]: %d\n", i, dimensions[i]);
-
-	DecodingText decodingText = {.length = 0, .decodedText = NULL};
+	if(DEBUG(pid)){
+		for (int i = 0; i < number_of_blocks; i++)
+			printf("dimensions[%d]: %d\n", i, dimensions[i]);
+	}
 
 	int start = 0;
 	int end = 0;
-	calculateBlockRange(number_of_blocks, 1, 0, &start, &end);
-	printf("Process %d - Block range: %d - %d - Blocks nr: %d\n", 0, start, end - 1, end - start);
+	calculateBlockRange(number_of_blocks, proc_number, pid, &start, &end);
+	printf("Process %d - Block range: %d - %d - Blocks nr: %d\n", pid, start, end - 1, end - start);
 
 	int startPos = (sizeof(FileHeader) * FILE_HEADER_ELEMENTS) + treeByteSize;
-	startPos += (0 != 0) ? calculatePrevTextSize(dimensions, start) : 0;
-	decodingText.decodedText = decodeFromFile(
+	startPos += (pid != 0) ? calculatePrevTextSize(dimensions, start) : 0;
+
+	char *decodedText = decodeFromFile(
 		startPos,
 		dimensions,
 		start,
@@ -100,19 +107,21 @@ int huffman_decoding() {
 		fp,
 		root);
 
-	decodingText.length = strlen(decodingText.decodedText) + 1;
+	DecodingText decodingText = {.length = strlen(decodedText) + 1, .decodedText = decodedText};
 
-	printf("\nDecoded text:\n%s\n\n", decodingText.decodedText);
+	printf("\nDecoded text:\n%s\n", decodingText.decodedText);
 
+	freeBuffer(decodedText);
+	freeBuffer(dimensions);
 	freeTree(root);
 
-	clock_t t_end = clock();
+	fclose(fp);
 
-	// calculate elapsed time by finding difference (end - begin) and
-	// dividing the difference by CLOCKS_PER_SEC to convert to seconds
-	time_spent += (double)(t_end - t_begin) / CLOCKS_PER_SEC;
+	takeTime(pid);
+	printTime(pid, "Time elapsed");
+	// saveTime(pid, LOG_FILE, "Time elapsed");
 
-	printf("The elapsed time is %f seconds\n", time_spent);
+	MPI_Finalize();
 
 	return 0;
 }
