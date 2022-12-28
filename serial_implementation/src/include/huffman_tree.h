@@ -39,7 +39,7 @@ LinkedListTreeNodeItem* createLinkedList(CharFreqDictionary *dict);
 int countTreeNodes(TreeNode *root);
 void encodeTree(TreeNode *root, TreeArrayItem *treeArray, int *globalIndex);
 
-void print(TreeNode *root, int depth, bool printFreq);
+void printNode(TreeNode *root, int depth, bool printFreq);
 
 extern LinkedListTreeNodeItem* createHuffmanTree(CharFreqDictionary *dict);
 extern BYTE* encodeTreeToByteArray(TreeNode *root, int *byteSizeOfTree);

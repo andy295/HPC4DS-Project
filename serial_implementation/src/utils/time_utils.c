@@ -5,37 +5,34 @@ double TimeUtils_lastElapsedTime = 0;
 int TimeUtils_indexOfFile = -1;
 char* TimeUtils_lastFilename;
 
-void takeTime() {
-    // double end = MPI_Wtime();
-    // TimeUtils_lastElapsedTime = end - TimeUtils_lastTimeStamp;
-    // TimeUtils_lastTimeStamp = end;
+int TimeUtils_ReferenceProcess = 0;
+
+void takeTime(int pid) {
+    if (pid == TimeUtils_ReferenceProcess) {
+        double end = MPI_Wtime();
+        TimeUtils_lastElapsedTime = end - TimeUtils_lastTimeStamp;
+        TimeUtils_lastTimeStamp = end;
+    }
 }
 
-void printTime(char* label) {
-    printf("%s: %f\n", label, TimeUtils_lastElapsedTime);
+void printTime(int pid, char* label) {
+    if (pid == TimeUtils_ReferenceProcess)
+        printf("%s: %f\n", label, TimeUtils_lastElapsedTime);
 }
 
 double getTime() {
     return TimeUtils_lastElapsedTime;
 }
 
-void setTime(double time) {
-    TimeUtils_lastElapsedTime = time;
+void setTime(int pid, double time) {
+    if (pid == TimeUtils_ReferenceProcess)
+        TimeUtils_lastElapsedTime = time;
 }
 
-// function to get number of lines in a file
-int getNumberOfLines(FILE *fp) {
-    int lines = 0;
-    char * line = NULL;
-    size_t len = 0;
+void saveTime(int pid, char* filename, char* label) {
+    if (pid != TimeUtils_ReferenceProcess)
+        return;
 
-    while (getline(&line, &len, fp) != -1)
-        lines++;
-
-    return lines;
-}
-
-void saveTime(char* filename, char* label) {
     if (TimeUtils_lastFilename != filename) {
         TimeUtils_indexOfFile = -1;
         TimeUtils_lastFilename = filename;
@@ -44,10 +41,9 @@ void saveTime(char* filename, char* label) {
     // open csv file
     FILE *fp = fopen(filename, "a+");
     if (fp == NULL) {
-        // create file if it doesn't exist
-        printf("Creating file\n");
         fp = fopen(filename, "w");
         TimeUtils_indexOfFile = 0;
+
         if (fp == NULL) {
             printf("Error opening file\n");
             exit(1);
@@ -64,4 +60,12 @@ void saveTime(char* filename, char* label) {
 
     // close csv file
     fclose(fp);
+}
+
+void setTimeUtilsReferenceProcess(int pid) {
+    TimeUtils_ReferenceProcess = pid;
+
+    // reset time
+    TimeUtils_lastTimeStamp = 0;
+    TimeUtils_lastElapsedTime = 0;
 }

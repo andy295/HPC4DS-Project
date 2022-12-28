@@ -160,15 +160,15 @@ void freeLinkedList(LinkedListTreeNodeItem *root) {
 void printHuffmanTree(TreeNode *root, int depth) {
 	switch (TREE_PRINT_WITH_FREQ) {
 		case 0:
-			print(root, depth, true);
+			printNode(root, depth, true);
 			break;
 		case 1:
-			print(root, depth, false);
+			printNode(root, depth, false);
 			break;
 	}
 }
 
-void print(TreeNode *root, int depth,  bool printFreq) {
+void printNode(TreeNode *root, int depth,  bool printFreq) {
 	if (root == NULL)
 		return; 
 

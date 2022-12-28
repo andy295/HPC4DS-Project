@@ -10,14 +10,6 @@ int getFileSize(const char *fileName) {
 	return fSize; 
 }
 
-void printWorkDir(int processId) {
-	char cwd[2048];
-   	if (getcwd(cwd, sizeof(cwd)) != NULL)
-    	printf("Process %d current working dir: %s\n", processId, cwd);
-   	else
-		perror("getcwd() error");
-}
-
 long readFilePortionForProcess(const char *fileName, char **fileDest, int processId, int proc_number) {
 	FILE *fp = openFile(fileName, READ_ALL, 0);
 	if (fp != NULL) {
@@ -36,7 +28,7 @@ long readFilePortionForProcess(const char *fileName, char **fileDest, int proces
 
 		(*fileDest)[fSize] = ENDTEXT;
 
-		#if VERBOSE <= 1
+		#if DEBUG
 			printf("process %d:\n%s\n", processId, *fileDest);
 			printf("total text length: %ld\n", fSize);
 		#endif
@@ -118,37 +110,16 @@ FILE* openFile(const char *filename, int openMode, int bytePosition) {
 
 void parseHeader(FileHeader *header, FILE *fp) {
 	fread(header, sizeof(unsigned int), 1, fp);
-	printf("Encoded text byte size: %d\n", header->byteStartOfDimensionArray - 1);
+
+	#if DEBUG
+		printf("Encoded text byte size: %d\n", header->byteStartOfDimensionArray - 1);
+	#endif
 }
 
 void parseBlockLengths(unsigned short *blockLengths, FILE *fp, int numberOfBlocks, int startPos) {
 	fseek(fp, 0, SEEK_SET);
 	fseek(fp, startPos, SEEK_SET);
 	fread(blockLengths, sizeof(unsigned short), numberOfBlocks, fp);
-}
-
-int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned short *blockLengths) {
-	fp = openFile(ENCODED_FILE, READ_B, 0);
-	
-	if (fp == NULL)
-		// handle the error
-		return -1;
-
-	FileHeader header = {.byteStartOfDimensionArray = 0};
-	parseHeader(&header, fp);
-	printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
-	int number_of_blocks = (getFileSize(ENCODED_FILE) - header.byteStartOfDimensionArray) / sizeof(unsigned short);
-	printf("Number of blocks: %d\n", number_of_blocks); 
-
-	fseek(fp, 0, SEEK_SET);
-	fseek(fp, sizeof(FileHeader), SEEK_SET);
-	// root = parseHuffmanTree(fp);
-
-	fseek(fp, 0, SEEK_SET);
-	fseek(fp, header.byteStartOfDimensionArray, SEEK_SET);
-	parseBlockLengths(blockLengths, fp, number_of_blocks, 0);
-
-	return number_of_blocks;
 }
 
 void parseHuffmanTree(TreeNode* root, FILE* fp) {
@@ -174,4 +145,15 @@ void extractNode(TreeNode* root, FILE* fp) {
 		root->rightChild = malloc(sizeof(TreeNode));
 		extractNode(root->rightChild, fp);
 	}
+}
+
+int getNumberOfLines(FILE *fp) {
+    int lines = 0;
+    char * line = NULL;
+    size_t len = 0;
+
+    while (getline(&line, &len, fp) != -1)
+        lines++;
+
+    return lines;
 }

@@ -26,13 +26,12 @@ typedef struct FileHeader {
 void extractNode(TreeNode* root, FILE* fp);
 
 extern FILE* openFile(const char *filename, int openMode, int bytePosition);
+
 extern int getFileSize(const char *fileName);
+extern int getNumberOfLines(FILE *fp); 
+
 extern long readFilePortionForProcess(const char *fileName, char **fileDest, int processId, int proc_number);
 extern void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition); 
 extern void parseHeader(FileHeader *header, FILE *fp);
 extern void parseHuffmanTree(TreeNode* root, FILE* fp);
 extern void parseBlockLengths(unsigned short *blockLengths, FILE *fp, int numberOfBlocks, int startPos); 
-
-extern int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned short *blockLengths);
-
-extern void printWorkDir(int processId);

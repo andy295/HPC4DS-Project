@@ -11,7 +11,7 @@
 #include <setjmp.h>
 
 // enable only if 1 AND if PID == master, so only prints one time
-#define DEBUG(PID) (0 && PID == 0) 
+#define DEBUG(PID) (0 && PID == 0)
 
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 
@@ -21,8 +21,9 @@
 #define ENCODED_FILE "HPC4DS-Project/serial_implementation/output/encoded_file"
 #define SRC_FILE "HPC4DS-Project/serial_implementation/text.txt"
 #define LOG_FILE "HPC4DS-Project/serial_implementation/output/data.csv"
+#define DATA_LOGGER_FILE "HPC4DS-Project/serial_implementation/output/data_log.csv"
 
-// they accept only char because it is 8 bits long
+// only chars accepted
 #define IsBit(v, n)      (bool)((v >> n) & 1U)
 #define SetBit(v, n)     (v |= 1UL << n)
 #define ClrBit(v, n)     (v &= ~(1UL << n))
