@@ -149,7 +149,7 @@ int main() {
 
 	takeTime(pid);
 	printTime(pid, "Time elapsed");
-	saveTime(pid, LOG_FILE, "Time elapsed");
+	// saveTime(pid, LOG_FILE, "Time elapsed");
 
 	MPI_Finalize();
 

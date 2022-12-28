@@ -64,11 +64,11 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 			++encodingText->nr_of_bits;
 	}
 
-	// #if VERBOSE <= 2
-	// 	printf("char: ");
-	// 	printFormattedChar(charEncoding->character);
-	// 	printf(" encoding: %s\n", charEncoding->encoding);
-	// #endif
+	#if DEBUG
+		printf("char: ");
+		printFormattedChar(charEncoding->character);
+		printf(" encoding: %s\n", charEncoding->encoding);
+	#endif
 }
 
 void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_chars) {
@@ -128,7 +128,6 @@ char* appendCharacter(char *text, char c, int *idx) {
 	text = realloc(text, sizeof(char) * (*idx + 1));
 	text[*idx] = c;
 	++(*idx);
-	// printf("%c\n", text[*idx - 1]);
 
 	return text;
 }
@@ -159,8 +158,6 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 			if (update_byte) {
 				fread(&byte, sizeof(BYTE), 1, fp);
 				update_byte = false;
-
-				// printEncodedText(&byte, sizeof(BYTE));
 			}
 
 			if (IsBit(byte, bit)) {
@@ -168,24 +165,18 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 					intermediateNode = intermediateNode->rightChild;
 
 					if (isNodeALeaf(intermediateNode)) {
-						// printf("%d. ", i);
 						decodedText = appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;
 					}
-					// else
-					// 	printf("bit: %d - %c\n", bit, intermediateNode->character);
 				}
 			} else {
 				if (intermediateNode->leftChild != NULL) {
 					intermediateNode = intermediateNode->leftChild;
 
 					if (isNodeALeaf(intermediateNode)) {
-						// printf("%d. ", i);
 						decodedText = appendCharacter(decodedText, intermediateNode->character, &idx);
 						found = true;
 					}
-				// 	else
-				// 		printf("bit: %d - %c\n", bit, intermediateNode->character);
 				}
 			}
 
@@ -222,23 +213,3 @@ void mergeDecodedText(DecodingText *dst, DecodingText *src) {
 
 	memcpy(dst->decodedText + oldLength, src->decodedText, src->length);
 }
-
-// void printEncodings(CharEncodingDictionary* dict) {
-// 	for (int i = 0; i < dict->number_of_chars; i++) {
-// 		printFormattedChar(dict->charEncoding[i].character);
-// 		printf(": %s\t\nlength: %d\n", dict->charEncoding[i].encoding, dict->charEncoding[i].length);
-// 	}
-// }
-
-// void printEncodedText(BYTE *text, int length) {
-// 	for (int i = 0; i < length; i++) {
-//         printf("\t");
-
-// 		for (int j = 0; j < BITS_IN_BYTE; j++)
-//             printf("%d", !!((text[i] << j) & 0x80));
-        
-//         printf("\n");
-//     }
-    
-//     printf("\n");
-// }

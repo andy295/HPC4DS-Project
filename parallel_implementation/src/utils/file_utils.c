@@ -10,14 +10,6 @@ int getFileSize(const char *fileName) {
 	return fSize; 
 }
 
-// void printWorkDir(int processId) {
-// 	char cwd[2048];
-//    	if (getcwd(cwd, sizeof(cwd)) != NULL)
-//     	printf("Process %d current working dir: %s\n", processId, cwd);
-//    	else
-// 		perror("getcwd() error");
-// }
-
 long readFilePortionForProcess(const char *fileName, char **fileDest, int processId, int proc_number) {
 	FILE *fp = openFile(fileName, READ_ALL, 0);
 	if (fp != NULL) {
@@ -118,7 +110,7 @@ FILE* openFile(const char *filename, int openMode, int bytePosition) {
 
 void parseHeader(FileHeader *header, FILE *fp) {
 	fread(header, sizeof(unsigned int), 1, fp);
-	
+
 	#if DEBUG
 		printf("Encoded text byte size: %d\n", header->byteStartOfDimensionArray - 1);
 	#endif
@@ -129,34 +121,6 @@ void parseBlockLengths(unsigned short *blockLengths, FILE *fp, int numberOfBlock
 	fseek(fp, startPos, SEEK_SET);
 	fread(blockLengths, sizeof(unsigned short), numberOfBlocks, fp);
 }
-
-// int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned short *blockLengths) {
-// 	fp = openFile(ENCODED_FILE, READ_B, 0);
-	
-// 	if (fp == NULL)
-// 		// handle the error
-// 		return -1;
-
-// 	FileHeader header = {.byteStartOfDimensionArray = 0};
-// 	parseHeader(&header, fp);
-
-// 	int number_of_blocks = (getFileSize(ENCODED_FILE) - header.byteStartOfDimensionArray) / sizeof(unsigned short);
-	
-// 	#if DEBUG
-// 		printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
-// 		printf("Number of blocks: %d\n", number_of_blocks); 
-// 	#endif
-
-// 	// fseek(fp, 0, SEEK_SET);
-// 	// fseek(fp, sizeof(FileHeader), SEEK_SET);
-// 	// root = parseHuffmanTree(fp);
-
-// 	fseek(fp, 0, SEEK_SET);
-// 	fseek(fp, header.byteStartOfDimensionArray, SEEK_SET);
-// 	parseBlockLengths(blockLengths, fp, number_of_blocks, 0);
-
-// 	return number_of_blocks;
-// }
 
 void parseHuffmanTree(TreeNode* root, FILE* fp) {
 	fseek(fp, 0, SEEK_SET);

@@ -1,9 +1,7 @@
 #pragma once
 
-#include <string.h>
-#include <stdlib.h>
-
 #include "../include/global_constants.h"
+
 #include "file_utils.h"
 
 char* DataLogHeader;

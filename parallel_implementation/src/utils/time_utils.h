@@ -1,8 +1,6 @@
 #pragma once
 
-#include <mpi.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include "../include/global_constants.h"
 
 #include "file_utils.h"
 

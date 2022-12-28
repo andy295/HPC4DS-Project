@@ -1,4 +1,3 @@
-
 #include "conversion_utils.h"
 
 char* intToString(int number) {

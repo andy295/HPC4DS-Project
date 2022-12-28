@@ -154,10 +154,10 @@ void deserializeMsgCharFreqDictionary(CharFreqDictionary* dict, BYTE *buffer) {
 	dict->charFreqs = malloc(sizeof(CharFreq) * dict->number_of_chars);
 	memcpy(dict->charFreqs, buffer + sizeof(MsgCharFreqDictionary), sizeof(CharFreq) * dict->number_of_chars);
 	
-	// #if VERBOSE <= 2
-	// 	printf("\nReceived dictionary with %d chars:\n", dict->number_of_chars);
-	// 	printCharFreqs(dict);
-	// #endif
+	#if DEBUG
+		printf("\nReceived dictionary with %d chars:\n", dict->number_of_chars);
+		printCharFreqs(dict);
+	#endif
 }
 
 void deserializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, BYTE *buffer) {
@@ -180,10 +180,10 @@ void deserializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, BYTE *bu
 		prevStrLen += dict->charEncoding[i].length+1;
 	}
 
-	// #if VERBOSE <= 2
-	// 	printf("\nReceived encoding dictionary with %d chars:\n", dict->number_of_chars);
-	// 	printEncodings(dict);
-	// #endif
+	#if DEBUG
+		printf("\nReceived encoding dictionary with %d chars:\n", dict->number_of_chars);
+		printEncodings(dict);
+	#endif
 }
 
 void deserializeMsgEncodingText(EncodingText *encodingText, BYTE *buffer) {

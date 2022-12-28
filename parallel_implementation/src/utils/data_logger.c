@@ -1,8 +1,6 @@
-
-
 #include "data_logger.h"
 
-void initDataLogger(){
+void initDataLogger() {
     DataLoggerReferenceProcess = 0; 
     
     itemsInHeader = 0;
@@ -14,38 +12,36 @@ void initDataLogger(){
     DataLogRow = (char*)malloc(MAX_DATA_LOGGER_ROW_SIZE*sizeof(char));
 }
 
-void addLogColumn(int pid, const char* name){
-    if (pid != DataLoggerReferenceProcess){
+void addLogColumn(int pid, const char* name) {
+    if (pid != DataLoggerReferenceProcess)
         return;
-    }
 
     itemsInHeader++;
     strcat(DataLogHeader, name);
     strcat(DataLogHeader, ",");
 }
 
-void addLogData(int pid, const char *data){
-    if (pid != DataLoggerReferenceProcess){
+void addLogData(int pid, const char *data) {
+    if (pid != DataLoggerReferenceProcess)
         return;
-    }
 
     strcat(DataLogRow, data);
     strcat(DataLogRow, ",");
 
     itemsInRow++;
-    if (itemsInRow == itemsInHeader){
+    if (itemsInRow == itemsInHeader) {
         itemsInRow = 0;
 
         saveRowToFile(DATA_LOGGER_FILE);
     }
 }
 
-
 void saveRowToFile(char* filename) {        
     // open csv file
     FILE *fp = fopen(filename, "a+");
     if (fp == NULL) {
         fp = fopen(filename, "w");
+
         if (fp == NULL) {
             printf("Error opening file\n");
             exit(1);
@@ -53,7 +49,7 @@ void saveRowToFile(char* filename) {
     }
 
     int indexOfFile = getNumberOfLines(fp);
-    if (indexOfFile == 0){
+    if (indexOfFile == 0) {
         fprintf(fp, "%s,%s\n", "Index", DataLogHeader);
         indexOfFile++;
     }
@@ -62,6 +58,6 @@ void saveRowToFile(char* filename) {
     fclose(fp);
 }
 
-void setDataLoggerReferenceProcess(int pid){
+void setDataLoggerReferenceProcess(int pid) {
     DataLoggerReferenceProcess = pid;
 }

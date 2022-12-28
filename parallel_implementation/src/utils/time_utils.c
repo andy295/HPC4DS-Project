@@ -8,7 +8,7 @@ char* TimeUtils_lastFilename;
 int TimeUtils_ReferenceProcess = 0;
 
 void takeTime(int pid) {
-    if (pid == TimeUtils_ReferenceProcess){
+    if (pid == TimeUtils_ReferenceProcess) {
         double end = MPI_Wtime();
         TimeUtils_lastElapsedTime = end - TimeUtils_lastTimeStamp;
         TimeUtils_lastTimeStamp = end;
@@ -32,7 +32,7 @@ void setTime(int pid, double time) {
 void saveTime(int pid, char* filename, char* label) {
     if (pid != TimeUtils_ReferenceProcess)
         return;
-        
+
     if (TimeUtils_lastFilename != filename) {
         TimeUtils_indexOfFile = -1;
         TimeUtils_lastFilename = filename;
@@ -43,6 +43,7 @@ void saveTime(int pid, char* filename, char* label) {
     if (fp == NULL) {
         fp = fopen(filename, "w");
         TimeUtils_indexOfFile = 0;
+
         if (fp == NULL) {
             printf("Error opening file\n");
             exit(1);

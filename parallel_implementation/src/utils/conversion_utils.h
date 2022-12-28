@@ -1,6 +1,4 @@
-
-#include <string.h>
-#include <stdlib.h>
+#pragma once
 
 #include "../include/global_constants.h"
 

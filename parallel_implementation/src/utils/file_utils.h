@@ -35,7 +35,3 @@ extern void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize
 extern void parseHeader(FileHeader *header, FILE *fp);
 extern void parseHuffmanTree(TreeNode* root, FILE* fp);
 extern void parseBlockLengths(unsigned short *blockLengths, FILE *fp, int numberOfBlocks, int startPos); 
-
-// extern int readEncodedFile(const char *fileName, FILE *fp, TreeNode *root, unsigned short *blockLengths);
-
-// extern void printWorkDir(int processId);
