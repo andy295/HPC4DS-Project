@@ -27,7 +27,6 @@ int main() {
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
 
 	CharEncodingDictionary encodingsDict = {.number_of_chars = allChars.number_of_chars, .charEncoding = NULL};
-
 	LinkedListTreeNodeItem* root = NULL;
 	EncodingText encodingText = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
 
@@ -130,7 +129,7 @@ int main() {
 		BYTE *startPos = (BYTE*)&fileHeader;
 		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B, 0);
 		
-		if(DEBUG(pid)){
+		if(DEBUG(pid)) {
 			printf("Header size: %lu\n", sizeof(unsigned int) * FILE_HEADER_ELEMENTS);
 			printf("Encoded arrayPosStartPos: %d\n", fileHeader.byteStartOfDimensionArray);
 		}
@@ -140,13 +139,12 @@ int main() {
 		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
 		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, APPEND_B, 0);
 
-		if(DEBUG(pid)){
+		if(DEBUG(pid))
 			printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
-		}
 
 		int nodes = countTreeNodes(root->item);
 
-		if(DEBUG(pid)){
+		if(DEBUG(pid)) {
 			printf("Huffman tree nodes number: %d\n", nodes);
 			printHuffmanTree(root->item, 0);
 		}
@@ -167,9 +165,8 @@ int main() {
 			// but we may make it work with the block sizes	
 			mergeEncodedText(&encodingText, &temp);
 
-			if(DEBUG(pid)){
+			if(DEBUG(pid))
 				printf("Number of bytes: %d\n", encodingText.nr_of_bytes);
-			}
 
 			freeBuffer(temp.dimensions);
 			freeBuffer(temp.encodedText);
@@ -178,27 +175,26 @@ int main() {
 
 		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, APPEND_B, 0);
 		
-		if(DEBUG(pid)){
+		if(DEBUG(pid))
 			printf("Encoded text size: %d\n", encodingText.nr_of_bytes);
-		}
 
 		BYTE* dimensions = (BYTE*)encodingText.dimensions;
 		writeBufferToFile(ENCODED_FILE, dimensions, encodingText.nr_of_dim * sizeof(unsigned short), APPEND_B, 0);
 		
-		if(DEBUG(pid)){
+		if(DEBUG(pid)) {
 			printf("Dimensions array size: %ld\n", encodingText.nr_of_dim * sizeof(unsigned short));
 			for (int i = 0; i < encodingText.nr_of_dim; i++)
 				printf("\tdimension[%d] = %d\n", i, encodingText.dimensions[i]);
 			
-			//printEncodedText(encodingText.encodedText, encodingText.nr_of_bytes);
-			//printf("\n");
+			// printEncodedText(encodingText.encodedText, encodingText.nr_of_bytes);
+			// printf("\n");
 		}
 
 		fileHeader.byteStartOfDimensionArray = sizeof(FileHeader) + byteSizeOfTree + encodingText.nr_of_bytes;
 		startPos = (BYTE*)&fileHeader;
 		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B_AT, 0);
 
-		if(DEBUG(pid)){
+		if(DEBUG(pid)) {
 			printf("Total number of blocks: %d\n", encodingText.nr_of_dim);
 			printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 			printf("Original file size: %d\n", getFileSize(SRC_FILE));

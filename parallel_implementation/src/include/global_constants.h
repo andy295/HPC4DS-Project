@@ -13,8 +13,6 @@
 // enable only if 1 AND if PID == master, so only prints one time
 #define DEBUG(PID) (0 && PID == 0) 
 
-// #define VERBOSE 3
-
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 
 #define ENDTEXT '\0'
@@ -36,22 +34,3 @@ static inline void freeBuffer(void* buffer) {
 	if (buffer != NULL)
 		free(buffer);
 }
-
-// enable only if we need
-// if at the end of the project we don't use it, we can remove all of them
-
-// #define IsBit2(v, n)      (bool)((v >> n) & 1U)
-// #define SetBit2(v, n)     (v |= 1UL << n)
-// #define ClrBit2(v, n)     (v &= ~(1UL << n))
-
-// #define IsBit8(v, n)      (bool)((v >> n) & 1U)
-// #define SetBit8(v, n)     (v |= 1UL << n)
-// #define ClrBit8(v, n)     (v &= ~(1UL << n))
-
-// #define IsBit16(v, n)     (bool)((v >> b) & 1U)
-// #define SetBit16(v, n)    (v |= 1UL << b)
-// #define ClrBit16(v, n)    (v &= ~(1UL << b);)
-
-// #define IsBit32(v, n)     (bool)((v >> b) & 1U)
-// #define SetBit32(v, n)    (v |= 1UL << b)
-// #define ClrBit32(v, n)    (v &= ~(1UL << b);)
