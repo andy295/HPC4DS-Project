@@ -19,8 +19,8 @@ typedef struct CharFreqDictionary {
 	CharFreq *charFreqs; 
 } CharFreqDictionary;
 
-extern void getCharFreqsFromText(CharFreqDictionary* dict, char text[], long len, int pid);
-extern void sortCharFreqs(CharFreqDictionary* res);
-extern void appendToCharFreqs(CharFreqDictionary* dict, char character, int pos);
-extern void mergeCharFreqs(CharFreqDictionary* dict, CharFreq* charFreqs, int size); 
-extern void printCharFreqs(CharFreqDictionary* dict);
+extern void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int pid);
+extern void sortCharFreqs(CharFreqDictionary *res);
+extern void appendToCharFreqs(CharFreqDictionary *dict, char character, int pos);
+extern void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size); 
+extern void printCharFreqs(CharFreqDictionary *dict);

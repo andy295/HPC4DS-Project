@@ -65,7 +65,7 @@ int main() {
 	FileHeader header = {.byteStartOfDimensionArray = 0};
 	parseHeader(&header, fp);
 
-	if(DEBUG(pid)){
+	if (DEBUG(pid)) {
 		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(unsigned int));
 		printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
 	}
@@ -75,7 +75,7 @@ int main() {
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
 
-	if(DEBUG(pid)){
+	if (DEBUG(pid)) {
 		printf("Encoded tree size: %d\n", treeByteSize);
 		printf("Huffman tree nodes number: %d\n", nodes);
 		printHuffmanTree(root, 0);
@@ -86,10 +86,9 @@ int main() {
 	unsigned short *dimensions = malloc(sizeof(unsigned short) * number_of_blocks);
 	parseBlockLengths(dimensions, fp, number_of_blocks, header.byteStartOfDimensionArray);
 
-	if(DEBUG(pid)){
+	if (DEBUG(pid))
 		for (int i = 0; i < number_of_blocks; i++)
 			printf("dimensions[%d]: %d\n", i, dimensions[i]);
-	}
 
 	int start = 0;
 	int end = 0;

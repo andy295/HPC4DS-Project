@@ -14,7 +14,7 @@ BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag) {
 	return buffer;
 }
 
-BYTE* getMessage(void* data, int msgType, int *bufferSize) {
+BYTE* getMessage(void *data, int msgType, int *bufferSize) {
 	switch (msgType)
 	{
 	case MSG_DICTIONARY:
@@ -40,7 +40,7 @@ BYTE* getMessage(void* data, int msgType, int *bufferSize) {
 	}
 }
 
-BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary* dict, int *bufferSize) {
+BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary *dict, int *bufferSize) {
 	*bufferSize = sizeof(MsgCharFreqDictionary) + (sizeof(CharFreq) * dict->number_of_chars);
 	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
 
@@ -55,7 +55,7 @@ BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary* dict, int *bufferSize) 
 	return buffer;
 }
 
-BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, int *bufferSize) {
+BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, int *bufferSize) {
 	*bufferSize = sizeof(MsgCharEncodingDictionary);
 	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
 
@@ -75,9 +75,9 @@ BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, int *buff
 		memcpy(buffer + start, &dict->charEncoding[i], sizeof(CharEncoding));
 
 		start += sizeof(CharEncoding);
-		memcpy(buffer + start, dict->charEncoding[i].encoding, sizeof(char) * dict->charEncoding[i].length+1);
+		memcpy(buffer + start, dict->charEncoding[i].encoding, sizeof(char) * (dict->charEncoding[i].length+1));
 
-		totalStrLen += dict->charEncoding[i].length+1;
+		totalStrLen += (dict->charEncoding[i].length + 1);
 	}
 
 	return buffer;
@@ -104,7 +104,7 @@ BYTE *serializeMsgEncodingText(EncodingText *encodingText, int *bufferSize) {
 }
 
 BYTE *serializeMsgText(char *text, int *bufferSize) {
-	int textLen = (strlen(text) + 1);
+	int textLen = strlen(text) + 1;
 	*bufferSize = sizeof(MsgText) + (sizeof(char) * textLen);
 	BYTE *buffer = malloc(sizeof(BYTE) * (*bufferSize));
 
@@ -146,7 +146,7 @@ void setMessage(void *data, BYTE *buffer) {
 	}
 }
 
-void deserializeMsgCharFreqDictionary(CharFreqDictionary* dict, BYTE *buffer) {
+void deserializeMsgCharFreqDictionary(CharFreqDictionary *dict, BYTE *buffer) {
 	MsgCharFreqDictionary msg;
 	memcpy(&msg, buffer, sizeof(MsgCharFreqDictionary));
 
@@ -160,7 +160,7 @@ void deserializeMsgCharFreqDictionary(CharFreqDictionary* dict, BYTE *buffer) {
 	#endif
 }
 
-void deserializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, BYTE *buffer) {
+void deserializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, BYTE *buffer) {
 	MsgCharEncodingDictionary msg;
 	memcpy(&msg, buffer, sizeof(MsgCharEncodingDictionary));
 
@@ -177,7 +177,7 @@ void deserializeMsgCharEncodingDictionary(CharEncodingDictionary* dict, BYTE *bu
 		start += sizeof(CharEncoding);
 		memcpy(dict->charEncoding[i].encoding, buffer + start, sizeof(char) * (dict->charEncoding[i].length+1));
 
-		prevStrLen += dict->charEncoding[i].length+1;
+		prevStrLen += dict->charEncoding[i].length + 1;
 	}
 
 	#if DEBUG

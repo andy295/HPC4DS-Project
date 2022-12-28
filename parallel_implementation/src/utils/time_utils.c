@@ -3,7 +3,7 @@
 double TimeUtils_lastTimeStamp = 0;
 double TimeUtils_lastElapsedTime = 0;
 int TimeUtils_indexOfFile = -1;
-char* TimeUtils_lastFilename;
+char *TimeUtils_lastFilename;
 
 int TimeUtils_ReferenceProcess = 0;
 
@@ -15,7 +15,7 @@ void takeTime(int pid) {
     }
 }
 
-void printTime(int pid, char* label) {
+void printTime(int pid, char *label) {
     if (pid == TimeUtils_ReferenceProcess)
         printf("%s: %f\n", label, TimeUtils_lastElapsedTime);
 }
@@ -29,7 +29,7 @@ void setTime(int pid, double time) {
         TimeUtils_lastElapsedTime = time;
 }
 
-void saveTime(int pid, char* filename, char* label) {
+void saveTime(int pid, char *filename, char *label) {
     if (pid != TimeUtils_ReferenceProcess)
         return;
 

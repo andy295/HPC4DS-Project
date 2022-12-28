@@ -119,9 +119,8 @@ void encodeTree(TreeNode *root, TreeArrayItem *treeArray, int *globalIndex) {
 }
 
 BYTE* encodeTreeToByteArray(TreeNode *root, int *byteSizeOfTree) {
-
 	int treeSize = countTreeNodes(root);
-	TreeArrayItem* treeArray = calloc(treeSize, sizeof(TreeArrayItem));
+	TreeArrayItem *treeArray = calloc(treeSize, sizeof(TreeArrayItem));
 	*byteSizeOfTree = sizeof(TreeArrayItem) * treeSize;
 
 	int globalIndex = 0;

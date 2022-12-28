@@ -6,6 +6,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include <mpi.h>
+#include <omp.h>
 #include <unistd.h> // get current directory
 #include <math.h>
 #include <setjmp.h>

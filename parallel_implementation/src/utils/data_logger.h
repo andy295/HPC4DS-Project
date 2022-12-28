@@ -4,10 +4,10 @@
 
 #include "file_utils.h"
 
-char* DataLogHeader;
+char *DataLogHeader;
 int itemsInHeader;
 
-char* DataLogRow; 
+char *DataLogRow; 
 int itemsInRow;
 
 int DataLoggerReferenceProcess; 
@@ -20,4 +20,4 @@ extern void addLogData(int pid, const char *data);
 
 extern void setDataLoggerReferenceProcess(int pid);
 
-void saveRowToFile(char* filename);
+void saveRowToFile(char *filename);

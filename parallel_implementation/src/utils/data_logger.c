@@ -8,11 +8,11 @@ void initDataLogger() {
 
     MAX_DATA_LOGGER_ROW_SIZE = 1000;
 
-    DataLogHeader = (char*)malloc(MAX_DATA_LOGGER_ROW_SIZE*sizeof(char));
-    DataLogRow = (char*)malloc(MAX_DATA_LOGGER_ROW_SIZE*sizeof(char));
+    DataLogHeader = (char*)malloc(MAX_DATA_LOGGER_ROW_SIZE * sizeof(char));
+    DataLogRow = (char*)malloc(MAX_DATA_LOGGER_ROW_SIZE * sizeof(char));
 }
 
-void addLogColumn(int pid, const char* name) {
+void addLogColumn(int pid, const char *name) {
     if (pid != DataLoggerReferenceProcess)
         return;
 
@@ -36,7 +36,7 @@ void addLogData(int pid, const char *data) {
     }
 }
 
-void saveRowToFile(char* filename) {        
+void saveRowToFile(char *filename) {        
     // open csv file
     FILE *fp = fopen(filename, "a+");
     if (fp == NULL) {
