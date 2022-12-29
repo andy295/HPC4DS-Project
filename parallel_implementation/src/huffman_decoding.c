@@ -46,7 +46,7 @@ void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int
 		++(*end);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
 
 	int proc_number;
@@ -113,8 +113,10 @@ int main() {
 			// maybe we could use the send version that uses the mpi buffer 
 			// in this way we can empty the msgDict.charFreqs without risks
 			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-		else
-			fprintf(stderr, "Error while sending %s message to the master process\n", getMsgName(MSG_TEXT));
+		else {
+			fprintf(stderr, "Process %d: Error while sending %s message to the master process\n", pid, getMsgName(MSG_TEXT));
+			return 2;
+		}
 
 		freeBuffer(buffer);
 	} else {

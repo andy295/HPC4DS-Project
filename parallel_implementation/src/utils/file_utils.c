@@ -10,16 +10,16 @@ int getFileSize(const char *fileName) {
 	return fSize; 
 }
 
-long readFilePortionForProcess(const char *fileName, char **fileDest, int processId, int proc_number) {
+long readFilePortionForProcess(const char *fileName, char **fileDest, int pid, int proc_number) {
 	FILE *fp = openFile(fileName, READ_ALL, 0);
 	if (fp != NULL) {
 		long fSize = ftell(fp);
 
 		int residual = fSize % proc_number; 
 		fSize = fSize / proc_number;
-		fseek(fp, processId * fSize, SEEK_SET);
+		fseek(fp, pid * fSize, SEEK_SET);
 
-		if (processId == proc_number - 1 && residual != 0)
+		if (pid == proc_number - 1 && residual != 0)
 			fSize += residual;
 
 		*fileDest = malloc(fSize + 1); 
@@ -29,15 +29,15 @@ long readFilePortionForProcess(const char *fileName, char **fileDest, int proces
 		(*fileDest)[fSize] = ENDTEXT;
 
 		#if DEBUG
-			printf("process %d:\n%s\n", processId, *fileDest);
+			printf("process %d:\n%s\n", pid, *fileDest);
 			printf("total text length: %ld\n", fSize);
 		#endif
 
 		return fSize;
 	}
 
-	printf("Error opening file %s\n", fileName);
-	return 0; 
+	fprintf(stderr, "Process %d: Error opening file %s\n", pid, fileName);
+	return -1;
 }
 
 // function to write byte buffer to file
