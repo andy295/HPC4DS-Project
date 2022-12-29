@@ -20,7 +20,7 @@ BYTE* getMessage(void *data, int msgType, int *bufferSize) {
 		break;
 	
 	default:
-		printf("Error: unknown message type: %d\n", msgType);
+		fprintf(stderr, "Error: in get message unknown message type: %d\n", msgType);
 		return NULL;
 		break;
 	}
@@ -127,7 +127,7 @@ void setMessage(void *data, BYTE *buffer) {
 		break;
 
 	default:
-		printf("Error: unknown message type: %d\n", msgId);
+		fprintf(stderr, "Error: in set message unknown message type: %d\n", msgId);
 		break;
 	}
 }

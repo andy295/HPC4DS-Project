@@ -9,34 +9,61 @@ int huffman_coding() {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	takeTime(pid);
+	// takeTime(pid);
 	initDataLogger();
 	setDataLoggerReferenceProcess(0);
 	addLogColumn(pid, "N.Processes");
 	addLogColumn(pid, "N.Characters");
 	addLogColumn(pid, "Time");
 
+	char str[128];
+
 	char *text = NULL;
+	takeTime(pid);
+	sprintf(str, "Pid %d: Time to get chars from text", pid);
 	long processes_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
+	takeTime(pid);
+	printTime(pid, str);
 
 	printf("Process %d: %ld characters read\n", pid, processes_text_length);
 	addLogData(pid, intToString(proc_number));
 	addLogData(pid, intToString(processes_text_length));
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
+	takeTime(pid);
+	sprintf(str, "Pid %d: Time to chars frequency", pid);
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
+	takeTime(pid);
+	printTime(pid, str);
 
 	CharEncodingDictionary encodingsDict = {.number_of_chars = allChars.number_of_chars, .charEncoding = NULL};
 	LinkedListTreeNodeItem *root = NULL;
 	EncodingText encodingText = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
 
+	takeTime(pid);
+	sprintf(str, "Pid %d: Time to sort charFreq dict", pid);
 	sortCharFreqs(&allChars);
+	takeTime(pid);
+	printTime(pid, str);
 
 	// creates the huffman tree
+	takeTime(pid);
+	sprintf(str, "Pid %d: Time to create huffman tree", pid);
 	root = createHuffmanTree(&allChars);
-	getEncodingFromTree(&encodingsDict, &allChars, root->item);
+	takeTime(pid);
+	printTime(pid, str);
 
+	takeTime(pid);
+	sprintf(str, "Pid %d: Time to create encoding dict", pid);
+	getEncodingFromTree(&encodingsDict, &allChars, root->item);
+	takeTime(pid);
+	printTime(pid, str);
+
+	takeTime(pid);
+	sprintf(str, "Pid %d: Time to encode text", pid);
 	encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
+	takeTime(pid);
+	printTime(pid, str);
 
 	freeBuffer(allChars.charFreqs);
 	freeBuffer(text);
@@ -97,8 +124,8 @@ int huffman_coding() {
 	freeBuffer(encodingText.encodedText);
 	freeLinkedList(root);
 
-	takeTime(pid);
-	printTime(pid, "Time elapsed");
+	// takeTime(pid);
+	// printTime(pid, "Time elapsed");
 	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
 	float time = getTime(pid, "Time elapsed");

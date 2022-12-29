@@ -5,8 +5,9 @@
 #include "../utils/print_utils.h"
 
 enum Position {
-    FIRST = 1,
-    LAST
+    FIRST = 0,
+    LAST,
+	LAST_R
 };
 
 typedef struct CharFreq {
@@ -21,6 +22,6 @@ typedef struct CharFreqDictionary {
 
 extern void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int pid);
 extern void sortCharFreqs(CharFreqDictionary *res);
-extern void appendToCharFreqs(CharFreqDictionary *dict, char character, int pos);
-extern void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size); 
+extern void appendToCharFreqs(CharFreqDictionary *dict, CharFreq *charFreq, int pos);
+extern void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size, int pos);
 extern void printCharFreqs(CharFreqDictionary *dict);

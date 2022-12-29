@@ -2,9 +2,9 @@
 #include "include/huffman_decoding.h"
 
 int main() {
-    // huffman_coding();
+    huffman_coding();
 
-    huffman_decoding();
+    // huffman_decoding();
 
     return 0;
 }

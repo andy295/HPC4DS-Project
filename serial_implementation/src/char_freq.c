@@ -1,6 +1,5 @@
 #include "include/char_freq.h"
 
-// maybe we could improve the function by using the multythrading for loop
 void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int pid) {
 	for (int i = 0; i < len; i++) {
 		char character = text[i]; 
@@ -43,7 +42,7 @@ void sortCharFreqs(CharFreqDictionary *res) {
 	}
 }
 
-void appendToCharFreqs(CharFreqDictionary *dict, char character, int pos) {
+void appendToCharFreqs(CharFreqDictionary *dict, CharFreq *charFreq, int pos) {
 	if (pos == FIRST) {
 		CharFreq *tmp = malloc(dict->number_of_chars * sizeof(CharFreq));
 		memcpy(tmp, dict->charFreqs, dict->number_of_chars * sizeof(CharFreq));
@@ -55,17 +54,19 @@ void appendToCharFreqs(CharFreqDictionary *dict, char character, int pos) {
 
 		memcpy(dict->charFreqs+1, tmp, oldSize * sizeof(CharFreq));
 
-		dict->charFreqs[0].character = character;
+		dict->charFreqs[0].character = charFreq->character;
 		dict->charFreqs[0].frequency = 1;
-	} else {
-		int frequency = dict->charFreqs[dict->number_of_chars-1].frequency + 1;
-		dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * (dict->number_of_chars+1));
-		dict->charFreqs[dict->number_of_chars] = (struct CharFreq) {.character = character, .frequency = frequency};
+	} else if (pos == LAST) {
+		dict->charFreqs[dict->number_of_chars] = (struct CharFreq) {.character = charFreq->character, .frequency = charFreq->frequency};
 		++dict->number_of_chars;
-	}
+	} else if (pos == LAST_R) {
+   		dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * (dict->number_of_chars+1));
+		dict->charFreqs[dict->number_of_chars] = (struct CharFreq) {.character = charFreq->character, .frequency = charFreq->frequency};
+		++dict->number_of_chars;
+    }
 }
 
-void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size) {
+void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size, int pos) {
 	for (int i = 0; i < size; i++) {
 		char character = charFreqs[i].character;
 		int frequency = charFreqs[i].frequency;
@@ -78,29 +79,9 @@ void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size) {
 		}
 
 		if (!assigned)
-			appendToCharFreqs(dict, character, LAST);
+			appendToCharFreqs(dict, &charFreqs[i], pos);
 	}
 }
-
-// // test if there is one faster than the other
-// void mergeCharFreqs(CharFreqDictionary *dict, MsgDictionary *msg) {
-// for (int i = 0; i < msg->charsNr; i++) {
-// 	bool found = false; 
-// 	for (int j = 0; j < dict->number_of_chars && !found; j++)
-// 		if (dict->charFreqs[j].character == msg->characters[i])
-// 			dict->charFreqs[j].frequency += msg->frequencies[i]; 
-// 			found = true; 
-
-// 		if (!found) {
-// 			++dict->number_of_chars; 
-// 			dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * dict->number_of_chars);
-
-// 			CharFreq *p = &dict->charFreqs[dict->number_of_chars-1];
-// 			p->character = msg->characters[i];
-// 			p->frequency = msg->frequencies[i];
-// 		}
-// 	}
-// }
 
 void printCharFreqs(CharFreqDictionary *dict) {
 	printf("Dictionary: \n");

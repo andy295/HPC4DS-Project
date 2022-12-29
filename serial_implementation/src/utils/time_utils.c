@@ -45,7 +45,7 @@ void saveTime(int pid, char *filename, char *label) {
         TimeUtils_indexOfFile = 0;
 
         if (fp == NULL) {
-            printf("Error opening file\n");
+            fprintf(stderr, "Error opening file\n");
             exit(1);
         }
     }

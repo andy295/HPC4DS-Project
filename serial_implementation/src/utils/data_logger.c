@@ -43,7 +43,7 @@ void saveRowToFile(char *filename) {
         fp = fopen(filename, "w");
 
         if (fp == NULL) {
-            printf("Error opening file\n");
+            fprintf(stderr, "Error opening file\n");
             exit(1);
         }
     }
