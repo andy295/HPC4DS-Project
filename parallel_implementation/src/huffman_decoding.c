@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
 
 	int proc_number;
 	int pid; 
+
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]) {
 	
 	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
 	if (fp == NULL) {
-		fprintf(stderr, "Error opening file %s\n", ENCODED_FILE);
+		fprintf(stderr, "Process %d: Error opening file %s\n", pid, ENCODED_FILE);
 		return 1;
 	}
 

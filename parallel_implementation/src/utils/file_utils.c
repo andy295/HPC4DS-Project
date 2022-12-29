@@ -36,72 +36,72 @@ long readFilePortionForProcess(const char *fileName, char **fileDest, int pid, i
 		return fSize;
 	}
 
-	fprintf(stderr, "Process %d: Error opening file %s\n", pid, fileName);
+	fprintf(stderr, "Process %d: Error while opening file %s\n", pid, fileName);
 	return -1;
 }
 
 // function to write byte buffer to file
-void writeBufferToFile(const char *filename, BYTE *buffer, int bufferSize, int openMode, int bytePosition) {
-	FILE *file = openFile(filename, openMode, bytePosition);
+void writeBufferToFile(const char *fileName, BYTE *buffer, int bufferSize, int openMode, int bytePosition) {
+	FILE *file = openFile(fileName, openMode, bytePosition);
 	fwrite(buffer, sizeof(BYTE), bufferSize, file);
 	fclose(file);
 }
 
-FILE* openFile(const char *filename, int openMode, int bytePosition) {
+FILE* openFile(const char *fileName, int openMode, int bytePosition) {
 	FILE *file; 
 
 	switch (openMode) {
 		case READ:
-			file = fopen(filename, "r");
+			file = fopen(fileName, "r");
 			break;
 
 		case READ_ALL:
-			file = fopen(filename, "r");
+			file = fopen(fileName, "r");
 			fseek(file, 0, SEEK_END); 
 			break;
 		
 		case WRITE:
-			file = fopen(filename, "w");
+			file = fopen(fileName, "w");
 			break;
 		
 		case APPEND:
-			file = fopen(filename, "a+");
+			file = fopen(fileName, "a+");
 			break;
 
 		case WRITE_AT:
-			file = fopen(filename, "r+");
+			file = fopen(fileName, "r+");
 			fseek(file, bytePosition, SEEK_SET);
 			break;
 
 		case READ_B:
-			file = fopen(filename, "rb");
+			file = fopen(fileName, "rb");
 			break;
 		
 		case WRITE_B:
-			file = fopen(filename, "wb");
+			file = fopen(fileName, "wb");
 			break;
 		
 		case APPEND_B:
-			file = fopen(filename, "ab+");
+			file = fopen(fileName, "ab+");
 			break;
 
 		case READ_ALL_B:
-			file = fopen(filename, "rb");
+			file = fopen(fileName, "rb");
 			fseek(file, 0, SEEK_END); 
 			break;
 
 		case WRITE_B_AT:
-			file = fopen(filename, "rb+");
+			file = fopen(fileName, "rb+");
 			fseek(file, bytePosition, SEEK_SET);
 			break;
 		
 		default:
-			printf("Error while opening file %s, unknown open mode: %d\n", filename, openMode);
+			fprintf(stderr, "Error while opening file %s, unknown open mode: %d\n", fileName, openMode);
 			return NULL;
 	}
 
 	if (file == NULL) {
-		printf("Error while opening file %s\n", filename);
+		fprintf(stderr, "Error while opening file %s\n", fileName);
 		return NULL;
 	}
 

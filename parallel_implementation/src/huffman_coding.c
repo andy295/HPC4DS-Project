@@ -1,6 +1,6 @@
 #include "include/huffman_coding.h"
 
-int main() {
+int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
 
 	int proc_number;
@@ -9,15 +9,21 @@ int main() {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	takeTime(pid);
+
 	initDataLogger();
 	setDataLoggerReferenceProcess(0);
 	addLogColumn(pid, "N.Processes");
 	addLogColumn(pid, "N.Characters");
 	addLogColumn(pid, "Time");
 
+	takeTime(pid);
 	char *text = NULL;
 	long processes_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
+
+	if (processes_text_length <= 0) {
+		fprintf(stderr, "Process %d: Error while reading file %s\n", pid, SRC_FILE);
+		return 1;
+	}
 
 	printf("Process %d: %ld characters read\n", pid, processes_text_length);
 	addLogData(pid, intToString(proc_number));
@@ -38,9 +44,10 @@ int main() {
 			// maybe we could use the send version that uses the mpi buffer 
 			// in this way we can empty the msgDict.charFreqs without risks
 			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-		else
-			// eventually print an error message
-			printf("Error while sending all character frequencies to the master process\n");
+		else {
+			fprintf(stderr, "Process %d: Error while sending %s message to the master process\n", pid, getMsgName(MSG_DICTIONARY));
+			return 2;
+		}
 
 		freeBuffer(buffer);
 	} else { // receive the character frequencies from the other processes
@@ -72,17 +79,16 @@ int main() {
 		if (buffer != NULL && bufferSize > 0)
 			for (int i = 1; i < proc_number; i++)
 				MPI_Send(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD);
-		else
-			// eventually print an error message
-			printf("Error while sending encoding dictionary to the other processes\n");
+		else {
+			fprintf(stderr, "Process %d: Error while sending %s message to the slave processes\n", pid, getMsgName(MSG_ENCODING_DICTIONARY));
+			return 2;
+		}
 
 		freeBuffer(buffer);
 
 		// encode the text for process 0
 		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
 	}
-
-	freeBuffer(allChars.charFreqs);
 
 	// each process receives the encoding dictionary 
 	// and encodes its portion of the text 
@@ -105,21 +111,13 @@ int main() {
 
 		if (buffer != NULL && bufferSize > 0)
 			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-		else
-			// eventually print an error message
-			printf("Error while sending encoded text to process 0\n");
+		else {
+			fprintf(stderr, "Process %d: Error while sending %s message to the master process\n", pid, getMsgName(MSG_ENCODING_TEXT));
+			return 2;
+		}
 
-		freeBuffer(encodingText.dimensions);
-		freeBuffer(encodingText.encodedText);
-
-		for (int i = 0; i < encodingsDict.number_of_chars; i++)
-			freeBuffer(encodingsDict.charEncoding[i].encoding);
-
-		freeBuffer(encodingsDict.charEncoding);
 		freeBuffer(buffer);
 	}
-
-	freeBuffer(text);
 
 	// master process receives the encoded text from each process
 	// and writes it to the file
@@ -199,10 +197,6 @@ int main() {
 			printf("Encoded file size: %d\n", getFileSize(ENCODED_FILE));
 			printf("Original file size: %d\n", getFileSize(SRC_FILE));
 		}
-
-		freeBuffer(encodingText.dimensions);
-		freeBuffer(encodingText.encodedText);
-		freeLinkedList(root);
 	}
 
 	takeTime(pid);
@@ -211,6 +205,17 @@ int main() {
 
 	float time = getTime(pid, "Time elapsed");
 	addLogData(pid, floatToString(time));
+
+	freeBuffer(encodingText.dimensions);
+	freeBuffer(encodingText.encodedText);
+	freeLinkedList(root);
+
+	for (int i = 0; i < encodingsDict.number_of_chars; i++)
+		freeBuffer(encodingsDict.charEncoding[i].encoding);
+
+	freeBuffer(encodingsDict.charEncoding);
+	freeBuffer(text);
+	freeBuffer(allChars.charFreqs);
 
 	MPI_Finalize();
 
