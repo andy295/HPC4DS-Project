@@ -135,7 +135,7 @@ int main() {
 		}
 
 		// write the encoded tree to the file
-		int byteSizeOfTree; 
+		int byteSizeOfTree;
 		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
 		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, APPEND_B, 0);
 

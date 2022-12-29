@@ -16,7 +16,7 @@
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 
 #define ENDTEXT '\0'
-#define CHARS_PER_BLOCK 15 // just for test
+#define CHARS_PER_BLOCK 15
 
 #define ENCODED_FILE "HPC4DS-Project/serial_implementation/output/encoded_file"
 #define SRC_FILE "HPC4DS-Project/serial_implementation/text.txt"

@@ -71,7 +71,7 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 	#endif
 }
 
-void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary* encodingDict, char *text, int total_chars) {
+void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary *encodingDict, char *text, int total_chars) {
 	char c = 0;
 
 	encodingText->nr_of_dim = (total_chars % CHARS_PER_BLOCK != 0) ? (total_chars / CHARS_PER_BLOCK) + 1 : total_chars / CHARS_PER_BLOCK;
@@ -125,7 +125,7 @@ void mergeEncodedText(EncodingText *dst, EncodingText *src) {
 }
 
 char* appendCharacter(char *text, char c, int *idx) {
-	text = realloc(text, sizeof(char) * (*idx + 1));
+	text = realloc(text, sizeof(char) * (*idx+1));
 	text[*idx] = c;
 	++(*idx);
 

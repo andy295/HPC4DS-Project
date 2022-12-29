@@ -177,7 +177,7 @@ void deserializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, BYTE *bu
 		start += sizeof(CharEncoding);
 		memcpy(dict->charEncoding[i].encoding, buffer + start, sizeof(char) * (dict->charEncoding[i].length+1));
 
-		prevStrLen += dict->charEncoding[i].length + 1;
+		prevStrLen += (dict->charEncoding[i].length + 1);
 	}
 
 	#if DEBUG
