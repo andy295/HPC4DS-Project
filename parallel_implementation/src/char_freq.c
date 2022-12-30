@@ -1,9 +1,32 @@
 #include "include/char_freq.h"
 
+// void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int pid) {
+// 	for (int i = 0; i < len; i++) {
+// 		char character = text[i]; 
+// 		bool assigned = false; 
+// 		for (int j = 0; j < dict->number_of_chars && !assigned; j++) {
+
+//             CharFreq *p = &dict->charFreqs[j];
+// 			if (p->character == character) {
+// 				++p->frequency; 
+// 				assigned = true; 
+// 			}
+// 		}
+
+// 		if (!assigned) {
+//             ++dict->number_of_chars;
+//             dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * dict->number_of_chars);
+
+//             CharFreq *p = &dict->charFreqs[dict->number_of_chars-1];
+// 			*p = (struct CharFreq) {.character = character, .frequency = 1};
+// 		}
+// 	}
+// }
+
 void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int pid) {
 	CharFreqDictionary **charFreqDict = calloc(omp_get_max_threads(), sizeof(CharFreqDictionary*));
 
-    #pragma omp parallel
+    #pragma omp parallel num_threads(omp_get_max_threads())
 	{
 		CharFreqDictionary *tmp = calloc(1, sizeof(CharFreqDictionary));	
 		tmp->number_of_chars = 0;
@@ -45,21 +68,49 @@ void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int p
 	}
 }
 
-void sortCharFreqs(CharFreqDictionary *res) {
-	for (int i = 0; i < res->number_of_chars; i++) {
-		CharFreq minCharFreq = res->charFreqs[i];
-		int indexOfMin = i;  
-		for (int j = i; j < res->number_of_chars; j++) {
-			if (minCharFreq.frequency > res->charFreqs[j].frequency) {
-				minCharFreq = res->charFreqs[j]; 
-				indexOfMin = j; 
-			}
-		}
+// void sortCharFreqs(CharFreqDictionary *res) {
+// 	for (int i = 0; i < res->number_of_chars; i++) {
+// 		CharFreq minCharFreq = res->charFreqs[i];
+// 		int indexOfMin = i;  
+// 		for (int j = i; j < res->number_of_chars; j++) {
+// 			if (minCharFreq.frequency > res->charFreqs[j].frequency) {
+// 				minCharFreq = res->charFreqs[j]; 
+// 				indexOfMin = j; 
+// 			}
+// 		}
 
-		CharFreq temp = res->charFreqs[i]; 
-		res->charFreqs[i] = minCharFreq;
-		res->charFreqs[indexOfMin] = temp;
-	}
+// 		CharFreq temp = res->charFreqs[i]; 
+// 		res->charFreqs[i] = minCharFreq;
+// 		res->charFreqs[indexOfMin] = temp;
+// 	}
+// }
+
+void sortCharFreqs(CharFreqDictionary *res) {
+    int phase = 0;
+    int i = 0;
+    CharFreq tmp = {.character = 0, .frequency = 0};
+
+    #pragma omp parallel num_threads(omp_get_max_threads()) default(none) shared(res) firstprivate(phase, i, tmp)
+    for (phase = 0; phase < res->number_of_chars; phase++) {
+        if (phase % 2 == 0) 
+            #pragma omp for
+            for (i = 1; i < res->number_of_chars; i += 2) {
+                if (res->charFreqs[i-1].frequency > res->charFreqs[i].frequency) {
+                    tmp = res->charFreqs[i-1]; 
+                    res->charFreqs[i-1] = res->charFreqs[i];
+                    res->charFreqs[i] = tmp;
+                }
+            }
+        else
+            #pragma omp for
+            for (i = 1; i < res->number_of_chars - 1; i += 2) {
+                if (res->charFreqs[i].frequency > res->charFreqs[i+1].frequency) {
+                    tmp = res->charFreqs[i+1]; 
+                    res->charFreqs[i+1] = res->charFreqs[i];
+                    res->charFreqs[i] = tmp;
+                }
+            }
+    }
 }
 
 void appendToCharFreqs(CharFreqDictionary *dict, CharFreq *charFreq, int pos) {
