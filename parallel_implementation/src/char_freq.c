@@ -46,12 +46,10 @@ void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int p
 }
 
 void sortCharFreqs(CharFreqDictionary *res) {
-	int i, j;
-
-	for (i = 0; i < res->number_of_chars; i++) {
+	for (int i = 0; i < res->number_of_chars; i++) {
 		CharFreq minCharFreq = res->charFreqs[i];
 		int indexOfMin = i;  
-		for (j = i; j < res->number_of_chars; j++){
+		for (int j = i; j < res->number_of_chars; j++) {
 			if (minCharFreq.frequency > res->charFreqs[j].frequency) {
 				minCharFreq = res->charFreqs[j]; 
 				indexOfMin = j; 
