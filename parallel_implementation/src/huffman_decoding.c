@@ -17,7 +17,7 @@ int roundUp(int numToRound, int multiple) {
 int calculatePrevTextSize(unsigned short *dimensions, int nrOfBlocks) {
 	int prevTextSize = 0;
 
-	#pragma omp parallel num_threads(omp_get_max_threads()) for reduction(+:prevTextSize)
+	#pragma omp parallel for num_threads(omp_get_max_threads()) reduction(+:prevTextSize)
 	for (int i = 0; i < nrOfBlocks; i++) {
 		// size of block in bits
 		int blockSize = dimensions[i]; 
@@ -47,7 +47,7 @@ void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int
 		++(*end);
 }
 
-int main_(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
 
 	int proc_number;
