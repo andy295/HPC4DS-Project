@@ -17,6 +17,7 @@ int roundUp(int numToRound, int multiple) {
 int calculatePrevTextSize(unsigned short *dimensions, int nrOfBlocks) {
 	int prevTextSize = 0;
 
+	#pragma omp parallel for reduction(+:prevTextSize)
 	for (int i = 0; i < nrOfBlocks; i++) {
 		// size of block in bits
 		int blockSize = dimensions[i]; 
@@ -54,6 +55,15 @@ int main(int argc, char *argv[]) {
 
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
+
+	int thread_count = strtol(argv[1], NULL, MAX_DIGITS);
+	if (thread_count <= 0) {
+		fprintf(stderr, "Invalid number of threads: %d\n", thread_count);
+		return 1;
+	}
+
+	omp_set_dynamic(0);
+	omp_set_num_threads(thread_count);
 
 	takeTime(pid);
 	

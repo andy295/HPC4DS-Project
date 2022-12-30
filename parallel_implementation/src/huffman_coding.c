@@ -9,6 +9,14 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
+	int thread_count = strtol(argv[1], NULL, MAX_DIGITS);
+	if (thread_count <= 0) {
+		fprintf(stderr, "Invalid number of threads: %d\n", thread_count);
+		return 1;
+	}
+
+	omp_set_dynamic(0);
+	omp_set_num_threads(thread_count);
 
 	initDataLogger();
 	setDataLoggerReferenceProcess(0);
@@ -17,6 +25,7 @@ int main(int argc, char *argv[]) {
 	addLogColumn(pid, "Time");
 
 	takeTime(pid);
+
 	char *text = NULL;
 	long processes_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
 
@@ -41,8 +50,6 @@ int main(int argc, char *argv[]) {
 		int bufferSize = 0;
 		BYTE *buffer = getMessage(&allChars, MSG_DICTIONARY, &bufferSize);
 		if (buffer != NULL && bufferSize > 0)
-			// maybe we could use the send version that uses the mpi buffer 
-			// in this way we can empty the msgDict.charFreqs without risks
 			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
 		else {
 			fprintf(stderr, "Process %d: Error while sending %s message to the master process\n", pid, getMsgName(MSG_DICTIONARY));
@@ -61,8 +68,8 @@ int main(int argc, char *argv[]) {
 			CharFreqDictionary rcvChars = {.number_of_chars = 0, .charFreqs = NULL};
 			setMessage(&rcvChars, buffer);
 
-			mergeCharFreqs(&allChars, rcvChars.charFreqs, rcvChars.number_of_chars);
-			
+			mergeCharFreqs(&allChars, rcvChars.charFreqs, rcvChars.number_of_chars, LAST_R);
+
 			freeBuffer(rcvChars.charFreqs);
 			freeBuffer(buffer);
 		}
@@ -105,6 +112,7 @@ int main(int argc, char *argv[]) {
 		freeBuffer(buffer);
 
 		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
+
 		// send to master process the encoded text
 		bufferSize = 0;
 		buffer = getMessage(&encodingText, MSG_ENCODING_TEXT, &bufferSize);
@@ -158,9 +166,9 @@ int main(int argc, char *argv[]) {
 
 			EncodingText temp;
 			setMessage(&temp, buffer);
-			
+
 			// not sure if this leaves spaces between bytes... probably yes
-			// but we may make it work with the block sizes	
+			// but we may make it work with the block sizes
 			mergeEncodedText(&encodingText, &temp);
 
 			if (DEBUG(pid))
@@ -214,6 +222,7 @@ int main(int argc, char *argv[]) {
 		freeBuffer(encodingsDict.charEncoding[i].encoding);
 
 	freeBuffer(encodingsDict.charEncoding);
+
 	freeBuffer(text);
 	freeBuffer(allChars.charFreqs);
 

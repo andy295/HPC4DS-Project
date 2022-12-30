@@ -1,25 +1,47 @@
 #include "include/char_freq.h"
 
 void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int pid) {
-	for (int i = 0; i < len; i++) {
-		char character = text[i]; 
-		bool assigned = false; 
-		for (int j = 0; j < dict->number_of_chars && !assigned; j++) {
+	CharFreqDictionary **charFreqDict = calloc(omp_get_max_threads(), sizeof(CharFreqDictionary*));
 
-            CharFreq *p = &dict->charFreqs[j];
-			if (p->character == character) {
-				++p->frequency; 
-				assigned = true; 
+    #pragma omp parallel
+	{
+		CharFreqDictionary *tmp = calloc(1, sizeof(CharFreqDictionary));	
+		tmp->number_of_chars = 0;
+        tmp->charFreqs = calloc(len, sizeof(CharFreq));
+		charFreqDict[omp_get_thread_num()] = tmp;
+
+		#pragma omp for nowait
+		for (int i = 0;  i < len; i++) {
+			char character = text[i]; 
+			bool assigned = false; 
+			for (int j = 0; j < tmp->number_of_chars && !assigned; j++) {
+				CharFreq *p = &tmp->charFreqs[j];
+				if (p->character == character) {
+					++p->frequency; 
+					assigned = true; 
+				}
+		}
+
+			if (!assigned) {
+				++tmp->number_of_chars;
+
+				CharFreq *p = &tmp->charFreqs[tmp->number_of_chars-1];
+				*p = (struct CharFreq) {.character = character, .frequency = 1};
 			}
 		}
+	}
 
-		if (!assigned) {
-            ++dict->number_of_chars;
-            dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * dict->number_of_chars);
+    for (int i = 1; i < omp_get_max_threads(); i++)
+        mergeCharFreqs(charFreqDict[0], charFreqDict[i]->charFreqs, charFreqDict[i]->number_of_chars, LAST);
 
-            CharFreq *p = &dict->charFreqs[dict->number_of_chars-1];
-			*p = (struct CharFreq) {.character = character, .frequency = 1};
-		}
+	dict->number_of_chars = charFreqDict[0]->number_of_chars;
+	dict->charFreqs = charFreqDict[0]->charFreqs;
+
+	dict->charFreqs = realloc(dict->charFreqs, dict->number_of_chars * sizeof(CharFreq));
+
+	for (int i = 1; i < omp_get_max_threads(); i++) {
+		free(charFreqDict[i]->charFreqs);
+		free(charFreqDict[i]);
 	}
 }
 
@@ -56,14 +78,17 @@ void appendToCharFreqs(CharFreqDictionary *dict, CharFreq *charFreq, int pos) {
 
 		dict->charFreqs[0].character = charFreq->character;
 		dict->charFreqs[0].frequency = 1;
-	} else {
-		dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * (dict->number_of_chars+1));
+	} else if (pos == LAST) {
 		dict->charFreqs[dict->number_of_chars] = (struct CharFreq) {.character = charFreq->character, .frequency = charFreq->frequency};
 		++dict->number_of_chars;
-	}
+	} else if (pos == LAST_R) {
+   		dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * (dict->number_of_chars+1));
+		dict->charFreqs[dict->number_of_chars] = (struct CharFreq) {.character = charFreq->character, .frequency = charFreq->frequency};
+		++dict->number_of_chars;
+    }
 }
 
-void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size {
+void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size, int pos) {
 	for (int i = 0; i < size; i++) {
 		char character = charFreqs[i].character;
 		int frequency = charFreqs[i].frequency;
@@ -76,7 +101,7 @@ void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size {
 		}
 
 		if (!assigned)
-			appendToCharFreqs(dict, charFreqs, LAST);
+			appendToCharFreqs(dict, &charFreqs[i], pos);
 	}
 }
 
