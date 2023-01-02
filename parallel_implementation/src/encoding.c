@@ -139,7 +139,6 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 	BYTE byte;
 	TreeNode *intermediateNode = root;
 
-	// maybe we can move it into file_utils.c
 	fseek(fp, 0, SEEK_SET);
 	fseek(fp, startByte, SEEK_SET);
 	

@@ -8,18 +8,18 @@
 #include "../utils/print_utils.h"
 
 typedef struct CharEncoding {
-	char character; 
+	char character;
 	int length;
-	char* encoding; 
+	char* encoding;
 } CharEncoding;
 
 typedef struct CharEncodingDictionary {
-	int number_of_chars; 
+	int number_of_chars;
 	CharEncoding *charEncoding;
 } CharEncodingDictionary;
 
 typedef struct EncodingText {
-	unsigned int nr_of_dim; // number of elemnts in the positions array
+	unsigned int nr_of_dim; // number of elements in the positions array
 	unsigned int nr_of_bytes; // number of bytes in the encodedText array
 	unsigned int nr_of_bits; // number of used bits in the last byte of the encodedText array
 	unsigned short *dimensions;
