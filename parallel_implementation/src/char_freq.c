@@ -55,7 +55,7 @@ void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int p
 	}
 
     for (int i = 1; i < omp_get_max_threads(); i++)
-        mergeCharFreqs(charFreqDict[0], charFreqDict[i]->charFreqs, charFreqDict[i]->number_of_chars, LAST);
+		mergeCharFreqs(charFreqDict[0], charFreqDict[i], LAST);
 
 	dict->number_of_chars = charFreqDict[0]->number_of_chars;
 	dict->charFreqs = charFreqDict[0]->charFreqs;
@@ -137,20 +137,20 @@ void appendToCharFreqs(CharFreqDictionary *dict, CharFreq *charFreq, int pos) {
     }
 }
 
-void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size, int pos) {
-	for (int i = 0; i < size; i++) {
-		char character = charFreqs[i].character;
-		int frequency = charFreqs[i].frequency;
+void mergeCharFreqs(CharFreqDictionary *dst, CharFreqDictionary *src, int pos) {
+	for (int i = 0; i < src->number_of_chars; i++) {
+		char character = src->charFreqs[i].character;
+		int frequency = src->charFreqs[i].frequency;
 		bool assigned = false;
-		for (int j = 0; j < dict->number_of_chars && !assigned; j++) {
-			if (dict->charFreqs[j].character == character) {
-				dict->charFreqs[j].frequency += frequency;
+		for (int j = 0; j < dst->number_of_chars && !assigned; j++) {
+			if (dst->charFreqs[j].character == character) {
+				dst->charFreqs[j].frequency += frequency;
 				assigned = true;
 			}
 		}
 
 		if (!assigned)
-			appendToCharFreqs(dict, &charFreqs[i], pos);
+			appendToCharFreqs(dst, &src->charFreqs[i], pos);
 	}
 }
 
