@@ -65,6 +65,10 @@ int main(int argc, char *argv[]) {
 	omp_set_dynamic(0);
 	omp_set_num_threads(thread_count);
 
+	FileHeader header = {.byteStartOfDimensionArray = 0};
+	TreeNode *root = calloc(1, sizeof(TreeNode));
+	DecodingText decodingText = {.length = 0, .decodedText = NULL};
+
 	takeTime(pid);
 	
 	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
@@ -73,7 +77,6 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	FileHeader header = {.byteStartOfDimensionArray = 0};
 	parseHeader(&header, fp);
 
 	if (DEBUG(pid)) {
@@ -81,7 +84,6 @@ int main(int argc, char *argv[]) {
 		printf("Encoded arrayPosStartPos: %d\n", header.byteStartOfDimensionArray);
 	}
 
-	TreeNode *root = malloc(sizeof(TreeNode));
 	parseHuffmanTree(root, fp);
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
@@ -94,7 +96,7 @@ int main(int argc, char *argv[]) {
 
 	int fileSize = getFileSize(ENCODED_FILE);
 	int number_of_blocks = (fileSize - header.byteStartOfDimensionArray) / sizeof(unsigned short);
-	unsigned short *dimensions = malloc(sizeof(unsigned short) * number_of_blocks);
+	unsigned short *dimensions = calloc(number_of_blocks, sizeof(unsigned short));
 	parseBlockLengths(dimensions, fp, number_of_blocks, header.byteStartOfDimensionArray);
 
 	if (DEBUG(pid))
@@ -104,7 +106,9 @@ int main(int argc, char *argv[]) {
 	int start = 0;
 	int end = 0;
 	calculateBlockRange(number_of_blocks, proc_number, pid, &start, &end);
-	printf("Process %d - Block range: %d - %d - Blocks nr: %d\n", pid, start, end - 1, end - start);
+	
+	if (DEBUG(pid))
+		printf("Process %d - Block range: %d - %d - Blocks nr: %d\n", pid, start, end - 1, end - start);
 
 	int startPos = (sizeof(FileHeader) * FILE_HEADER_ELEMENTS) + treeByteSize;
 	startPos += (pid != 0) ? calculatePrevTextSize(dimensions, start) : 0;
@@ -117,31 +121,33 @@ int main(int argc, char *argv[]) {
 		fp,
 		root);
 
+	fclose(fp);
+
 	if (pid != 0) {
-		int bufferSize = 0;
-		BYTE *buffer = getMessage(decodedText, MSG_TEXT, &bufferSize);
-		if (buffer != NULL && bufferSize > 0)
-			// maybe we could use the send version that uses the mpi buffer 
-			// in this way we can empty the msgDict.charFreqs without risks
-			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-		else {
-			fprintf(stderr, "Process %d: Error while sending %s message to the master process\n", pid, getMsgName(MSG_TEXT));
-			return 2;
+		MsgHeader header = {.id = MSG_TEXT, .size = 0};
+		BYTE *buffer = getMessage(&header, decodedText);
+
+		if (buffer == NULL || header.size <= 0) {
+			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
+			return 1;
 		}
+
+		MPI_Send(buffer, header.size, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
 
 		freeBuffer(buffer);
 	} else {
-		DecodingText decodingText = {.length = strlen(decodedText) + 1, .decodedText = decodedText};
+		decodingText.length = strlen(decodedText) + 1;
+		decodingText.decodedText = decodedText;
 
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
-			int bufferSize = 0;
-
-			BYTE *buffer = prepareForReceive(&status, &bufferSize, i, 0);
-			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
-
 			DecodingText rcvText = {.length = 0, .decodedText = NULL};
-			setMessage(&rcvText, buffer);
+			MsgProbe probe = {.header.id = MSG_TEXT, .header.size = 0, .pid = i, .tag = 0};
+
+			BYTE *buffer = prepareForReceive(&probe, &status);
+
+			MPI_Recv(buffer, probe.header.size, MPI_BYTE, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
+			setMessage(&probe.header, &rcvText, buffer);
 
 			mergeDecodedText(&decodingText, &rcvText);
 
@@ -150,18 +156,15 @@ int main(int argc, char *argv[]) {
 		}
 
 		printf("\nDecoded text:\n%s\n", decodingText.decodedText);
-		decodedText = decodingText.decodedText;
 	}
-
-	freeBuffer(decodedText);
-	freeBuffer(dimensions);
-	freeTree(root);
-
-	fclose(fp);
 
 	takeTime(pid);
 	printTime(pid, "Time elapsed");
 	// saveTime(pid, LOG_FILE, "Time elapsed");
+
+	freeBuffer(decodingText.decodedText);
+	freeBuffer(dimensions);
+	freeTree(root);
 
 	MPI_Finalize();
 

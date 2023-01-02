@@ -1,6 +1,6 @@
 #include "include/huffman_coding.h"
 
-int main(int argc, char *argv[]) {
+int main_(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
 
 	int proc_number;
@@ -24,6 +24,11 @@ int main(int argc, char *argv[]) {
 	addLogColumn(pid, "N.Characters");
 	addLogColumn(pid, "Time");
 
+	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
+	LinkedListTreeNodeItem* root = NULL;
+	CharEncodingDictionary encodingDict = {.number_of_chars = 0, .charEncoding = NULL};
+	EncodingText encodingText = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
+
 	takeTime(pid);
 
 	char *text = NULL;
@@ -38,100 +43,114 @@ int main(int argc, char *argv[]) {
 	addLogData(pid, intToString(proc_number));
 	addLogData(pid, intToString(processes_text_length));
 
-	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
-
-	CharEncodingDictionary encodingsDict = {.number_of_chars = allChars.number_of_chars, .charEncoding = NULL};
-	LinkedListTreeNodeItem* root = NULL;
-	EncodingText encodingText = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
 
 	// send the character frequencies to the master process
 	if (pid != 0) {
-		int bufferSize = 0;
-		BYTE *buffer = getMessage(&allChars, MSG_DICTIONARY, &bufferSize);
-		if (buffer != NULL && bufferSize > 0)
-			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-		else {
-			fprintf(stderr, "Process %d: Error while sending %s message to the master process\n", pid, getMsgName(MSG_DICTIONARY));
-			return 2;
+		MsgHeader header = {.id = MSG_DICTIONARY, .size = 0};
+		BYTE *buffer = getMessage(&header, &allChars);
+
+		if (buffer == NULL || header.size <= 0) {
+			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
+			return 1;
 		}
 
+		MPI_Send(buffer, header.size, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+
 		freeBuffer(buffer);
-	} else { // receive the character frequencies from the other processes
+	} else { // receive the character frequencies dictionary from the other processes
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
-			int bufferSize = 0;
+			CharFreqDictionary rcvCharFreq = {.number_of_chars = 0, .charFreqs = NULL};
+			MsgProbe probe = {.header.id = MSG_DICTIONARY, .header.size = 0, .pid = i, .tag = 0};
+			BYTE *buffer = prepareForReceive(&probe, &status);
 
-			BYTE *buffer = prepareForReceive(&status, &bufferSize, i, 0);
-			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
+			MPI_Recv(buffer, probe.header.size, MPI_BYTE, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
+			setMessage(&probe.header, &rcvCharFreq, buffer);
 
-			CharFreqDictionary rcvChars = {.number_of_chars = 0, .charFreqs = NULL};
-			setMessage(&rcvChars, buffer);
+			mergeCharFreqs(&allChars, &rcvCharFreq, LAST_R);
 
-			mergeCharFreqs(&allChars, rcvChars.charFreqs, rcvChars.number_of_chars, LAST_R);
-
-			freeBuffer(rcvChars.charFreqs);
 			freeBuffer(buffer);
+			freeBuffer(rcvCharFreq.charFreqs);
 		}
 
 		sortCharFreqs(&allChars);
 
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);
-		getEncodingFromTree(&encodingsDict, &allChars, root->item);
 
-		// send the complete encoding table to each process
-		int bufferSize = 0;
-		BYTE *buffer = getMessage(&encodingsDict, MSG_ENCODING_DICTIONARY, &bufferSize);
-		if (buffer != NULL && bufferSize > 0)
-			for (int i = 1; i < proc_number; i++)
-				MPI_Send(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD);
-		else {
-			fprintf(stderr, "Process %d: Error while sending %s message to the slave processes\n", pid, getMsgName(MSG_ENCODING_DICTIONARY));
-			return 2;
-		}
-
-		freeBuffer(buffer);
-
-		// encode the text for process 0
-		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
+		// creates the encoding dictionary
+		getEncodingFromTree(&encodingDict, &allChars, root->item);
 	}
 
-	// each process receives the encoding dictionary 
-	// and encodes its portion of the text 
-	// then sends the encoded text to the master process
-	if (pid != 0) {
-		MPI_Status status;
-		int bufferSize = 0;
-
-		BYTE *buffer = prepareForReceive(&status, &bufferSize, 0, 0);
-		MPI_Recv(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD, &status);
-
-		setMessage(&encodingsDict, buffer);
-
-		freeBuffer(buffer);
-
-		encodeStringToByteArray(&encodingText, &encodingsDict, text, processes_text_length);
-
-		// send to master process the encoded text
-		bufferSize = 0;
-		buffer = getMessage(&encodingText, MSG_ENCODING_TEXT, &bufferSize);
-
-		if (buffer != NULL && bufferSize > 0)
-			MPI_Send(buffer, bufferSize, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
-		else {
-			fprintf(stderr, "Process %d: Error while sending %s message to the master process\n", pid, getMsgName(MSG_ENCODING_TEXT));
-			return 2;
-		}
-
-		freeBuffer(buffer);
-	}
-
-	// master process receives the encoded text from each process
-	// and writes it to the file
+	// send the complete encoding table to each process
 	if (pid == 0) {
-		// write an empty header to the file
-		FileHeader fileHeader = {.byteStartOfDimensionArray = 0};
+		MsgHeader header = {.id = MSG_ENCODING_DICTIONARY, .size = 0};
+		BYTE *buffer = getMessage(&header, &encodingDict);
+
+		if (buffer == NULL || header.size <= 0) {
+			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
+			return 1;
+		}
+
+		for (int i = 1; i < proc_number; i++)
+			MPI_Send(buffer, header.size, MPI_BYTE, i, 0, MPI_COMM_WORLD);
+
+		freeBuffer(buffer);
+	} else {
+		MPI_Status status;
+		MsgProbe probe = {.header.id = MSG_ENCODING_DICTIONARY, .header.size = 0, .pid = 0, .tag = 0};
+		BYTE *buffer = prepareForReceive(&probe, &status);
+
+		MPI_Recv(buffer, probe.header.size, MPI_BYTE, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
+		setMessage(&probe.header, &encodingDict, buffer);
+
+		freeBuffer(buffer);
+	}
+
+ 	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
+
+	// send the encoded text to the master process
+	if (pid != 0) {
+		MsgHeader header = {.id = MSG_ENCODING_TEXT, .size = 0};
+		BYTE *buffer = getMessage(&header, &encodingText);
+
+		if (buffer == NULL || header.size <= 0) {
+			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
+			return 1;
+		}
+
+		MPI_Send(buffer, header.size, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+
+		freeBuffer(buffer);
+	} else { // receive the encoded text from each process and store in unique buffer
+		for (int i = 1; i < proc_number; i++) {
+			MPI_Status status;
+			EncodingText rcvEncTxt = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
+			MsgProbe probe = {.header.id = MSG_ENCODING_TEXT, .header.size = 0, .pid = i, .tag = 0};
+			BYTE *buffer = prepareForReceive(&probe, &status);
+
+			MPI_Recv(buffer, probe.header.size, MPI_BYTE, probe.pid, 0, MPI_COMM_WORLD, &status);
+			setMessage(&probe.header, &rcvEncTxt, buffer);
+
+			mergeEncodedText(&encodingText, &rcvEncTxt);
+
+			freeBuffer(buffer);
+			freeBuffer(rcvEncTxt.dimensions);
+			freeBuffer(rcvEncTxt.encodedText);
+		}
+	}
+
+	// master process writes data into file
+	if (pid == 0) {\
+
+		// convert tree into a suitable form for writing to file
+		int byteSizeOfTree;
+		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
+		int nodes = countTreeNodes(root->item);
+
+		// write the header
+		FileHeader fileHeader = {.byteStartOfDimensionArray = sizeof(FileHeader) + byteSizeOfTree + encodingText.nr_of_bytes};
 		BYTE *startPos = (BYTE*)&fileHeader;
 		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B, 0);
 		
@@ -140,47 +159,17 @@ int main(int argc, char *argv[]) {
 			printf("Encoded arrayPosStartPos: %d\n", fileHeader.byteStartOfDimensionArray);
 		}
 
-		// write the encoded tree to the file
-		int byteSizeOfTree;
-		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
+		// write the huffman tree
 		writeBufferToFile(ENCODED_FILE, encodedTree, byteSizeOfTree, APPEND_B, 0);
 
-		if (DEBUG(pid))
-			printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
-
-		int nodes = countTreeNodes(root->item);
-
 		if (DEBUG(pid)) {
+			printf("Encoded tree size: %d\n", getByteSizeOfTree(root->item));
 			printf("Huffman tree nodes number: %d\n", nodes);
 			printHuffmanTree(root->item, 0);
 		}
 
-		// receive the encoded text from each process
-		// store in unique buffer
-		for (int i = 1; i < proc_number; i++) {
-			MPI_Status status;
-			int bufferSize = 0;
-
-			BYTE *buffer = prepareForReceive(&status, &bufferSize, i, 0);
-			MPI_Recv(buffer, bufferSize, MPI_BYTE, i, 0, MPI_COMM_WORLD, &status);
-
-			EncodingText temp;
-			setMessage(&temp, buffer);
-
-			// not sure if this leaves spaces between bytes... probably yes
-			// but we may make it work with the block sizes
-			mergeEncodedText(&encodingText, &temp);
-
-			if (DEBUG(pid))
-				printf("Number of bytes: %d\n", encodingText.nr_of_bytes);
-
-			freeBuffer(temp.dimensions);
-			freeBuffer(temp.encodedText);
-			freeBuffer(buffer);
-		}
-
 		writeBufferToFile(ENCODED_FILE, encodingText.encodedText, encodingText.nr_of_bytes, APPEND_B, 0);
-		
+
 		if (DEBUG(pid))
 			printf("Encoded text size: %d\n", encodingText.nr_of_bytes);
 
@@ -191,14 +180,7 @@ int main(int argc, char *argv[]) {
 			printf("Dimensions array size: %ld\n", encodingText.nr_of_dim * sizeof(unsigned short));
 			for (int i = 0; i < encodingText.nr_of_dim; i++)
 				printf("\tdimension[%d] = %d\n", i, encodingText.dimensions[i]);
-			
-			// printEncodedText(encodingText.encodedText, encodingText.nr_of_bytes);
-			// printf("\n");
 		}
-
-		fileHeader.byteStartOfDimensionArray = sizeof(FileHeader) + byteSizeOfTree + encodingText.nr_of_bytes;
-		startPos = (BYTE*)&fileHeader;
-		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B_AT, 0);
 
 		if (DEBUG(pid)) {
 			printf("Total number of blocks: %d\n", encodingText.nr_of_dim);
@@ -214,14 +196,15 @@ int main(int argc, char *argv[]) {
 	float time = getTime(pid, "Time elapsed");
 	addLogData(pid, floatToString(time));
 
-	freeBuffer(encodingText.dimensions);
-	freeBuffer(encodingText.encodedText);
 	freeLinkedList(root);
 
-	for (int i = 0; i < encodingsDict.number_of_chars; i++)
-		freeBuffer(encodingsDict.charEncoding[i].encoding);
+	for (int i = 0; i < encodingDict.number_of_chars; i++)
+		freeBuffer(encodingDict.charEncoding[i].encoding);
 
-	freeBuffer(encodingsDict.charEncoding);
+	freeBuffer(encodingDict.charEncoding);
+
+	freeBuffer(encodingText.dimensions);
+	freeBuffer(encodingText.encodedText);
 
 	freeBuffer(text);
 	freeBuffer(allChars.charFreqs);

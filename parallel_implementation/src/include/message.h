@@ -13,14 +13,18 @@ enum Messages {
     MSG_TEXT = 3,
 };
 
+#ifdef MPI_TYPE_VERSION
+static const int MSG_DICTIONARY_SIZE = 2;
+static const int MSG_ENCODING_DICTIONARY_SIZE = 2;
+static const int MSG_ENCODING_TEXT_SIZE = 2;
+static const int MSG_TEXT_SIZE = 1;
+#endif
+
+#ifdef BYTE_TYPE_VERSION
 typedef struct MsgHeader {
-    int id; // messaget type
+    int id; // message id
     int size; // size of the message in bytes
 } MsgHeader;
-
-typedef struct MsgGeneric {
-    MsgHeader header;
-} MsgGeneric;
 
 typedef struct MsgCharFreqDictionary {
     MsgHeader header;
@@ -36,8 +40,8 @@ typedef struct MsgCharEncodingDictionary {
 
 typedef struct MsgEncodingText {
     MsgHeader header;
-    int nrOfPos;
-    int nrOfBytes;
+    unsigned int nrOfPos;
+    unsigned int nrOfBytes;
     short *positions;
     BYTE *text;
 } MsgEncodingText;
@@ -48,21 +52,40 @@ typedef struct MsgText {
     BYTE *text;
 } MsgText;
 
-BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary *dict, int *bufferSize);
-void deserializeMsgCharFreqDictionary(CharFreqDictionary *dict, BYTE *buffer);
+BYTE* serializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict);
+void deserializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict, BYTE *buffer);
+#endif
 
-BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, int *bufferSize);
-void deserializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, BYTE *buffer);
+#ifdef MPI_TYPE_VERSION
+typedef struct MsgHeader {
+    int id; // message id
+    int size; // size of the message in bytes
+    MPI_Datatype *type; // message type
+    int position; // position in the buffer
+} MsgHeader ;
 
-BYTE *serializeMsgEncodingText(EncodingText *data, int *bufferSize);
-void deserializeMsgEncodingText(EncodingText *data, BYTE *buffer);
+extern void buildDatatype(int msgId, MPI_Datatype *type);
+void buildCharFreqDictionaryType(MPI_Datatype *charFrecDictType);
+void buildCharEncodingDictionaryType(MPI_Datatype *charEncDictType);
+#endif
 
-BYTE *serializeMsgText(char *data, int *bufferSize);
-void deserializeMsgText(DecodingText *decodedText, BYTE *buffer);
+typedef struct MsgProbe {
+    MsgHeader header;
+    int pid;
+    int tag;
+} MsgProbe;
 
-extern BYTE* prepareForReceive(MPI_Status *status, int *bufferSize, int pid, int tag);
+BYTE* serializeMsgCharFreqDictionary(MsgHeader *header, CharFreqDictionary *dict);
+void deserializeMsgCharFreqDictionary(MsgHeader *header, CharFreqDictionary *dict, BYTE *buffer);
 
-extern BYTE* getMessage(void *data, int msgType, int *bufferSize);
-extern void setMessage(void *data, BYTE *buffer);
+BYTE *serializeMsgEncodingText(MsgHeader *header, EncodingText *encodingText);
+void deserializeMsgEncodingText(MsgHeader *header, EncodingText *encodingText, BYTE *buffer);
+
+BYTE *serializeMsgText(MsgHeader *header, char *text);
+void deserializeMsgText(MsgHeader *header, DecodingText *decodedText, BYTE *buffer);
+
+extern BYTE* getMessage(MsgHeader *header, void *data);
+extern void setMessage(MsgHeader *header, void *data, BYTE *buffer);
+extern BYTE* prepareForReceive(MsgProbe *probe, MPI_Status *status);
 
 extern char* getMsgName(int msgType);
