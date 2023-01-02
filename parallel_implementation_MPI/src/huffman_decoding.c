@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 	fclose(fp);
 
 	if (pid != 0) {
-		MsgHeader header = {.id = MSG_TEXT, .size = 0};
+		MsgHeader header = {.id = MSG_TEXT, .size = 0, .type = NULL, .position = 0};
 		BYTE *buffer = getMessage(&header, decodedText);
 
 		if (buffer == NULL || header.size <= 0) {
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 
-		MPI_Send(buffer, header.size, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+		MPI_Send(buffer, header.position, MPI_PACKED, 0, 0, MPI_COMM_WORLD);
 
 		freeBuffer(buffer);
 	} else {
@@ -142,11 +142,11 @@ int main(int argc, char *argv[]) {
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
 			DecodingText rcvText = {.length = 0, .decodedText = NULL};
-			MsgProbe probe = {.header.id = MSG_TEXT, .header.size = 0, .pid = i, .tag = 0};
+			MsgProbe probe = {.header.id = MSG_TEXT, .header.size = 0, .header.type = NULL, .header.position = 0, .pid = i, .tag = 0};
 
 			BYTE *buffer = prepareForReceive(&probe, &status);
 
-			MPI_Recv(buffer, probe.header.size, MPI_BYTE, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
+			MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
 			setMessage(&probe.header, &rcvText, buffer);
 
 			mergeDecodedText(&decodingText, &rcvText);

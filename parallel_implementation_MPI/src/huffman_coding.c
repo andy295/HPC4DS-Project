@@ -45,9 +45,12 @@ int main(int argc, char *argv[]) {
 
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
 
+	MPI_Datatype charFreqDictType;
+	buildDatatype(MSG_DICTIONARY, &charFreqDictType);
+
 	// send the character frequencies to the master process
 	if (pid != 0) {
-		MsgHeader header = {.id = MSG_DICTIONARY, .size = 0};
+		MsgHeader header = {.id = MSG_DICTIONARY, .size = 0, .type = &charFreqDictType, .position = 0};
 		BYTE *buffer = getMessage(&header, &allChars);
 
 		if (buffer == NULL || header.size <= 0) {
@@ -55,17 +58,17 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 
-		MPI_Send(buffer, header.size, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+		MPI_Send(buffer, header.position, MPI_PACKED, 0, 0, MPI_COMM_WORLD);
 
 		freeBuffer(buffer);
 	} else { // receive the character frequencies dictionary from the other processes
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
 			CharFreqDictionary rcvCharFreq = {.number_of_chars = 0, .charFreqs = NULL};
-			MsgProbe probe = {.header.id = MSG_DICTIONARY, .header.size = 0, .pid = i, .tag = 0};
+			MsgProbe probe = {.header.id = MSG_DICTIONARY, .header.size = 0, .header.type = &charFreqDictType, .header.position = 0, .pid = i, .tag = 0};
 			BYTE *buffer = prepareForReceive(&probe, &status);
 
-			MPI_Recv(buffer, probe.header.size, MPI_BYTE, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
+			MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
 			setMessage(&probe.header, &rcvCharFreq, buffer);
 
 			mergeCharFreqs(&allChars, &rcvCharFreq, LAST_R);
@@ -83,36 +86,33 @@ int main(int argc, char *argv[]) {
 		getEncodingFromTree(&encodingDict, &allChars, root->item);
 	}
 
-	// send the complete encoding table to each process
-	if (pid == 0) {
-		MsgHeader header = {.id = MSG_ENCODING_DICTIONARY, .size = 0};
-		BYTE *buffer = getMessage(&header, &encodingDict);
+	MPI_Type_free(&charFreqDictType);
 
-		if (buffer == NULL || header.size <= 0) {
-			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
-			return 1;
-		}
+	MPI_Datatype charEncDictType;
+	buildDatatype(MSG_ENCODING_DICTIONARY, &charEncDictType);
 
-		for (int i = 1; i < proc_number; i++)
-			MPI_Send(buffer, header.size, MPI_BYTE, i, 0, MPI_COMM_WORLD);
+	// send/receive the complete encoding table
+	MPI_Bcast(&encodingDict.number_of_chars , 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-		freeBuffer(buffer);
-	} else {
-		MPI_Status status;
-		MsgProbe probe = {.header.id = MSG_ENCODING_DICTIONARY, .header.size = 0, .pid = 0, .tag = 0};
-		BYTE *buffer = prepareForReceive(&probe, &status);
+	if (pid != 0)
+		encodingDict.charEncoding = calloc(encodingDict.number_of_chars, sizeof(CharEncoding));
 
-		MPI_Recv(buffer, probe.header.size, MPI_BYTE, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
-		setMessage(&probe.header, &encodingDict, buffer);
+	for (int i = 0; i < encodingDict.number_of_chars; i++) {
+		MPI_Bcast(&encodingDict.charEncoding[i], 1, charEncDictType, 0, MPI_COMM_WORLD);
 
-		freeBuffer(buffer);
+		if (pid != 0)
+			encodingDict.charEncoding[i].encoding = calloc(encodingDict.charEncoding[i].length, sizeof(char));
+
+		MPI_Bcast(encodingDict.charEncoding[i].encoding, encodingDict.charEncoding[i].length, MPI_CHAR, 0, MPI_COMM_WORLD);
 	}
+
+	MPI_Type_free(&charEncDictType);
 
  	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
 
 	// send the encoded text to the master process
 	if (pid != 0) {
-		MsgHeader header = {.id = MSG_ENCODING_TEXT, .size = 0};
+		MsgHeader header = {.id = MSG_ENCODING_TEXT, .size = 0, .type = NULL, .position = 0};
 		BYTE *buffer = getMessage(&header, &encodingText);
 
 		if (buffer == NULL || header.size <= 0) {
@@ -120,17 +120,17 @@ int main(int argc, char *argv[]) {
 			return 1;
 		}
 
-		MPI_Send(buffer, header.size, MPI_BYTE, 0, 0, MPI_COMM_WORLD);
+		MPI_Send(buffer, header.position, MPI_PACKED, 0, 0, MPI_COMM_WORLD);
 
 		freeBuffer(buffer);
 	} else { // receive the encoded text from each process and store in unique buffer
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
 			EncodingText rcvEncTxt = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
-			MsgProbe probe = {.header.id = MSG_ENCODING_TEXT, .header.size = 0, .pid = i, .tag = 0};
+			MsgProbe probe = {.header.id = MSG_ENCODING_TEXT, .header.size = 0, .header.type = NULL, .header.position = 0, .pid = i, .tag = 0};
 			BYTE *buffer = prepareForReceive(&probe, &status);
 
-			MPI_Recv(buffer, probe.header.size, MPI_BYTE, probe.pid, 0, MPI_COMM_WORLD, &status);
+			MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, 0, MPI_COMM_WORLD, &status);
 			setMessage(&probe.header, &rcvEncTxt, buffer);
 
 			mergeEncodedText(&encodingText, &rcvEncTxt);
@@ -142,12 +142,12 @@ int main(int argc, char *argv[]) {
 	}
 
 	// master process writes data into file
-	if (pid == 0) {\
+	if (pid == 0) {
 
 		// convert tree into a suitable form for writing to file
 		int byteSizeOfTree;
 		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
-		int nodes = countTreeNodes(root->item);
+		int nodes = countTreeNodes(root->item);		
 
 		// write the header
 		FileHeader fileHeader = {.byteStartOfDimensionArray = sizeof(FileHeader) + byteSizeOfTree + encodingText.nr_of_bytes};
