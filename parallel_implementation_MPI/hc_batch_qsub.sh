@@ -6,4 +6,4 @@
 
 module load mpich-3.2
 
-mpirun.actual ./HPC4DS-Project/parallel_implementation/output/huffman_coding
+mpirun.actual ./HPC4DS-Project/parallel_implementation_MPI/output/huffman_coding 2

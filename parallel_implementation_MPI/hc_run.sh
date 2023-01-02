@@ -7,18 +7,18 @@
 # set execution queu
 #PBS -q short_cpuQ
 
-touch parallel_implementation/output/reference.txt
+touch parallel_implementation_MPI/output/reference.txt
 
-if [ -z parallel_implementation/output/out ]; then 
-	rm parallel_implementation/output/out
+if [ -z parallel_implementation_MPI/output/out ]; then 
+	rm parallel_implementation_MPI/output/out
 fi
 
-qsub -q short_cpuQ -l walltime=0:01:00 -o parallel_implementation/output/out -e parallel_implementation/output/err ./parallel_implementation/hc_qsub.sh
+qsub -q short_cpuQ -l walltime=0:01:00 -o parallel_implementation_MPI/output/out -e parallel_implementation_MPI/output/err ./parallel_implementation_MPI/hc_qsub.sh
 
-while ! test parallel_implementation/output/out -nt parallel_implementation/output/reference.txt; do
+while ! test parallel_implementation_MPI/output/out -nt parallel_implementation_MPI/output/reference.txt; do
 	sleep 3; 
 done
 
-rm parallel_implementation/output/reference.txt
+rm parallel_implementation_MPI/output/reference.txt
 
-cat parallel_implementation/output/out
+cat parallel_implementation_MPI/output/out
