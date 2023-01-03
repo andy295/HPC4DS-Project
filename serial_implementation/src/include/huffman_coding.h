@@ -11,5 +11,3 @@
 #include "../utils/time_utils.h"
 #include "../utils/data_logger.h"
 #include "../utils/conversion_utils.h"
-
-extern int huffman_coding();

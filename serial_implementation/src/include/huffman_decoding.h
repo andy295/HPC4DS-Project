@@ -11,5 +11,3 @@
 
 void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int *end);
 int roundUp(int numToRound, int multiple);
-
-extern int huffman_decoding();
