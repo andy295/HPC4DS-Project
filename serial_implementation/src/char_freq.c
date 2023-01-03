@@ -23,21 +23,30 @@ void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int p
 	}
 }
 
-void sortCharFreqs(CharFreqDictionary *res) {
-	for (int i = 0; i < res->number_of_chars; i++) {
-		CharFreq minCharFreq = res->charFreqs[i];
-		int indexOfMin = i;  
-		for (int j = i; j < res->number_of_chars; j++) {
-			if (minCharFreq.frequency > res->charFreqs[j].frequency) {
-				minCharFreq = res->charFreqs[j]; 
-				indexOfMin = j; 
-			}
-		}
+void oddEvenSort(CharFreqDictionary *res) {
+    int phase;
+    int i;
+    CharFreq tmp = {.character = 0, .frequency = 0};
 
-		CharFreq temp = res->charFreqs[i]; 
-		res->charFreqs[i] = minCharFreq;
-		res->charFreqs[indexOfMin] = temp;
-	}
+    for (phase = 0; phase < res->number_of_chars; phase++) {
+        if (phase % 2 == 0) {
+            for (i = 1; i < res->number_of_chars; i += 2) {
+                if (res->charFreqs[i-1].frequency > res->charFreqs[i].frequency) {
+                    tmp = res->charFreqs[i-1]; 
+                    res->charFreqs[i-1] = res->charFreqs[i];
+                    res->charFreqs[i] = tmp;
+                }
+            }
+        } else {
+             for (i = 1; i < res->number_of_chars - 1; i += 2) {
+                if (res->charFreqs[i].frequency > res->charFreqs[i+1].frequency) {
+                    tmp = res->charFreqs[i+1]; 
+                    res->charFreqs[i+1] = res->charFreqs[i];
+                    res->charFreqs[i] = tmp;
+                }
+            }
+        }
+    }
 }
 
 void appendToCharFreqs(CharFreqDictionary *dict, CharFreq *charFreq, int pos) {

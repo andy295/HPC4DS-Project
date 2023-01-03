@@ -36,7 +36,7 @@ int huffman_coding() {
 
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
 
-	sortCharFreqs(&allChars);
+	oddEvenSort(&allChars);
 
 	// creates the huffman tree
 	root = createHuffmanTree(&allChars);

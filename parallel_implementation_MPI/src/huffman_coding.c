@@ -77,7 +77,7 @@ int main(int argc, char *argv[]) {
 			freeBuffer(rcvCharFreq.charFreqs);
 		}
 
-		sortCharFreqs(&allChars);
+		oddEvenSort(&allChars);
 
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);

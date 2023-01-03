@@ -85,14 +85,14 @@ void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int p
 // 	}
 // }
 
-void sortCharFreqs(CharFreqDictionary *res) {
+void oddEvenSort(CharFreqDictionary *res) {
     int phase = 0;
     int i = 0;
     CharFreq tmp = {.character = 0, .frequency = 0};
 
     #pragma omp parallel num_threads(omp_get_max_threads()) default(none) shared(res) firstprivate(phase, i, tmp)
     for (phase = 0; phase < res->number_of_chars; phase++) {
-        if (phase % 2 == 0) 
+        if (phase % 2 == 0) {
             #pragma omp for
             for (i = 1; i < res->number_of_chars; i += 2) {
                 if (res->charFreqs[i-1].frequency > res->charFreqs[i].frequency) {
@@ -101,7 +101,7 @@ void sortCharFreqs(CharFreqDictionary *res) {
                     res->charFreqs[i] = tmp;
                 }
             }
-        else
+        } else {
             #pragma omp for
             for (i = 1; i < res->number_of_chars - 1; i += 2) {
                 if (res->charFreqs[i].frequency > res->charFreqs[i+1].frequency) {
@@ -110,6 +110,7 @@ void sortCharFreqs(CharFreqDictionary *res) {
                     res->charFreqs[i] = tmp;
                 }
             }
+        }
     }
 }
 
