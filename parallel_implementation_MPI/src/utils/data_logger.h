@@ -5,13 +5,13 @@
 #include "file_utils.h"
 
 typedef struct Logger {
-    char *DataLogHeader;
+    char *dataLogHeader;
     int itemsInHeader;
 
-    char *DataLogRow;
+    char *dataLogRow;
     int itemsInRow;
 
-    int DataLoggerReferenceProcess;
+    int dataLoggerReferenceProcess;
 
     bool active;
 } Logger;

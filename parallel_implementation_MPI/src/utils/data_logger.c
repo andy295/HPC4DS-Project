@@ -5,12 +5,12 @@ static const int MAX_DATA_LOGGER_ROW_SIZE = 1000;
 Logger logger = { NULL, 0, NULL, 0, 0, false};
 
 void initDataLogger(int pid, bool enable) {
-    logger.DataLoggerReferenceProcess = pid;
+    logger.dataLoggerReferenceProcess = pid;
     logger.active = enable;
 
     if (enable) {
-        logger.DataLogHeader = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
-        logger.DataLogRow = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
+        logger.dataLogHeader = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
+        logger.dataLogRow = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
 
         addLogColumn(pid, "N.Processes");
         addLogColumn(pid, "N.Threads");
@@ -19,16 +19,16 @@ void initDataLogger(int pid, bool enable) {
     }
 }
 void addLogColumn(int pid, const char *name) {
-    if (pid != logger.DataLoggerReferenceProcess)
+    if (pid != logger.dataLoggerReferenceProcess)
         return;
 
     logger.itemsInHeader++;
-    strcat(logger.DataLogHeader, name);
-    strcat(logger.DataLogHeader, ",");
+    strcat(logger.dataLogHeader, name);
+    strcat(logger.dataLogHeader, ",");
 }
 
 void addLogData(int pid, char *data) {
-    if (pid != logger.DataLoggerReferenceProcess)
+    if (pid != logger.dataLoggerReferenceProcess)
         return;
 
     if (data == NULL) {
@@ -36,8 +36,8 @@ void addLogData(int pid, char *data) {
         return;
     }
 
-    strcat(logger.DataLogRow, data);
-    strcat(logger.DataLogRow, ",");
+    strcat(logger.dataLogRow, data);
+    strcat(logger.dataLogRow, ",");
 
     logger.itemsInRow++;
     if (logger.itemsInRow == logger.itemsInHeader) {
@@ -63,11 +63,11 @@ void saveRowToFile(char *filename) {
 
     int indexOfFile = getNumberOfLines(fp);
     if (indexOfFile == 0) {
-        fprintf(fp, "%s,%s\n", "Index", logger.DataLogHeader);
+        fprintf(fp, "%s,%s\n", "Index", logger.dataLogHeader);
         indexOfFile++;
     }
 
-    fprintf(fp, "%i,%s\n", indexOfFile, logger.DataLogRow);
+    fprintf(fp, "%i,%s\n", indexOfFile, logger.dataLogRow);
     fclose(fp);
 }
 
@@ -77,7 +77,7 @@ void setDataLoggerReferenceProcess(int pid) {
         initDataLogger(pid, true);
     }
     else
-        logger.DataLoggerReferenceProcess = pid;
+        logger.dataLoggerReferenceProcess = pid;
 }
 
 void terminateDataLogger() {
@@ -85,6 +85,6 @@ void terminateDataLogger() {
         return;
 
     logger.active = false;
-    freeBuffer(logger.DataLogHeader);
-    freeBuffer(logger.DataLogRow);
+    freeBuffer(logger.dataLogHeader);
+    freeBuffer(logger.dataLogRow);
 }
