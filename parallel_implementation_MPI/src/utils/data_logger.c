@@ -1,39 +1,52 @@
 #include "data_logger.h"
 
-void initDataLogger() {
-    DataLoggerReferenceProcess = 0; 
-    
-    itemsInHeader = 0;
-    itemsInRow = 0;
+static const int MAX_DATA_LOGGER_ROW_SIZE = 1000;
 
-    MAX_DATA_LOGGER_ROW_SIZE = 1000;
+Logger logger = { NULL, 0, NULL, 0, 0, false};
 
-    DataLogHeader = (char*)malloc(MAX_DATA_LOGGER_ROW_SIZE * sizeof(char));
-    DataLogRow = (char*)malloc(MAX_DATA_LOGGER_ROW_SIZE * sizeof(char));
+void initDataLogger(int pid, bool enable) {
+    logger.DataLoggerReferenceProcess = pid;
+    logger.active = enable;
+
+    if (enable) {
+        logger.DataLogHeader = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
+        logger.DataLogRow = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
+
+        addLogColumn(pid, "N.Processes");
+        addLogColumn(pid, "N.Threads");
+        addLogColumn(pid, "N.Characters");
+        addLogColumn(pid, "Time");
+    }
 }
-
 void addLogColumn(int pid, const char *name) {
-    if (pid != DataLoggerReferenceProcess)
+    if (pid != logger.DataLoggerReferenceProcess)
         return;
 
-    itemsInHeader++;
-    strcat(DataLogHeader, name);
-    strcat(DataLogHeader, ",");
+    logger.itemsInHeader++;
+    strcat(logger.DataLogHeader, name);
+    strcat(logger.DataLogHeader, ",");
 }
 
-void addLogData(int pid, const char *data) {
-    if (pid != DataLoggerReferenceProcess)
+void addLogData(int pid, char *data) {
+    if (pid != logger.DataLoggerReferenceProcess)
         return;
 
-    strcat(DataLogRow, data);
-    strcat(DataLogRow, ",");
+    if (data == NULL) {
+        fprintf(stderr, "Error: invalid log data value\n");
+        return;
+    }
 
-    itemsInRow++;
-    if (itemsInRow == itemsInHeader) {
-        itemsInRow = 0;
+    strcat(logger.DataLogRow, data);
+    strcat(logger.DataLogRow, ",");
+
+    logger.itemsInRow++;
+    if (logger.itemsInRow == logger.itemsInHeader) {
+        logger.itemsInRow = 0;
 
         saveRowToFile(DATA_LOGGER_FILE);
     }
+
+    freeBuffer(data);
 }
 
 void saveRowToFile(char *filename) {        
@@ -50,14 +63,28 @@ void saveRowToFile(char *filename) {
 
     int indexOfFile = getNumberOfLines(fp);
     if (indexOfFile == 0) {
-        fprintf(fp, "%s,%s\n", "Index", DataLogHeader);
+        fprintf(fp, "%s,%s\n", "Index", logger.DataLogHeader);
         indexOfFile++;
     }
 
-    fprintf(fp, "%i,%s\n", indexOfFile, DataLogRow);
+    fprintf(fp, "%i,%s\n", indexOfFile, logger.DataLogRow);
     fclose(fp);
 }
 
 void setDataLoggerReferenceProcess(int pid) {
-    DataLoggerReferenceProcess = pid;
+    if(!logger.active) {
+        logger.active = true;
+        initDataLogger(pid, true);
+    }
+    else
+        logger.DataLoggerReferenceProcess = pid;
+}
+
+void terminateDataLogger(int pid) {
+    if (!logger.active)
+        return;
+
+    logger.active = false;
+    freeBuffer(logger.DataLogHeader);
+    freeBuffer(logger.DataLogRow);
 }
