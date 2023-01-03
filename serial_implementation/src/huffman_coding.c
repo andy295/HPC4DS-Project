@@ -1,6 +1,6 @@
 #include "include/huffman_coding.h"
 
-int huffman_coding() {
+int main() {
 	MPI_Init(NULL, NULL);
 
 	int proc_number;

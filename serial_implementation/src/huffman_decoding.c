@@ -46,7 +46,7 @@ void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int
 		++(*end);
 }
 
-int huffman_decoding() {
+int main() {
 	MPI_Init(NULL, NULL);
 
 	int proc_number;
