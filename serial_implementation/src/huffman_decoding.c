@@ -103,7 +103,7 @@ int huffman_decoding() {
 	int startPos = (sizeof(FileHeader) * FILE_HEADER_ELEMENTS) + treeByteSize;
 	startPos += (pid != 0) ? calculatePrevTextSize(dimensions, start) : 0;
 
-	char *decodedText = decodeFromFile(
+	decodingText.decodedText = decodeFromFile(
 		startPos,
 		dimensions,
 		start,
@@ -113,7 +113,7 @@ int huffman_decoding() {
 
 	fclose(fp);
 
-	printf("\nDecoded text:\n%s\n", decodingText.decodedText);
+	printf("Decoded text:\n%s\n", decodingText.decodedText);
 	takeTime(pid);
 	printTime(pid, "Time elapsed");
 	// saveTime(pid, LOG_FILE, "Time elapsed");

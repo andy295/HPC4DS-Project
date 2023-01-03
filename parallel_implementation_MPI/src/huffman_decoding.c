@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
 	int startPos = (sizeof(FileHeader) * FILE_HEADER_ELEMENTS) + treeByteSize;
 	startPos += (pid != 0) ? calculatePrevTextSize(dimensions, start) : 0;
 
-	char *decodedText = decodeFromFile(
+	decodingText.decodedText = decodeFromFile(
 		startPos,
 		dimensions,
 		start,
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
 
 	if (pid != 0) {
 		MsgHeader header = {.id = MSG_TEXT, .size = 0, .type = NULL, .position = 0};
-		BYTE *buffer = getMessage(&header, decodedText);
+		BYTE *buffer = getMessage(&header, decodingText.decodedText);
 
 		if (buffer == NULL || header.size <= 0) {
 			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
@@ -136,8 +136,7 @@ int main(int argc, char *argv[]) {
 
 		freeBuffer(buffer);
 	} else {
-		decodingText.length = strlen(decodedText) + 1;
-		decodingText.decodedText = decodedText;
+		decodingText.length = strlen(decodingText.decodedText) + 1;
 
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
