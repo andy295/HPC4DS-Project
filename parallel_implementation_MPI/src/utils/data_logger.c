@@ -80,7 +80,7 @@ void setDataLoggerReferenceProcess(int pid) {
         logger.DataLoggerReferenceProcess = pid;
 }
 
-void terminateDataLogger(int pid) {
+void terminateDataLogger() {
     if (!logger.active)
         return;
 

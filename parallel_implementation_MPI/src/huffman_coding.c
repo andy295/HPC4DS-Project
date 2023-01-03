@@ -193,6 +193,8 @@ int main(int argc, char *argv[]) {
 	float time = getTime(pid, "Time elapsed");
 	addLogData(pid, floatToString(time));
 
+	terminateDataLogger();
+
 	freeLinkedList(root);
 
 	for (int i = 0; i < encodingDict.number_of_chars; i++)
