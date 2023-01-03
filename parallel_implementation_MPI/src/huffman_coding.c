@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 	addLogColumn(pid, "Time");
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
-	LinkedListTreeNodeItem* root = NULL;
+	LinkedListTreeNodeItem *root = NULL;
 	CharEncodingDictionary encodingDict = {.number_of_chars = 0, .charEncoding = NULL};
 	EncodingText encodingText = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
 
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
 
 	MPI_Type_free(&charEncDictType);
 
- 	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
+	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
 
 	// send the encoded text to the master process
 	if (pid != 0) {
@@ -147,13 +147,13 @@ int main(int argc, char *argv[]) {
 		// convert tree into a suitable form for writing to file
 		int byteSizeOfTree;
 		BYTE* encodedTree = encodeTreeToByteArray(root->item, &byteSizeOfTree);
-		int nodes = countTreeNodes(root->item);		
+		int nodes = countTreeNodes(root->item);
 
 		// write the header
 		FileHeader fileHeader = {.byteStartOfDimensionArray = sizeof(FileHeader) + byteSizeOfTree + encodingText.nr_of_bytes};
 		BYTE *startPos = (BYTE*)&fileHeader;
 		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B, 0);
-		
+
 		if (DEBUG(pid)) {
 			printf("Header size: %lu\n", sizeof(unsigned int) * FILE_HEADER_ELEMENTS);
 			printf("Encoded arrayPosStartPos: %d\n", fileHeader.byteStartOfDimensionArray);
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
 
 		BYTE *dimensions = (BYTE*)encodingText.dimensions;
 		writeBufferToFile(ENCODED_FILE, dimensions, encodingText.nr_of_dim * sizeof(unsigned short), APPEND_B, 0);
-		
+
 		if (DEBUG(pid)) {
 			printf("Dimensions array size: %ld\n", encodingText.nr_of_dim * sizeof(unsigned short));
 			for (int i = 0; i < encodingText.nr_of_dim; i++)

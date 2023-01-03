@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
 
 	int proc_number;
-	int pid; 
+	int pid;
 
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 	DecodingText decodingText = {.length = 0, .decodedText = NULL};
 
 	takeTime(pid);
-	
+
 	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
 	if (fp == NULL) {
 		fprintf(stderr, "Process %d: Error opening file %s\n", pid, ENCODED_FILE);
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 	int start = 0;
 	int end = 0;
 	calculateBlockRange(number_of_blocks, proc_number, pid, &start, &end);
-	
+
 	if (DEBUG(pid))
 		printf("Process %d - Block range: %d - %d - Blocks nr: %d\n", pid, start, end - 1, end - start);
 
