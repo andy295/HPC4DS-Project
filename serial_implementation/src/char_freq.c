@@ -24,12 +24,10 @@ void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int p
 }
 
 void sortCharFreqs(CharFreqDictionary *res) {
-	int i, j;
-
-	for (i = 0; i < res->number_of_chars; i++) {
+	for (int i = 0; i < res->number_of_chars; i++) {
 		CharFreq minCharFreq = res->charFreqs[i];
 		int indexOfMin = i;  
-		for (j = i; j < res->number_of_chars; j++){
+		for (int j = i; j < res->number_of_chars; j++) {
 			if (minCharFreq.frequency > res->charFreqs[j].frequency) {
 				minCharFreq = res->charFreqs[j]; 
 				indexOfMin = j; 
@@ -66,20 +64,20 @@ void appendToCharFreqs(CharFreqDictionary *dict, CharFreq *charFreq, int pos) {
     }
 }
 
-void mergeCharFreqs(CharFreqDictionary *dict, CharFreq *charFreqs, int size, int pos) {
-	for (int i = 0; i < size; i++) {
-		char character = charFreqs[i].character;
-		int frequency = charFreqs[i].frequency;
+void mergeCharFreqs(CharFreqDictionary *dst, CharFreqDictionary *src, int pos) {
+	for (int i = 0; i < src->number_of_chars; i++) {
+		char character = src->charFreqs[i].character;
+		int frequency = src->charFreqs[i].frequency;
 		bool assigned = false;
-		for (int j = 0; j < dict->number_of_chars && !assigned; j++) {
-			if (dict->charFreqs[j].character == character) {
-				dict->charFreqs[j].frequency += frequency;
+		for (int j = 0; j < dst->number_of_chars && !assigned; j++) {
+			if (dst->charFreqs[j].character == character) {
+				dst->charFreqs[j].frequency += frequency;
 				assigned = true;
 			}
 		}
 
 		if (!assigned)
-			appendToCharFreqs(dict, &charFreqs[i], pos);
+			appendToCharFreqs(dst, &src->charFreqs[i], pos);
 	}
 }
 

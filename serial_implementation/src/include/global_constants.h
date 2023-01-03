@@ -6,9 +6,11 @@
 #include <time.h>
 #include <stdbool.h>
 #include <mpi.h>
+#include <omp.h>
 #include <unistd.h> // get current directory
 #include <math.h>
 #include <setjmp.h>
+#include <stddef.h>
 
 // enable only if 1 AND if PID == master, so only prints one time
 #define DEBUG(PID) (0 && PID == 0)
@@ -17,6 +19,7 @@
 #define BITS_IN_BYTE 8 
 #define ENDTEXT '\0'
 #define CHARS_PER_BLOCK 15
+#define MAX_DIGITS 10
 
 #define ENCODED_FILE "HPC4DS-Project/serial_implementation/output/encoded_file"
 #define SRC_FILE "HPC4DS-Project/serial_implementation/text.txt"

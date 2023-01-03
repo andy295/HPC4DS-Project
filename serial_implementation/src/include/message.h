@@ -14,13 +14,9 @@ enum Messages {
 };
 
 typedef struct MsgHeader {
-    int id; // messaget type
+    int id; // message id
     int size; // size of the message in bytes
 } MsgHeader;
-
-typedef struct MsgGeneric {
-    MsgHeader header;
-} MsgGeneric;
 
 typedef struct MsgCharFreqDictionary {
     MsgHeader header;
@@ -36,8 +32,8 @@ typedef struct MsgCharEncodingDictionary {
 
 typedef struct MsgEncodingText {
     MsgHeader header;
-    int nrOfPos;
-    int nrOfBytes;
+    unsigned int nrOfPos;
+    unsigned int nrOfBytes;
     short *positions;
     BYTE *text;
 } MsgEncodingText;
@@ -48,19 +44,19 @@ typedef struct MsgText {
     BYTE *text;
 } MsgText;
 
-BYTE* serializeMsgCharFreqDictionary(CharFreqDictionary *dict, int *bufferSize);
-void deserializeMsgCharFreqDictionary(CharFreqDictionary *dict, BYTE *buffer);
+BYTE* serializeMsgCharFreqDictionary(MsgHeader *header, CharFreqDictionary *dict);
+void deserializeMsgCharFreqDictionary(MsgHeader *header, CharFreqDictionary *dict, BYTE *buffer);
 
-BYTE* serializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, int *bufferSize);
-void deserializeMsgCharEncodingDictionary(CharEncodingDictionary *dict, BYTE *buffer);
+BYTE* serializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict);
+void deserializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict, BYTE *buffer);
 
-BYTE *serializeMsgEncodingText(EncodingText *data, int *bufferSize);
-void deserializeMsgEncodingText(EncodingText *data, BYTE *buffer);
+BYTE *serializeMsgEncodingText(MsgHeader *header, EncodingText *encodingText);
+void deserializeMsgEncodingText(MsgHeader *header, EncodingText *encodingText, BYTE *buffer);
 
-BYTE *serializeMsgText(char *data, int *bufferSize);
-void deserializeMsgText(DecodingText *decodedText, BYTE *buffer);
+BYTE *serializeMsgText(MsgHeader *header, char *text);
+void deserializeMsgText(MsgHeader *header, DecodingText *decodedText, BYTE *buffer);
 
-extern BYTE* getMessage(void *data, int msgType, int *bufferSize);
-extern void setMessage(void *data, BYTE *buffer);
+extern BYTE* getMessage(MsgHeader *header, void *data);
+extern void setMessage(MsgHeader *header, void *data, BYTE *buffer);
 
 extern char* getMsgName(int msgType);
