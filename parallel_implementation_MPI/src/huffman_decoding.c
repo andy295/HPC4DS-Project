@@ -56,8 +56,8 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	int thread_count = strtol(argv[1], NULL, MAX_DIGITS);
-	if (thread_count <= 0) {
+	int thread_count = stringToInt(argv[1]);
+	if (thread_count <= 0 || thread_count > MAX_THREADS) {
 		fprintf(stderr, "Invalid number of threads: %d\n", thread_count);
 		return 1;
 	}

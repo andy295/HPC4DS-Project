@@ -14,16 +14,16 @@ enum Childern {
 };
 
 typedef struct TreeNode_t {
-	int frequency; 
-	char character; 
+	int frequency;
+	char character;
 
-	struct TreeNode_t *leftChild; 
-	struct TreeNode_t *rightChild; 
+	struct TreeNode_t *leftChild;
+	struct TreeNode_t *rightChild;
 } TreeNode;
 
 typedef struct LinkedListTreeNodeItem_t {
-	TreeNode *item; 
-	struct LinkedListTreeNodeItem_t *next; 
+	TreeNode *item;
+	struct LinkedListTreeNodeItem_t *next;
 } LinkedListTreeNodeItem;
 
 typedef struct TreeArrayItem_t {
