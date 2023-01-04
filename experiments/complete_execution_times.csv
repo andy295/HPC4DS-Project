@@ -1,0 +1,10 @@
+Index,Type,Number of Processes,Encoding Time,Decoding Time
+0,serial,1,0.188691,0.047683
+1,parallel_simple,4,0.062545,
+2,parallel_simple,8,,
+3,parallel_simple,16,,
+4,parallel_simple,32,,
+5,parallel_MPI,4,,
+6,parallel_MPI,8,,
+7,parallel_MPI,16,,
+8,parallel_MPI,32,,

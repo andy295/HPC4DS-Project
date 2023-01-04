@@ -12,8 +12,9 @@
 #include <setjmp.h>
 #include <stddef.h>
 
-// enable only if 1 AND if PID == master, so only prints one time
-#define DEBUG(PID) (0 && PID == 0)
+// enable only if DEBUG_ENABLED AND if PID == master, so only prints one time
+#define DEBUG_ENABLED 0
+#define DEBUG(PID) (DEBUG_ENABLED && PID == 0)
 
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 
