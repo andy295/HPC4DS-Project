@@ -25,8 +25,6 @@ int main(int argc, char *argv[]) {
 	CharEncodingDictionary encodingDict = {.number_of_chars = 0, .charEncoding = NULL};
 	EncodingText encodingText = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
 
-	takeTime(pid);
-
 	char *text = NULL;
 	long processes_text_length = readFilePortionForProcess(SRC_FILE, &text, pid, proc_number);
 
