@@ -4,20 +4,25 @@
 
 #include "file_utils.h"
 
-char *DataLogHeader;
-int itemsInHeader;
+typedef struct DataLogger {
+    char *logHeader;
+    int itemsInHeader;
 
-char *DataLogRow; 
-int itemsInRow;
+    char *logRow;
+    int itemsInRow;
 
-int DataLoggerReferenceProcess; 
+    int referenceProcess;
 
-int MAX_DATA_LOGGER_ROW_SIZE;
-
-extern void initDataLogger();
-extern void addLogColumn(int pid, const char *columnName);
-extern void addLogData(int pid, const char *data);
-
-extern void setDataLoggerReferenceProcess(int pid);
+    bool active;
+} DataLogger;
 
 void saveRowToFile(char *filename);
+
+extern void initDataLogger(int pid, bool enable);
+extern void terminateDataLogger();
+
+extern void addLogColumn(int pid, const char *columnName);
+extern void addLogData(int pid, char *data);
+
+extern void setDataLoggerReferenceProcess(int pid);
+extern void enableDataLogger(int pid);

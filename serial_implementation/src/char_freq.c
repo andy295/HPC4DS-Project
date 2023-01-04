@@ -2,14 +2,14 @@
 
 void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int pid) {
 	for (int i = 0; i < len; i++) {
-		char character = text[i]; 
-		bool assigned = false; 
+		char character = text[i];
+		bool assigned = false;
 		for (int j = 0; j < dict->number_of_chars && !assigned; j++) {
 
             CharFreq *p = &dict->charFreqs[j];
 			if (p->character == character) {
-				++p->frequency; 
-				assigned = true; 
+				++p->frequency;
+				assigned = true;
 			}
 		}
 
@@ -32,7 +32,7 @@ void oddEvenSort(CharFreqDictionary *res) {
         if (phase % 2 == 0) {
             for (i = 1; i < res->number_of_chars; i += 2) {
                 if (res->charFreqs[i-1].frequency > res->charFreqs[i].frequency) {
-                    tmp = res->charFreqs[i-1]; 
+                    tmp = res->charFreqs[i-1];
                     res->charFreqs[i-1] = res->charFreqs[i];
                     res->charFreqs[i] = tmp;
                 }
@@ -40,7 +40,7 @@ void oddEvenSort(CharFreqDictionary *res) {
         } else {
              for (i = 1; i < res->number_of_chars - 1; i += 2) {
                 if (res->charFreqs[i].frequency > res->charFreqs[i+1].frequency) {
-                    tmp = res->charFreqs[i+1]; 
+                    tmp = res->charFreqs[i+1];
                     res->charFreqs[i+1] = res->charFreqs[i];
                     res->charFreqs[i] = tmp;
                 }
@@ -59,7 +59,7 @@ void appendToCharFreqs(CharFreqDictionary *dict, CharFreq *charFreq, int pos) {
 		++dict->number_of_chars;
 		dict->charFreqs = malloc(dict->number_of_chars * sizeof(CharFreq));
 
-		memcpy(dict->charFreqs+1, tmp, oldSize * sizeof(CharFreq));
+		memcpy(dict->charFreqs + 1, tmp, oldSize * sizeof(CharFreq));
 
 		dict->charFreqs[0].character = charFreq->character;
 		dict->charFreqs[0].frequency = 1;
@@ -93,8 +93,8 @@ void mergeCharFreqs(CharFreqDictionary *dst, CharFreqDictionary *src, int pos) {
 void printCharFreqs(CharFreqDictionary *dict) {
 	printf("Dictionary: \n");
 	for (int i = 0; i < dict->number_of_chars; i++) {
-			printf("\t%d.\tcharacter: ", i); 
+			printf("\t%d.\tcharacter: ", i);
 			printFormattedChar(dict->charFreqs[i].character);
-			printf("\tfrequence: %d\n", dict->charFreqs[i].frequency); 
+			printf("\tfrequence: %d\n", dict->charFreqs[i].frequency);
 	}
 }

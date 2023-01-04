@@ -2,5 +2,8 @@
 
 #include "../include/global_constants.h"
 
-extern char* intToString(int i); 
-extern char* floatToString(float i); 
+bool checkNumber(int number);
+
+extern char* intToString(int i);
+extern char* floatToString(float i);
+extern int stringToInt(char* str);
