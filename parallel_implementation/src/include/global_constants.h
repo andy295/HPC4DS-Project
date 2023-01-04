@@ -19,6 +19,9 @@
 // #define MPI_TYPE_VERSION
 #define BYTE_TYPE_VERSION
 
+// #define DECODING_PACK_STRATEGY //use MPI_Pack and MPI_Unpack
+#define DECODING_GATHER_STRATEGY // USE MPI_Gather and MPI_Gatherv
+
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 
 #define ENDTEXT '\0'

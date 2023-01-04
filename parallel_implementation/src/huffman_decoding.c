@@ -65,11 +65,16 @@ int main(int argc, char *argv[]) {
 	omp_set_dynamic(0);
 	omp_set_num_threads(thread_count);
 
+	takeTime(pid);
+
+	int totLength = 0;
+	int *strLengths = NULL;
+	int *dispLengths = NULL;
+    char *totalstring = NULL;
+
 	FileHeader header = {.byteStartOfDimensionArray = 0};
 	TreeNode *root = calloc(1, sizeof(TreeNode));
 	DecodingText decodingText = {.length = 0, .decodedText = NULL};
-
-	takeTime(pid);
 
 	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
 	if (fp == NULL) {
@@ -121,8 +126,52 @@ int main(int argc, char *argv[]) {
 		fp,
 		root);
 
+	decodingText.length = strlen(decodingText.decodedText);
+
 	fclose(fp);
 
+#ifdef DECODING_GATHER_STRATEGY
+	if (pid == 0)
+		strLengths = calloc(proc_number, sizeof(int));
+
+	// send/receive the length of the decoded text
+	MPI_Gather(&decodingText.length, 1, MPI_INT, strLengths, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	if (pid == 0) {
+		dispLengths = calloc(proc_number, sizeof(int));
+
+		totLength += strLengths[0];
+
+		for (int i = 1; i < proc_number; i++) {
+			totLength += strLengths[i];
+			dispLengths[i] = dispLengths[i-1] + strLengths[i-1];
+		}
+
+		// becuase of the '\0' character
+		++totLength;
+
+		totalstring = calloc(totLength, sizeof(char));
+		totalstring[totLength-1] = ENDTEXT;
+
+		if (DEBUG(pid)) {
+			for (int i = 0; i < proc_number; i++)
+				printf("Process %d - strLengths[%d]: %d\n", i, i, strLengths[i]);
+
+			for (int i = 0; i < proc_number; i++)
+				printf("Process %d - dispLengths[%d]: %d\n", i, i, dispLengths[i]);
+
+			printf("Process %d - totalstring: %d\n", pid, dispLengths);
+		}
+	}
+
+	// send/receive the decoded text
+	MPI_Gatherv(decodingText.decodedText, decodingText.length, MPI_CHAR, totalstring, strLengths, dispLengths, MPI_CHAR, 0, MPI_COMM_WORLD);
+
+	if (pid == 0)
+		printf("\nDecoded text:\n%s\n", totalstring);
+#endif
+
+#ifdef DECODING_PACK_STRATEGY
 	if (pid != 0) {
 		MsgHeader header = {.id = MSG_TEXT, .size = 0};
 		BYTE *buffer = getMessage(&header, decodingText.decodedText);
@@ -136,7 +185,7 @@ int main(int argc, char *argv[]) {
 
 		freeBuffer(buffer);
 	} else {
-		decodingText.length = strlen(decodingText.decodedText) + 1;
+		++decodingText.length;
 
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
@@ -156,10 +205,15 @@ int main(int argc, char *argv[]) {
 
 		printf("\nDecoded text:\n%s\n", decodingText.decodedText);
 	}
+#endif
 
 	takeTime(pid);
 	printTime(pid, "Time elapsed");
 	// saveTime(pid, LOG_FILE, "Time elapsed");
+
+    freeBuffer(totalstring);
+	freeBuffer(dispLengths);
+	freeBuffer(strLengths);
 
 	freeBuffer(decodingText.decodedText);
 	freeBuffer(dimensions);
