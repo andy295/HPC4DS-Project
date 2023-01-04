@@ -1,28 +1,5 @@
 #include "include/char_freq.h"
 
-// void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int pid) {
-// 	for (int i = 0; i < len; i++) {
-// 		char character = text[i]; 
-// 		bool assigned = false; 
-// 		for (int j = 0; j < dict->number_of_chars && !assigned; j++) {
-
-//             CharFreq *p = &dict->charFreqs[j];
-// 			if (p->character == character) {
-// 				++p->frequency; 
-// 				assigned = true; 
-// 			}
-// 		}
-
-// 		if (!assigned) {
-//             ++dict->number_of_chars;
-//             dict->charFreqs = realloc(dict->charFreqs, sizeof(CharFreq) * dict->number_of_chars);
-
-//             CharFreq *p = &dict->charFreqs[dict->number_of_chars-1];
-// 			*p = (struct CharFreq) {.character = character, .frequency = 1};
-// 		}
-// 	}
-// }
-
 void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int pid) {
 	CharFreqDictionary **charFreqDict = calloc(omp_get_max_threads(), sizeof(CharFreqDictionary*));
 
@@ -68,23 +45,6 @@ void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int p
 	}
 }
 
-// void sortCharFreqs(CharFreqDictionary *res) {
-// 	for (int i = 0; i < res->number_of_chars; i++) {
-// 		CharFreq minCharFreq = res->charFreqs[i];
-// 		int indexOfMin = i;  
-// 		for (int j = i; j < res->number_of_chars; j++) {
-// 			if (minCharFreq.frequency > res->charFreqs[j].frequency) {
-// 				minCharFreq = res->charFreqs[j]; 
-// 				indexOfMin = j; 
-// 			}
-// 		}
-
-// 		CharFreq temp = res->charFreqs[i]; 
-// 		res->charFreqs[i] = minCharFreq;
-// 		res->charFreqs[indexOfMin] = temp;
-// 	}
-// }
-
 void oddEvenSort(CharFreqDictionary *res) {
     int phase = 0;
     int i = 0;
@@ -96,7 +56,7 @@ void oddEvenSort(CharFreqDictionary *res) {
             #pragma omp for
             for (i = 1; i < res->number_of_chars; i += 2) {
                 if (res->charFreqs[i-1].frequency > res->charFreqs[i].frequency) {
-                    tmp = res->charFreqs[i-1]; 
+                    tmp = res->charFreqs[i-1];
                     res->charFreqs[i-1] = res->charFreqs[i];
                     res->charFreqs[i] = tmp;
                 }
@@ -105,7 +65,7 @@ void oddEvenSort(CharFreqDictionary *res) {
             #pragma omp for
             for (i = 1; i < res->number_of_chars - 1; i += 2) {
                 if (res->charFreqs[i].frequency > res->charFreqs[i+1].frequency) {
-                    tmp = res->charFreqs[i+1]; 
+                    tmp = res->charFreqs[i+1];
                     res->charFreqs[i+1] = res->charFreqs[i];
                     res->charFreqs[i] = tmp;
                 }
@@ -158,8 +118,8 @@ void mergeCharFreqs(CharFreqDictionary *dst, CharFreqDictionary *src, int pos) {
 void printCharFreqs(CharFreqDictionary *dict) {
 	printf("Dictionary: \n");
 	for (int i = 0; i < dict->number_of_chars; i++) {
-			printf("\t%d.\tcharacter: ", i); 
+			printf("\t%d.\tcharacter: ", i);
 			printFormattedChar(dict->charFreqs[i].character);
-			printf("\tfrequence: %d\n", dict->charFreqs[i].frequency); 
+			printf("\tfrequence: %d\n", dict->charFreqs[i].frequency);
 	}
 }
