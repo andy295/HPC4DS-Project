@@ -6,12 +6,12 @@ bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int
 		dst->encoding = realloc(dst->encoding, sizeof(char) * (depth+1));
 		dst->encoding[depth] = ENDTEXT;
 		dst->length = depth;
-		return true;  
+		return true;
 	} else {
 		if (root->leftChild != NULL) {
 			dst->encoding = realloc(dst->encoding, sizeof(char) * (depth+1));
-			dst->encoding[depth] = '0'; 
-			found = findEncodingFromTree(character, root->leftChild, dst, depth+1); 
+			dst->encoding[depth] = '0';
+			found = findEncodingFromTree(character, root->leftChild, dst, depth+1);
 		}
 
 		if (!found && root->rightChild != NULL) {
@@ -19,7 +19,7 @@ bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int
 				dst->encoding = realloc(dst->encoding, sizeof(char) * (depth+1));
 
 			dst->encoding[depth] = '1';
-			found = findEncodingFromTree(character, root->rightChild, dst, depth+1); 
+			found = findEncodingFromTree(character, root->rightChild, dst, depth+1);
 		}
 	}
 
@@ -31,11 +31,11 @@ void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionar
 	encodingDict->number_of_chars = charFreqDict->number_of_chars;
 
 	for (int i = 0; i < encodingDict->number_of_chars; i++) {
-		encodingDict->charEncoding[i].character = charFreqDict->charFreqs[i].character;  
+		encodingDict->charEncoding[i].character = charFreqDict->charFreqs[i].character;
 		encodingDict->charEncoding[i].length = 0;
 		encodingDict->charEncoding[i].encoding = malloc(sizeof(char));
 
-		findEncodingFromTree(charFreqDict->charFreqs[i].character, root, &encodingDict->charEncoding[i], encodingDict->charEncoding[i].length); 
+		findEncodingFromTree(charFreqDict->charFreqs[i].character, root, &encodingDict->charEncoding[i], encodingDict->charEncoding[i].length);
 	}
 }
 
@@ -75,9 +75,9 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary 
 	char c = 0;
 
 	encodingText->nr_of_dim = (total_chars % CHARS_PER_BLOCK != 0) ? (total_chars / CHARS_PER_BLOCK) + 1 : total_chars / CHARS_PER_BLOCK;
-	encodingText->dimensions = calloc(encodingText->nr_of_dim, sizeof(short)); 
+	encodingText->dimensions = calloc(encodingText->nr_of_dim, sizeof(short));
 
-	encodingText->encodedText = malloc(sizeof(BYTE) * total_chars); // TODO: check if this is the right size
+	encodingText->encodedText = malloc(sizeof(BYTE) * total_chars);
 
 	unsigned short bitSizeOfBlock = 0;
 	for (int i = 0; i < total_chars; i++) {

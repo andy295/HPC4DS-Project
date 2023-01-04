@@ -19,6 +19,7 @@ int main(int argc, char *argv[]) {
 	omp_set_num_threads(thread_count);
 
 	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
+	takeTime(pid);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	LinkedListTreeNodeItem *root = NULL;
