@@ -4,17 +4,17 @@
 
 #include "file_utils.h"
 
-typedef struct Logger {
-    char *dataLogHeader;
+typedef struct DataLogger {
+    char *logHeader;
     int itemsInHeader;
 
-    char *dataLogRow;
+    char *logRow;
     int itemsInRow;
 
-    int dataLoggerReferenceProcess;
+    int referenceProcess;
 
     bool active;
-} Logger;
+} DataLogger;
 
 void saveRowToFile(char *filename);
 
@@ -25,3 +25,4 @@ extern void addLogColumn(int pid, const char *columnName);
 extern void addLogData(int pid, char *data);
 
 extern void setDataLoggerReferenceProcess(int pid);
+extern void enableDataLogger(int pid);

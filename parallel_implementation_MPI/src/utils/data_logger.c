@@ -2,15 +2,15 @@
 
 static const int MAX_DATA_LOGGER_ROW_SIZE = 1000;
 
-Logger logger = { NULL, 0, NULL, 0, 0, false};
+DataLogger dataLogger = { NULL, 0, NULL, 0, 0, false};
 
 void initDataLogger(int pid, bool enable) {
-    logger.dataLoggerReferenceProcess = pid;
-    logger.active = enable;
+    dataLogger.referenceProcess = pid;
+    dataLogger.active = enable;
 
     if (enable) {
-        logger.dataLogHeader = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
-        logger.dataLogRow = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
+        dataLogger.logHeader = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
+        dataLogger.logRow = (char*)malloc(sizeof(char) * MAX_DATA_LOGGER_ROW_SIZE);
 
         addLogColumn(pid, "N.Processes");
         addLogColumn(pid, "N.Threads");
@@ -19,16 +19,16 @@ void initDataLogger(int pid, bool enable) {
     }
 }
 void addLogColumn(int pid, const char *name) {
-    if (pid != logger.dataLoggerReferenceProcess)
+    if (pid != dataLogger.referenceProcess)
         return;
 
-    logger.itemsInHeader++;
-    strcat(logger.dataLogHeader, name);
-    strcat(logger.dataLogHeader, ",");
+    dataLogger.itemsInHeader++;
+    strcat(dataLogger.logHeader, name);
+    strcat(dataLogger.logHeader, ",");
 }
 
 void addLogData(int pid, char *data) {
-    if (pid != logger.dataLoggerReferenceProcess)
+    if (pid != dataLogger.referenceProcess)
         return;
 
     if (data == NULL) {
@@ -36,12 +36,12 @@ void addLogData(int pid, char *data) {
         return;
     }
 
-    strcat(logger.dataLogRow, data);
-    strcat(logger.dataLogRow, ",");
+    strcat(dataLogger.logRow, data);
+    strcat(dataLogger.logRow, ",");
 
-    logger.itemsInRow++;
-    if (logger.itemsInRow == logger.itemsInHeader) {
-        logger.itemsInRow = 0;
+    dataLogger.itemsInRow++;
+    if (dataLogger.itemsInRow == dataLogger.itemsInHeader) {
+        dataLogger.itemsInRow = 0;
 
         saveRowToFile(DATA_LOGGER_FILE);
     }
@@ -51,10 +51,9 @@ void addLogData(int pid, char *data) {
 
 void saveRowToFile(char *filename) {        
     // open csv file
-    FILE *fp = fopen(filename, "a+");
+    FILE *fp = openFile(filename, APPEND, 0);
     if (fp == NULL) {
-        fp = fopen(filename, "w");
-
+        fp = openFile(filename, WRITE, 0);
         if (fp == NULL) {
             fprintf(stderr, "Error opening file\n");
             exit(1);
@@ -63,28 +62,33 @@ void saveRowToFile(char *filename) {
 
     int indexOfFile = getNumberOfLines(fp);
     if (indexOfFile == 0) {
-        fprintf(fp, "%s,%s\n", "Index", logger.dataLogHeader);
+        fprintf(fp, "%s,%s\n", "Index", dataLogger.logHeader);
         indexOfFile++;
     }
 
-    fprintf(fp, "%i,%s\n", indexOfFile, logger.dataLogRow);
+    fprintf(fp, "%i,%s\n", indexOfFile, dataLogger.logRow);
     fclose(fp);
 }
 
 void setDataLoggerReferenceProcess(int pid) {
-    if(!logger.active) {
-        logger.active = true;
-        initDataLogger(pid, true);
-    }
+    if(dataLogger.active)
+        dataLogger.referenceProcess = pid;
     else
-        logger.dataLoggerReferenceProcess = pid;
+        initDataLogger(pid, true);
 }
 
 void terminateDataLogger() {
-    if (!logger.active)
+    if (!dataLogger.active)
         return;
 
-    logger.active = false;
-    freeBuffer(logger.dataLogHeader);
-    freeBuffer(logger.dataLogRow);
+    dataLogger.active = false;
+    freeBuffer(dataLogger.logHeader);
+    freeBuffer(dataLogger.logRow);
+}
+
+void enableDataLogger(int pid) {
+    if (dataLogger.active)
+        return;
+
+    initDataLogger(pid, true);
 }
