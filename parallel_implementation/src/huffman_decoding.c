@@ -51,13 +51,13 @@ int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
 
 	int proc_number;
-	int pid; 
+	int pid;
 
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	int thread_count = strtol(argv[1], NULL, MAX_DIGITS);
-	if (thread_count <= 0) {
+	int thread_count = stringToInt(argv[1]);
+	if (thread_count <= 0 || thread_count > MAX_THREADS) {
 		fprintf(stderr, "Invalid number of threads: %d\n", thread_count);
 		return 1;
 	}
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 	DecodingText decodingText = {.length = 0, .decodedText = NULL};
 
 	takeTime(pid);
-	
+
 	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
 	if (fp == NULL) {
 		fprintf(stderr, "Process %d: Error opening file %s\n", pid, ENCODED_FILE);
@@ -106,14 +106,14 @@ int main(int argc, char *argv[]) {
 	int start = 0;
 	int end = 0;
 	calculateBlockRange(number_of_blocks, proc_number, pid, &start, &end);
-	
+
 	if (DEBUG(pid))
 		printf("Process %d - Block range: %d - %d - Blocks nr: %d\n", pid, start, end - 1, end - start);
 
 	int startPos = (sizeof(FileHeader) * FILE_HEADER_ELEMENTS) + treeByteSize;
 	startPos += (pid != 0) ? calculatePrevTextSize(dimensions, start) : 0;
 
-	char *decodedText = decodeFromFile(
+	decodingText.decodedText = decodeFromFile(
 		startPos,
 		dimensions,
 		start,
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
 
 	if (pid != 0) {
 		MsgHeader header = {.id = MSG_TEXT, .size = 0};
-		BYTE *buffer = getMessage(&header, decodedText);
+		BYTE *buffer = getMessage(&header, decodingText.decodedText);
 
 		if (buffer == NULL || header.size <= 0) {
 			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
@@ -136,8 +136,7 @@ int main(int argc, char *argv[]) {
 
 		freeBuffer(buffer);
 	} else {
-		decodingText.length = strlen(decodedText) + 1;
-		decodingText.decodedText = decodedText;
+		decodingText.length = strlen(decodingText.decodedText) + 1;
 
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;

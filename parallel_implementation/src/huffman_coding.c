@@ -9,8 +9,8 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	int thread_count = strtol(argv[1], NULL, MAX_DIGITS);
-	if (thread_count <= 0) {
+	int thread_count = stringToInt(argv[1]);
+	if (thread_count <= 0 || thread_count > MAX_THREADS) {
 		fprintf(stderr, "Invalid number of threads: %d\n", thread_count);
 		return 1;
 	}
@@ -18,14 +18,10 @@ int main(int argc, char *argv[]) {
 	omp_set_dynamic(0);
 	omp_set_num_threads(thread_count);
 
-	initDataLogger();
-	setDataLoggerReferenceProcess(0);
-	addLogColumn(pid, "N.Processes");
-	addLogColumn(pid, "N.Characters");
-	addLogColumn(pid, "Time");
+	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
-	LinkedListTreeNodeItem* root = NULL;
+	LinkedListTreeNodeItem *root = NULL;
 	CharEncodingDictionary encodingDict = {.number_of_chars = 0, .charEncoding = NULL};
 	EncodingText encodingText = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
 
@@ -41,6 +37,7 @@ int main(int argc, char *argv[]) {
 
 	printf("Process %d: %ld characters read\n", pid, processes_text_length);
 	addLogData(pid, intToString(proc_number));
+	addLogData(pid, intToString(thread_count));
 	addLogData(pid, intToString(processes_text_length));
 
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
@@ -142,7 +139,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// master process writes data into file
-	if (pid == 0) {\
+	if (pid == 0) {
 
 		// convert tree into a suitable form for writing to file
 		int byteSizeOfTree;
@@ -153,7 +150,7 @@ int main(int argc, char *argv[]) {
 		FileHeader fileHeader = {.byteStartOfDimensionArray = sizeof(FileHeader) + byteSizeOfTree + encodingText.nr_of_bytes};
 		BYTE *startPos = (BYTE*)&fileHeader;
 		writeBufferToFile(ENCODED_FILE, startPos, sizeof(unsigned int) * FILE_HEADER_ELEMENTS, WRITE_B, 0);
-		
+
 		if (DEBUG(pid)) {
 			printf("Header size: %lu\n", sizeof(unsigned int) * FILE_HEADER_ELEMENTS);
 			printf("Encoded arrayPosStartPos: %d\n", fileHeader.byteStartOfDimensionArray);
@@ -175,7 +172,7 @@ int main(int argc, char *argv[]) {
 
 		BYTE *dimensions = (BYTE*)encodingText.dimensions;
 		writeBufferToFile(ENCODED_FILE, dimensions, encodingText.nr_of_dim * sizeof(unsigned short), APPEND_B, 0);
-		
+
 		if (DEBUG(pid)) {
 			printf("Dimensions array size: %ld\n", encodingText.nr_of_dim * sizeof(unsigned short));
 			for (int i = 0; i < encodingText.nr_of_dim; i++)
@@ -195,6 +192,8 @@ int main(int argc, char *argv[]) {
 
 	float time = getTime(pid, "Time elapsed");
 	addLogData(pid, floatToString(time));
+
+	terminateDataLogger();
 
 	freeLinkedList(root);
 

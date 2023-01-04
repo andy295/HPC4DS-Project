@@ -21,8 +21,10 @@
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 
 #define ENDTEXT '\0'
-#define CHARS_PER_BLOCK 15
+#define CHARS_PER_BLOCK 125
 #define MAX_DIGITS 10
+#define MAX_THREADS 512
+#define MASTER_PROCESS 0
 
 #define ENCODED_FILE "HPC4DS-Project/parallel_implementation/output/encoded_file"
 #define SRC_FILE "HPC4DS-Project/parallel_implementation/text.txt"

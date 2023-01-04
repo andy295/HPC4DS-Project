@@ -1,49 +1,43 @@
 #include "time_utils.h"
 
-double TimeUtils_lastTimeStamp = 0;
-double TimeUtils_lastElapsedTime = 0;
-int TimeUtils_indexOfFile = -1;
-char *TimeUtils_lastFilename;
-
-int TimeUtils_ReferenceProcess = 0;
+TimeUtils timeUtils = { 0, 0, -1, NULL, 0 };
 
 void takeTime(int pid) {
-    if (pid == TimeUtils_ReferenceProcess) {
+    if (pid == timeUtils.referenceProcess) {
         double end = MPI_Wtime();
-        TimeUtils_lastElapsedTime = end - TimeUtils_lastTimeStamp;
-        TimeUtils_lastTimeStamp = end;
+        timeUtils.lastElapsedTime = end - timeUtils.lastTimeStamp;
+        timeUtils.lastTimeStamp = end;
     }
 }
 
 void printTime(int pid, char *label) {
-    if (pid == TimeUtils_ReferenceProcess)
-        printf("%s: %f\n", label, TimeUtils_lastElapsedTime);
+    if (pid == timeUtils.referenceProcess)
+        printf("%s: %f\n", label, timeUtils.lastElapsedTime);
 }
 
 double getTime() {
-    return TimeUtils_lastElapsedTime;
+    return timeUtils.lastElapsedTime;
 }
 
 void setTime(int pid, double time) {
-    if (pid == TimeUtils_ReferenceProcess)
-        TimeUtils_lastElapsedTime = time;
+    if (pid == timeUtils.referenceProcess)
+        timeUtils.lastElapsedTime = time;
 }
 
 void saveTime(int pid, char *filename, char *label) {
-    if (pid != TimeUtils_ReferenceProcess)
+    if (pid != timeUtils.referenceProcess)
         return;
 
-    if (TimeUtils_lastFilename != filename) {
-        TimeUtils_indexOfFile = -1;
-        TimeUtils_lastFilename = filename;
+    if (timeUtils.lastFilename != filename) {
+        timeUtils.indexOfFile = -1;
+        timeUtils.lastFilename = filename;
     }
 
     // open csv file
-    FILE *fp = fopen(filename, "a+");
+    FILE *fp = openFile(filename, APPEND, 0);
     if (fp == NULL) {
-        fp = fopen(filename, "w");
-        TimeUtils_indexOfFile = 0;
-
+        fp = openFile(filename, WRITE, 0);
+        timeUtils.indexOfFile = 0;
         if (fp == NULL) {
             fprintf(stderr, "Error opening file\n");
             exit(1);
@@ -51,21 +45,21 @@ void saveTime(int pid, char *filename, char *label) {
     }
 
     // read index of last row from file
-    if (TimeUtils_indexOfFile == -1)
-        TimeUtils_indexOfFile = getNumberOfLines(fp);
+    if (timeUtils.indexOfFile == -1)
+        timeUtils.indexOfFile = getNumberOfLines(fp);
 
     // write to csv file
-    fprintf(fp, "%d,%s,%f\n", TimeUtils_indexOfFile, label, TimeUtils_lastElapsedTime);
-    TimeUtils_indexOfFile++; 
+    fprintf(fp, "%d,%s,%f\n", timeUtils.indexOfFile, label, timeUtils.lastElapsedTime);
+    timeUtils.indexOfFile++;
 
     // close csv file
     fclose(fp);
 }
 
 void setTimeUtilsReferenceProcess(int pid) {
-    TimeUtils_ReferenceProcess = pid;
+    timeUtils.referenceProcess = pid;
 
     // reset time
-    TimeUtils_lastTimeStamp = 0;
-    TimeUtils_lastElapsedTime = 0;
+    timeUtils.lastTimeStamp = 0;
+    timeUtils.lastElapsedTime = 0;
 }

@@ -179,7 +179,7 @@ char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, 
 				}
 			}
 
-			if (bit + 1 == BITS_IN_BYTE) {
+			if ((bit+1) == BITS_IN_BYTE) {
 				bit = 0;
 				update_byte = true;
 			}

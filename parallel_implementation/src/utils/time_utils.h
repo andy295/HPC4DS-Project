@@ -4,6 +4,14 @@
 
 #include "file_utils.h"
 
+typedef struct TimeUtils {
+    double lastTimeStamp;
+    double lastElapsedTime;
+    int indexOfFile;
+    char *lastFilename;
+    int referenceProcess;
+} TimeUtils;
+
 extern void takeTime(int pid); 
 extern void printTime(int pid, char *label);
 extern double getTime(); 

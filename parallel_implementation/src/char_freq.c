@@ -124,7 +124,7 @@ void appendToCharFreqs(CharFreqDictionary *dict, CharFreq *charFreq, int pos) {
 		++dict->number_of_chars;
 		dict->charFreqs = malloc(dict->number_of_chars * sizeof(CharFreq));
 
-		memcpy(dict->charFreqs+1, tmp, oldSize * sizeof(CharFreq));
+		memcpy(dict->charFreqs + 1, tmp, oldSize * sizeof(CharFreq));
 
 		dict->charFreqs[0].character = charFreq->character;
 		dict->charFreqs[0].frequency = 1;
