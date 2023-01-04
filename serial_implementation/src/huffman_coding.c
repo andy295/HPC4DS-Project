@@ -10,6 +10,7 @@ int main() {
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
 	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
+	takeTime(pid);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
 	LinkedListTreeNodeItem *root = NULL;
