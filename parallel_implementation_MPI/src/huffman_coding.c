@@ -41,6 +41,9 @@ int main(int argc, char *argv[]) {
 
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
 
+	// takeTime(pid);
+	// printTime(pid, "Time to get character frequencies");
+
 	MPI_Datatype charFreqDictType;
 	buildDatatype(MSG_DICTIONARY, &charFreqDictType);
 
@@ -73,13 +76,25 @@ int main(int argc, char *argv[]) {
 			freeBuffer(rcvCharFreq.charFreqs);
 		}
 
+		// takeTime(pid);
+		// printTime(pid, "Time to receive character frequencies from other processes");
+
 		oddEvenSort(&allChars);
+
+		// takeTime(pid);
+		// printTime(pid, "Time to sort character frequencies");
 
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);
 
+		// takeTime(pid);
+		// printTime(pid, "Time to create huffman tree");
+
 		// creates the encoding dictionary
 		getEncodingFromTree(&encodingDict, &allChars, root->item);
+
+		// takeTime(pid);
+		// printTime(pid, "Time to create encoding dictionary");
 	}
 
 	MPI_Type_free(&charFreqDictType);
@@ -102,9 +117,15 @@ int main(int argc, char *argv[]) {
 		MPI_Bcast(encodingDict.charEncoding[i].encoding, encodingDict.charEncoding[i].length, MPI_CHAR, 0, MPI_COMM_WORLD);
 	}
 
+	// takeTime(pid);
+	// printTime(pid, "Time to send/receive encoding dictionary");
+
 	MPI_Type_free(&charEncDictType);
 
 	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
+
+	// takeTime(pid);
+	// printTime(pid, "Time to encode text");
 
 	// send the encoded text to the master process
 	if (pid != 0) {
@@ -135,6 +156,14 @@ int main(int argc, char *argv[]) {
 			freeBuffer(rcvEncTxt.dimensions);
 			freeBuffer(rcvEncTxt.encodedText);
 		}
+
+		takeTime(pid);
+		printTime(pid, "Total Time elapsed");
+		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+
+		float time = getTime(pid, "Time elapsed");
+		addLogData(pid, floatToString(time));
+
 	}
 
 	// master process writes data into file
@@ -185,12 +214,12 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	takeTime(pid);
-	printTime(pid, "Time elapsed");
+	// takeTime(pid);
+	// printTime(pid, "Total Time elapsed");
 	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
-	float time = getTime(pid, "Time elapsed");
-	addLogData(pid, floatToString(time));
+	// float time = getTime(pid, "Time elapsed");
+	// addLogData(pid, floatToString(time));
 
 	terminateDataLogger();
 

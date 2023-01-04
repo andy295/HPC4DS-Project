@@ -72,6 +72,13 @@ int main(int argc, char *argv[]) {
 
 		oddEvenSort(&allChars);
 
+		takeTime(pid);
+		printTime(pid, "Time elapsed");
+		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+
+		float time = getTime(pid, "Time elapsed");
+		addLogData(pid, floatToString(time));
+
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);
 
@@ -185,12 +192,12 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	takeTime(pid);
-	printTime(pid, "Time elapsed");
-	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+	// takeTime(pid);
+	// printTime(pid, "Time elapsed");
+	// // saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
-	float time = getTime(pid, "Time elapsed");
-	addLogData(pid, floatToString(time));
+	// float time = getTime(pid, "Time elapsed");
+	// addLogData(pid, floatToString(time));
 
 	terminateDataLogger();
 

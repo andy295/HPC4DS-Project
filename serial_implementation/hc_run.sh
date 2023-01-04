@@ -13,7 +13,7 @@ if [ -z serial_implementation/output/out ]; then
 	rm serial_implementation/output/out
 fi
 
-qsub -q short_cpuQ -l walltime=0:01:00 -o serial_implementation/output/out -e serial_implementation/output/err ./serial_implementation/hc_qsub.sh
+qsub -q short_cpuQ -l walltime=0:05:00 -o serial_implementation/output/out -e serial_implementation/output/err ./serial_implementation/hc_qsub.sh
 
 while ! test serial_implementation/output/out -nt serial_implementation/output/reference.txt; do
 	sleep 3; 

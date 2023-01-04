@@ -34,13 +34,25 @@ int main() {
 
 	oddEvenSort(&allChars);
 
+	takeTime(pid);
+	printTime(pid, "Time to sort frequencies");
+
 	// creates the huffman tree
 	root = createHuffmanTree(&allChars);
+
+	takeTime(pid);
+	printTime(pid, "Time to create tree");
 
 	// creates the encoding dictionary
 	getEncodingFromTree(&encodingDict, &allChars, root->item);
 
+	takeTime(pid);
+	printTime(pid, "Time to get encoding dictionary");
+
 	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
+
+	takeTime(pid);
+	printTime(pid, "Time to encode text");
 
 	// convert tree into a suitable form for writing to file
 	int byteSizeOfTree;
@@ -90,8 +102,6 @@ int main() {
 		printf("Original file size: %d\n", getFileSize(SRC_FILE));
 	}
 
-	takeTime(pid);
-	printTime(pid, "Time elapsed");
 	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
 	float time = getTime(pid, "Time elapsed");
