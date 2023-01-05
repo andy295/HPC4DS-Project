@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 			for (int i = 0; i < proc_number; i++)
 				printf("Process %d - dispLengths[%d]: %d\n", i, i, dispLengths[i]);
 
-			printf("Process %d - totalstring: %d\n", pid, dispLengths);
+			printf("Process %d - totalstring: %d\n", pid, totLength);
 		}
 	}
 
@@ -185,6 +185,8 @@ int main(int argc, char *argv[]) {
 
 		freeBuffer(buffer);
 	} else {
+		++decodingText.length;
+
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
 			DecodingText rcvText = {.length = 0, .decodedText = NULL};
