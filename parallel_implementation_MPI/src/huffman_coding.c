@@ -19,6 +19,10 @@ int main(int argc, char *argv[]) {
 	omp_set_num_threads(thread_count);
 
 	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
+	addLogColumn(pid, "Sort Time");
+    addLogColumn(pid, "Encoding Time");
+    addLogColumn(pid, "Merge Encodings Time");
+    addLogColumn(pid, "Write Time");
 	takeTime(pid);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
@@ -81,8 +85,13 @@ int main(int argc, char *argv[]) {
 
 		oddEvenSort(&allChars);
 
-		// takeTime(pid);
-		// printTime(pid, "Time to sort character frequencies");
+		takeTime(pid);
+		printTime(pid, "Sort Time");
+		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+
+		float time = getTime(pid, "Time elapsed");
+		addLogData(pid, floatToString(time));
+
 
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);
@@ -145,8 +154,12 @@ int main(int argc, char *argv[]) {
 
 	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
 
-	// takeTime(pid);
-	// printTime(pid, "Time to encode text");
+	takeTime(pid);
+	printTime(pid, "Sort Time");
+	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+
+	float time = getTime(pid, "Time elapsed");
+	addLogData(pid, floatToString(time));
 
 	// send the encoded text to the master process
 	if (pid != 0) {
@@ -179,11 +192,10 @@ int main(int argc, char *argv[]) {
 		}
 
 		takeTime(pid);
-		printTime(pid, "Total Time elapsed");
+		printTime(pid, "Sort Time");
 		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
-		float time = getTime(pid, "Time elapsed");
-		addLogData(pid, floatToString(time));
+		addLogData(pid, floatToString(getTime(pid, "Time elapsed")));
 
 	}
 
@@ -235,12 +247,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	// takeTime(pid);
-	// printTime(pid, "Total Time elapsed");
-	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+		takeTime(pid);
+		printTime(pid, "Write Time");
+		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
-	// float time = getTime(pid, "Time elapsed");
-	// addLogData(pid, floatToString(time));
+		addLogData(pid, floatToString(getTime(pid, "Time elapsed")));
 
 	terminateDataLogger();
 
