@@ -19,6 +19,4 @@ if [ $1 ]; then
     fi
 fi
 
-# parallel_implementation/src/huffman_coding.c parallel_implementation/src/utils/file_utils.c parallel_implementation/src/char_freq.c parallel_implementation/src/message.c parallel_implementation/src/huffman_tree.c
-
 mpicc -std=gnu99 -g -Wall -fopenmp -o parallel_implementation/output/huffman_coding $c_files
