@@ -19,8 +19,11 @@
 #define MPI_TYPE_VER
 // #define BYTE_TYPE_VER
 
-// #define DECODING_PACK_STR //use MPI_Pack and MPI_Unpack
-#define DECODING_GATHER_STR // use MPI_Gather and MPI_Gatherv
+#define DECODING_STR 1	// 0 - MPI_Pack and MPI_Unpack
+						// 1 - MPI_Gather and MPI_Gatherv
+
+#define ENCODING_DICTIONARY_STR	1	// 0 - MPI_BCAST
+									// 1 - MPI_BCAST along with MPI_Pack and MPI_Unpack
 
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 

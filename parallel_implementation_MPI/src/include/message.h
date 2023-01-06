@@ -51,9 +51,6 @@ typedef struct MsgText {
     int textLength;
     BYTE *text;
 } MsgText;
-
-BYTE* serializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict);
-void deserializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict, BYTE *buffer);
 #endif
 
 #ifdef MPI_TYPE_VER
@@ -80,6 +77,9 @@ void deserializeMsgCharFreqDictionary(MsgHeader *header, CharFreqDictionary *dic
 
 BYTE *serializeMsgEncodingText(MsgHeader *header, EncodingText *encodingText);
 void deserializeMsgEncodingText(MsgHeader *header, EncodingText *encodingText, BYTE *buffer);
+
+BYTE* serializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict);
+void deserializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict, BYTE *buffer);
 
 BYTE *serializeMsgText(MsgHeader *header, char *text);
 void deserializeMsgText(MsgHeader *header, DecodingText *decodedText, BYTE *buffer);
