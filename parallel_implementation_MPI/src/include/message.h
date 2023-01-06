@@ -13,14 +13,14 @@ enum Messages {
     MSG_TEXT = 3,
 };
 
-#ifdef MPI_TYPE_VERSION
+#ifdef MPI_TYPE_VER
 static const int MSG_DICTIONARY_SIZE = 2;
 static const int MSG_ENCODING_DICTIONARY_SIZE = 2;
 static const int MSG_ENCODING_TEXT_SIZE = 2;
 static const int MSG_TEXT_SIZE = 1;
 #endif
 
-#ifdef BYTE_TYPE_VERSION
+#ifdef BYTE_TYPE_VER
 typedef struct MsgHeader {
     int id; // message id
     int size; // size of the message in bytes
@@ -51,12 +51,9 @@ typedef struct MsgText {
     int textLength;
     BYTE *text;
 } MsgText;
-
-BYTE* serializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict);
-void deserializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict, BYTE *buffer);
 #endif
 
-#ifdef MPI_TYPE_VERSION
+#ifdef MPI_TYPE_VER
 typedef struct MsgHeader {
     int id; // message id
     int size; // size of the message in bytes
@@ -80,6 +77,9 @@ void deserializeMsgCharFreqDictionary(MsgHeader *header, CharFreqDictionary *dic
 
 BYTE *serializeMsgEncodingText(MsgHeader *header, EncodingText *encodingText);
 void deserializeMsgEncodingText(MsgHeader *header, EncodingText *encodingText, BYTE *buffer);
+
+BYTE* serializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict);
+void deserializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict, BYTE *buffer);
 
 BYTE *serializeMsgText(MsgHeader *header, char *text);
 void deserializeMsgText(MsgHeader *header, DecodingText *decodedText, BYTE *buffer);

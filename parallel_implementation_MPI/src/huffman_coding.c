@@ -103,6 +103,7 @@ int main(int argc, char *argv[]) {
 	buildDatatype(MSG_ENCODING_DICTIONARY, &charEncDictType);
 
 	// send/receive the complete encoding table
+#if ENCODING_DICTIONARY_STR == 0
 	MPI_Bcast(&encodingDict.number_of_chars , 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 	if (pid != 0)
@@ -116,6 +117,26 @@ int main(int argc, char *argv[]) {
 
 		MPI_Bcast(encodingDict.charEncoding[i].encoding, encodingDict.charEncoding[i].length, MPI_CHAR, 0, MPI_COMM_WORLD);
 	}
+#elif ENCODING_DICTIONARY_STR == 1
+	MsgHeader header = {.id = MSG_ENCODING_DICTIONARY, .size = 0, .type = &charEncDictType, .position = 0};
+
+	BYTE *buffer = NULL;
+
+	if (pid == 0)
+		buffer = getMessage(&header, &encodingDict);
+
+	MPI_Bcast(&header.size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+	if (pid != 0)
+		buffer = calloc(header.size, sizeof(BYTE));
+
+	MPI_Bcast(buffer, header.size, MPI_PACKED, 0, MPI_COMM_WORLD);
+
+	if (pid != 0)
+		setMessage(&header, &encodingDict, buffer);
+
+	freeBuffer(buffer);
+#endif
 
 	// takeTime(pid);
 	// printTime(pid, "Time to send/receive encoding dictionary");

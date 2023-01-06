@@ -1,6 +1,6 @@
 #include "include/message.h"
 
-#ifdef BYTE_TYPE_VERSION
+#ifdef BYTE_TYPE_VER
 BYTE* getMessage(MsgHeader *header, void *data) {
 	switch (header->id)
 	{
@@ -107,7 +107,7 @@ BYTE *serializeMsgText(MsgHeader *header, char *text) {
 }
 #endif
 
-#ifdef MPI_TYPE_VERSION
+#ifdef MPI_TYPE_VER
 void buildDatatype(int msgId, MPI_Datatype *type) {
 	switch (msgId)
 	{
@@ -159,6 +159,10 @@ BYTE* getMessage(MsgHeader *header, void *data) {
 	case MSG_ENCODING_TEXT:
 		return serializeMsgEncodingText(header, (EncodingText*)data);
 		break;
+	
+	case MSG_ENCODING_DICTIONARY:
+		return serializeMsgCharEncodingDictionary(header, (CharEncodingDictionary*)data);
+		break;
 
 	case MSG_TEXT:
 		return serializeMsgText(header, (char*)data);
@@ -200,7 +204,24 @@ BYTE* serializeMsgEncodingText(MsgHeader *header, EncodingText *encodedText) {
 	return buffer;
 }
 
-BYTE* serializeMsgText(MsgHeader *header, char* text) {
+BYTE* serializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict) {
+	header->size = sizeof(int);
+	BYTE *buffer = malloc(sizeof(BYTE) * (header->size));
+
+	MPI_Pack(&dict->number_of_chars, 1, MPI_INT, buffer, header->size, &header->position, MPI_COMM_WORLD);
+
+	for (int i = 0; i < dict->number_of_chars; i++) {
+		header->size += sizeof(char) + sizeof(int) + (sizeof(char) * (dict->charEncoding[i].length+1));
+		buffer = realloc(buffer, header->size);
+
+		MPI_Pack(&dict->charEncoding[i], 1, *header->type, buffer, header->size, &header->position, MPI_COMM_WORLD);
+		MPI_Pack(dict->charEncoding[i].encoding, (dict->charEncoding[i].length+1), MPI_CHAR, buffer, header->size, &header->position, MPI_COMM_WORLD);
+	}
+
+	return buffer;
+}
+
+BYTE* serializeMsgText(MsgHeader *header, char *text) {
 	int textLen = strlen(text) + 1;
 	header->size = (sizeof(int) * MSG_TEXT_SIZE) + (sizeof(char) * textLen);
 	
@@ -214,7 +235,7 @@ BYTE* serializeMsgText(MsgHeader *header, char* text) {
 }
 #endif
 
-#ifdef BYTE_TYPE_VERSION
+#ifdef BYTE_TYPE_VER
 void setMessage(MsgHeader *header, void *data, BYTE *buffer) {
 	MsgHeader *p = (MsgHeader*)buffer;
 	switch (p->id)
@@ -309,7 +330,7 @@ void deserializeMsgText(MsgHeader *header, DecodingText *decodedText, BYTE *buff
 }
 #endif
 
-#ifdef MPI_TYPE_VERSION
+#ifdef MPI_TYPE_VER
 void setMessage(MsgHeader *header, void *data, BYTE *buffer) {
 	switch (header->id)
 	{
@@ -319,6 +340,10 @@ void setMessage(MsgHeader *header, void *data, BYTE *buffer) {
 
 	case MSG_ENCODING_TEXT:
 		deserializeMsgEncodingText(header, (EncodingText*)data, buffer);
+		break;
+
+	case MSG_ENCODING_DICTIONARY:
+		deserializeMsgCharEncodingDictionary(header, (CharEncodingDictionary*)data, buffer);
 		break;
 
 	case MSG_TEXT:
@@ -349,7 +374,19 @@ void deserializeMsgEncodingText(MsgHeader *header, EncodingText *encodedText, BY
 	MPI_Unpack(buffer, header->size, &header->position, encodedText->encodedText, encodedText->nr_of_bytes, MPI_CHAR, MPI_COMM_WORLD);
 }
 
-void deserializeMsgText(MsgHeader *header, DecodingText *decodedText, BYTE* buffer) {
+void deserializeMsgCharEncodingDictionary(MsgHeader *header, CharEncodingDictionary *dict, BYTE *buffer) {
+	MPI_Unpack(buffer, header->size, &header->position, &dict->number_of_chars, 1, MPI_INT, MPI_COMM_WORLD);
+	dict->charEncoding = malloc(sizeof(CharEncoding) * dict->number_of_chars);
+
+	for (int i = 0; i < dict->number_of_chars; i++) {
+		MPI_Unpack(buffer, header->size, &header->position, &dict->charEncoding[i], 1, *header->type, MPI_COMM_WORLD);
+
+		dict->charEncoding[i].encoding = malloc(sizeof(char) * (dict->charEncoding[i].length+1));
+		MPI_Unpack(buffer, header->size, &header->position, dict->charEncoding[i].encoding, (dict->charEncoding[i].length+1), MPI_CHAR, MPI_COMM_WORLD);
+	}
+}
+
+void deserializeMsgText(MsgHeader *header, DecodingText *decodedText, BYTE *buffer) {
 	MPI_Unpack(buffer, header->size, &header->position, &decodedText->length, 1, MPI_INT, MPI_COMM_WORLD);
 
 	decodedText->decodedText = calloc(decodedText->length, sizeof(char));
