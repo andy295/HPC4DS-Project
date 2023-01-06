@@ -1,6 +1,10 @@
-Process 1: 28630 characters read
-Process 0: 28630 characters read
-Sort Time: 0.120207
-Encoding Time: 0.006481
-Merge Encoding Time: 0.000081
-Write time: 0.399650
+Process 5: 9545 characters read
+Process 2: 9543 characters read
+Process 3: 9543 characters read
+Process 0: 9543 characters read
+Process 4: 9543 characters read
+Process 1: 9543 characters read
+Sort Time: 0.224676
+Encoding Time: 0.002400
+Merge Encoding Time: 0.000191
+Write time: 0.032846

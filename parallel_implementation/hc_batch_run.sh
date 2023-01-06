@@ -2,13 +2,13 @@
 #!/bin/bash
 # qsub -q short_cpuQ -l select=2:ncpus=2 -o parallel_implementation/output/out -e parallel_implementation/output/err ./parallel_implementation/hc_batch_qsub.sh
 
-repeat_executions=2
+repeat_executions=10
 
-start_num_of_processes=2
+start_num_of_processes=1
 end_num_of_processes=16
 step_processes=2
 
-start_num_of_threads=2
+start_num_of_threads=1
 end_num_of_threads=16
 step_threads=2
 
