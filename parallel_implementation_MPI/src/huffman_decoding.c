@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
 
 	fclose(fp);
 
-#ifdef DECODING_GATHER_STRATEGY
+#ifdef DECODING_GATHER_STR
 	if (pid == 0)
 		strLengths = calloc(proc_number, sizeof(int));
 
@@ -171,7 +171,7 @@ int main(int argc, char *argv[]) {
 		printf("\nDecoded text:\n%s\n", totalstring);
 #endif
 
-#ifdef DECODING_PACK_STRATEGY
+#ifdef DECODING_PACK_STR
 	if (pid != 0) {
 		MsgHeader header = {.id = MSG_TEXT, .size = 0, .type = NULL, .position = 0};
 		BYTE *buffer = getMessage(&header, decodingText.decodedText);

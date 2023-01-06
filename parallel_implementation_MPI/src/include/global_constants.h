@@ -16,11 +16,11 @@
 #define DEBUG_ENABLED 0
 #define DEBUG(PID) (DEBUG_ENABLED && PID == 0)
 
-#define MPI_TYPE_VERSION
-// #define BYTE_TYPE_VERSION
+#define MPI_TYPE_VER
+// #define BYTE_TYPE_VER
 
-// #define DECODING_PACK_STRATEGY //use MPI_Pack and MPI_Unpack
-#define DECODING_GATHER_STRATEGY // USE MPI_Gather and MPI_Gatherv
+// #define DECODING_PACK_STR //use MPI_Pack and MPI_Unpack
+#define DECODING_GATHER_STR // use MPI_Gather and MPI_Gatherv
 
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 
