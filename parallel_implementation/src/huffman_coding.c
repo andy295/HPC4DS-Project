@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	int thread_count = stringToInt(argv[1]);
+	int thread_count = proc_number; //stringToInt(argv[1]);
 	if (thread_count <= 0 || thread_count > MAX_THREADS) {
 		fprintf(stderr, "Invalid number of threads: %d\n", thread_count);
 		return 1;
@@ -19,6 +19,11 @@ int main(int argc, char *argv[]) {
 	omp_set_num_threads(thread_count);
 
 	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
+    addLogColumn(pid, "Sort Time");
+    addLogColumn(pid, "Encoding Time");
+    addLogColumn(pid, "Merge Encodings Time");
+    addLogColumn(pid, "Write Time");
+
 	takeTime(pid);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
@@ -73,7 +78,7 @@ int main(int argc, char *argv[]) {
 		oddEvenSort(&allChars);
 
 		takeTime(pid);
-		printTime(pid, "Time elapsed");
+		printTime(pid, "Sort Time");
 		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
 		float time = getTime(pid, "Time elapsed");
@@ -113,6 +118,12 @@ int main(int argc, char *argv[]) {
 
  	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
 
+	takeTime(pid);
+	printTime(pid, "Encoding Time");
+	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+
+	addLogData(pid, floatToString(getTime(pid, "Time elapsed")));
+
 	// send the encoded text to the master process
 	if (pid != 0) {
 		MsgHeader header = {.id = MSG_ENCODING_TEXT, .size = 0};
@@ -142,6 +153,13 @@ int main(int argc, char *argv[]) {
 			freeBuffer(rcvEncTxt.dimensions);
 			freeBuffer(rcvEncTxt.encodedText);
 		}
+
+		takeTime(pid);
+		printTime(pid, "Merge Encoding Time");
+		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+
+		float time = getTime(pid, "Time elapsed");
+		addLogData(pid, floatToString(time));
 	}
 
 	// master process writes data into file
@@ -192,12 +210,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	// takeTime(pid);
-	// printTime(pid, "Time elapsed");
-	// // saveTime(pid, TIME_LOG_FILE, "Time elapsed");
+	takeTime(pid);
+	printTime(pid, "Write time");
+	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
-	// float time = getTime(pid, "Time elapsed");
-	// addLogData(pid, floatToString(time));
+	addLogData(pid, floatToString(getTime(pid, "Time elapsed")));
 
 	terminateDataLogger();
 

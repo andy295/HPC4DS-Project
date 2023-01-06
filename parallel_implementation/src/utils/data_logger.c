@@ -15,7 +15,6 @@ void initDataLogger(int pid, bool enable) {
         addLogColumn(pid, "N.Processes");
         addLogColumn(pid, "N.Threads");
         addLogColumn(pid, "N.Characters");
-        addLogColumn(pid, "Time");
     }
 }
 void addLogColumn(int pid, const char *name) {
