@@ -4,13 +4,13 @@
 
 repeat_executions=10
 
-start_num_of_processes=2
-end_num_of_processes=20
-step_processes=1
+start_num_of_processes=1
+end_num_of_processes=16
+step_processes=2
 
-start_num_of_threads=2
-end_num_of_threads=20
-step_threads=1
+start_num_of_threads=1
+end_num_of_threads=16
+step_threads=2
 
 echo -e "Running ${repeat_executions} executions with processes from ${start_num_of_processes} to ${end_num_of_processes} skipping ${step} each step...\n"
 
@@ -31,7 +31,7 @@ do
                 rm parallel_implementation_MPI/output/out
             fi
 
-            qsub -q long_cpuQ -l select=$i:ncpus=$i -v "num_of_threads=$t" -o parallel_implementation_MPI/output/out -e parallel_implementation_MPI/output/err ./parallel_implementation_MPI/hc_batch_qsub.sh
+            qsub -q short_cpuQ -l select=$i:ncpus=$i -v "num_of_threads=$t" -o parallel_implementation_MPI/output/out -e parallel_implementation_MPI/output/err ./parallel_implementation_MPI/hc_batch_qsub.sh
 
             while ! test parallel_implementation_MPI/output/out -nt parallel_implementation_MPI/output/reference.txt; do
                 sleep 3; 
