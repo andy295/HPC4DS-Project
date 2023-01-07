@@ -9,14 +9,14 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	int thread_count = stringToInt(argv[1]);
-	if (thread_count <= 0 || thread_count > MAX_THREADS) {
-		fprintf(stderr, "Invalid number of threads: %d\n", thread_count);
+	int thread_number = stringToInt(argv[1]);
+	if (thread_number <= 0 || thread_number > MAX_THREADS) {
+		fprintf(stderr, "Invalid number of threads: %d\n", thread_number);
 		return 1;
 	}
 
 	omp_set_dynamic(0);
-	omp_set_num_threads(thread_count);
+	omp_set_num_threads(thread_number);
 
 	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
 	addLogColumn(pid, "Sort Time");
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 	printf("Process %d: %ld characters read\n", pid, processes_text_length);
 	addLogData(pid, intToString(proc_number));
-	addLogData(pid, intToString(thread_count));
+	addLogData(pid, intToString(thread_number));
 	addLogData(pid, intToString(processes_text_length));
 
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
@@ -196,7 +196,6 @@ int main(int argc, char *argv[]) {
 		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
 		addLogData(pid, floatToString(getTime(pid, "Time elapsed")));
-
 	}
 
 	// master process writes data into file
