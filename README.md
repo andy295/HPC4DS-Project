@@ -2,7 +2,7 @@
 
 High performance computing for data science project.
 
-Andrea Cristiano, matr.
+Andrea Cristiano, matr. 229370
 
 Gabriele Padovani, matr. 229207
 
