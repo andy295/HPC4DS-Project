@@ -1,5 +1,12 @@
 #include "include/huffman_coding.h"
 
+void timeCheckPoint(int pid, char* label){
+	takeTime(pid);
+	printTime(pid, label);
+	float time = getTime(pid, label);
+	addLogData(pid, floatToString(time));
+}
+
 int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
 
@@ -19,10 +26,16 @@ int main(int argc, char *argv[]) {
 	omp_set_num_threads(thread_number);
 
 	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
-	addLogColumn(pid, "Sort Time");
-    addLogColumn(pid, "Encoding Time");
-    addLogColumn(pid, "Merge Encodings Time");
-    addLogColumn(pid, "Write Time");
+	addLogColumn(pid, "Read File");
+	addLogColumn(pid, "Get Char Frequencies");
+	addLogColumn(pid, "Merge Char Frequencies");
+	addLogColumn(pid, "Sort Char Frequencies");
+	addLogColumn(pid, "Create Huffman Tree");
+	addLogColumn(pid, "Get Encoding from Tree");
+	addLogColumn(pid, "Encode Single Text");
+	addLogColumn(pid, "Merge Encoded Texts");
+	addLogColumn(pid, "Write Encoded Text");
+
 	takeTime(pid);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
@@ -38,15 +51,16 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	printf("Process %d: %ld characters read\n", pid, processes_text_length);
+	// printf("Process %d: %ld characters read\n", pid, processes_text_length);
 	addLogData(pid, intToString(proc_number));
 	addLogData(pid, intToString(thread_number));
 	addLogData(pid, intToString(processes_text_length));
 
+	timeCheckPoint(pid, "Read File");
+
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
 
-	// takeTime(pid);
-	// printTime(pid, "Time to get character frequencies");
+	timeCheckPoint(pid, "Get Char Frequencies");
 
 	MPI_Datatype charFreqDictType;
 	buildDatatype(MSG_DICTIONARY, &charFreqDictType);
@@ -80,30 +94,21 @@ int main(int argc, char *argv[]) {
 			freeBuffer(rcvCharFreq.charFreqs);
 		}
 
-		// takeTime(pid);
-		// printTime(pid, "Time to receive character frequencies from other processes");
+		timeCheckPoint(pid, "Merge Char Frequencies");
 
 		oddEvenSort(&allChars);
 
-		takeTime(pid);
-		printTime(pid, "Sort Time");
-		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
-
-		float time = getTime(pid, "Time elapsed");
-		addLogData(pid, floatToString(time));
-
+		timeCheckPoint(pid, "Sort Char Frequencies");
 
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);
 
-		// takeTime(pid);
-		// printTime(pid, "Time to create huffman tree");
+		timeCheckPoint(pid, "Create Huffman Tree");
 
 		// creates the encoding dictionary
 		getEncodingFromTree(&encodingDict, &allChars, root->item);
 
-		// takeTime(pid);
-		// printTime(pid, "Time to create encoding dictionary");
+		timeCheckPoint(pid, "Get Encoding from Tree");
 	}
 
 	MPI_Type_free(&charFreqDictType);
@@ -147,19 +152,11 @@ int main(int argc, char *argv[]) {
 	freeBuffer(buffer);
 #endif
 
-	// takeTime(pid);
-	// printTime(pid, "Time to send/receive encoding dictionary");
-
 	MPI_Type_free(&charEncDictType);
 
 	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
 
-	takeTime(pid);
-	printTime(pid, "Sort Time");
-	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
-
-	float time = getTime(pid, "Time elapsed");
-	addLogData(pid, floatToString(time));
+	timeCheckPoint(pid, "Encode Single Text");
 
 	// send the encoded text to the master process
 	if (pid != 0) {
@@ -191,11 +188,7 @@ int main(int argc, char *argv[]) {
 			freeBuffer(rcvEncTxt.encodedText);
 		}
 
-		takeTime(pid);
-		printTime(pid, "Sort Time");
-		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
-
-		addLogData(pid, floatToString(getTime(pid, "Time elapsed")));
+		timeCheckPoint(pid, "Merge Encoded Texts");
 	}
 
 	// master process writes data into file
@@ -246,11 +239,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-		takeTime(pid);
-		printTime(pid, "Write Time");
-		// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
-
-		addLogData(pid, floatToString(getTime(pid, "Time elapsed")));
+	timeCheckPoint(pid, "Write Encoded Text");
 
 	terminateDataLogger();
 

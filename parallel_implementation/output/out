@@ -1,5 +1,10 @@
-Process 0: 57260 characters read
-Sort Time: 0.008569
-Encoding Time: 0.011279
-Merge Encoding Time: 0.000006
-Write time: 0.027339
+Read File: 0.014362
+Get Char Frequencies: 0.001462
+Merge Char Frequencies: 0.831157
+Sort Char Frequencies: 0.000413
+Create Huffman Tree: 0.000040
+Get Encoding from Tree: 0.000173
+Send Encoding Table: 0.000112
+Encode Single Text: 0.000859
+Merge Encoded Texts: 0.000200
+Write Encoded Text: 0.076489

@@ -1,16 +1,14 @@
 
 #!/bin/bash
-# qsub -q short_cpuQ -l select=2:ncpus=2 -o parallel_implementation_MPI/output/out -e parallel_implementation_MPI/output/err ./parallel_implementation_MPI/hc_batch_qsub.sh
-
-repeat_executions=10
+repeat_executions=5
 
 start_num_of_processes=1
 end_num_of_processes=16
-step_processes=2
+step_processes=1
 
 start_num_of_threads=1
 end_num_of_threads=16
-step_threads=2
+step_threads=1
 
 echo -e "Running ${repeat_executions} executions with processes from ${start_num_of_processes} to ${end_num_of_processes} skipping ${step} each step...\n"
 

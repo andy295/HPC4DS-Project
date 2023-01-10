@@ -1,6 +1,5 @@
-Process 0: 543209 characters read
-Time to sort frequencies: 0.243187
-Time to create tree: 0.000053
-Time to get encoding dictionary: 0.000106
-Time to encode text: 0.108144
-Time to write to file: 1.100129
+Read File: 0.214528
+Parse Header: 0.000087
+Parse Huffman Tree: 0.000030
+Parse Block Lengths: 0.127684
+Decode File: 0.041690

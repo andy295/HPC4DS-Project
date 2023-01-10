@@ -1,5 +1,12 @@
 #include "include/huffman_decoding.h"
 
+void timeCheckPoint(int pid, char* label){
+	takeTime(pid);
+	printTime(pid, label);
+	float time = getTime(pid, label);
+	addLogData(pid, floatToString(time));
+}
+
 int roundUp(int numToRound, int multiple) {
     if (multiple == 0)
         return numToRound;
@@ -59,6 +66,16 @@ int main() {
 	TreeNode *root = calloc(1, sizeof(TreeNode));
 	DecodingText decodingText = {.length = 0, .decodedText = NULL};
 
+	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
+	addLogColumn(pid, "Read File");
+	addLogColumn(pid, "Parse Header");
+	addLogColumn(pid, "Parse Huffman Tree");
+	addLogColumn(pid, "Parse Block Lengths");
+	addLogColumn(pid, "Decode File");
+
+	addLogData(pid, intToString(proc_number));
+	addLogData(pid, intToString(0));
+	addLogData(pid, intToString(0));
 	takeTime(pid);
 
 	FILE *fp = openFile(ENCODED_FILE, READ_B, 0);
@@ -67,7 +84,11 @@ int main() {
 		return 1;
 	}
 
+	timeCheckPoint(pid, "Read File");
+
 	parseHeader(&header, fp);
+
+	timeCheckPoint(pid, "Parse Header");
 
 	if (DEBUG(pid)) {
 		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(unsigned int));
@@ -77,6 +98,8 @@ int main() {
 	parseHuffmanTree(root, fp);
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
+
+	timeCheckPoint(pid, "Parse Huffman Tree");
 
 	if (DEBUG(pid)) {
 		printf("Encoded tree size: %d\n", treeByteSize);
@@ -88,6 +111,8 @@ int main() {
 	int number_of_blocks = (fileSize - header.byteStartOfDimensionArray) / sizeof(unsigned short);
 	unsigned short *dimensions = calloc(number_of_blocks, sizeof(unsigned short));
 	parseBlockLengths(dimensions, fp, number_of_blocks, header.byteStartOfDimensionArray);
+
+	timeCheckPoint(pid, "Parse Block Lengths");
 
 	if (DEBUG(pid))
 		for (int i = 0; i < number_of_blocks; i++)
@@ -111,12 +136,16 @@ int main() {
 		fp,
 		root);
 
+	timeCheckPoint(pid, "Decode File");
+
 	fclose(fp);
 
-	printf("Decoded text:\n%s\n", decodingText.decodedText);
-	takeTime(pid);
-	printTime(pid, "Time elapsed");
+	// printf("Decoded text:\n%s\n", decodingText.decodedText);
+	// takeTime(pid);
+	// printTime(pid, "Time elapsed");
 	// saveTime(pid, LOG_FILE, "Time elapsed");
+
+	
 
 	freeBuffer(decodingText.decodedText);
 	freeBuffer(dimensions);

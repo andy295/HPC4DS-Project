@@ -1,19 +1,7 @@
-Process 4: 36213 characters read
-Process 13: 36213 characters read
-Process 6: 36213 characters read
-Process 14: 36227 characters read
-Process 11: 36213 characters read
-Process 3: 36213 characters read
-Process 5: 36213 characters read
-Process 9: 36213 characters read
-Process 0: 36213 characters read
-Process 2: 36213 characters read
-Process 7: 36213 characters read
-Process 1: 36213 characters read
-Process 8: 36213 characters read
-Process 10: 36213 characters read
-Process 12: 36213 characters read
-Sort Time: 0.486012
-Sort Time: 0.008092
-Sort Time: 0.001378
-Write Time: 0.037460
+Read File: 0.002881
+Parse Header: 0.000085
+Parse Huffman Tree: 0.000067
+Parse Block Lengths: 0.000172
+Calculate Block Range: 0.000015
+Decode Single Text: 0.010770
+Merge Decoded Texts: 0.235861

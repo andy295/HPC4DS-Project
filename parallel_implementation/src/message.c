@@ -1,6 +1,6 @@
 #include "include/message.h"
 
-#ifdef BYTE_TYPE_VER
+#ifdef BYTE_TYPE_VERSION
 BYTE* getMessage(MsgHeader *header, void *data) {
 	switch (header->id)
 	{
@@ -107,7 +107,7 @@ BYTE *serializeMsgText(MsgHeader *header, char *text) {
 }
 #endif
 
-#ifdef MPI_TYPE_VER
+#ifdef MPI_TYPE_VERSION
 void buildDatatype(int msgId, MPI_Datatype *type) {
 	switch (msgId)
 	{
@@ -235,7 +235,7 @@ BYTE* serializeMsgText(MsgHeader *header, char *text) {
 }
 #endif
 
-#ifdef BYTE_TYPE_VER
+#ifdef BYTE_TYPE_VERSION
 void setMessage(MsgHeader *header, void *data, BYTE *buffer) {
 	MsgHeader *p = (MsgHeader*)buffer;
 	switch (p->id)
@@ -330,7 +330,7 @@ void deserializeMsgText(MsgHeader *header, DecodingText *decodedText, BYTE *buff
 }
 #endif
 
-#ifdef MPI_TYPE_VER
+#ifdef MPI_TYPE_VERSION
 void setMessage(MsgHeader *header, void *data, BYTE *buffer) {
 	switch (header->id)
 	{

@@ -1,5 +1,12 @@
 #include "include/huffman_decoding.h"
 
+void timeCheckPoint(int pid, char* label){
+	takeTime(pid);
+	printTime(pid, label);
+	float time = getTime(pid, label);
+	addLogData(pid, floatToString(time));
+}
+
 int roundUp(int numToRound, int multiple) {
     if (multiple == 0)
         return numToRound;
@@ -65,6 +72,19 @@ int main(int argc, char *argv[]) {
 	omp_set_dynamic(0);
 	omp_set_num_threads(thread_count);
 
+	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
+	addLogColumn(pid, "Read File");
+	addLogColumn(pid, "Parse Header");
+	addLogColumn(pid, "Parse Huffman Tree");
+	addLogColumn(pid, "Parse Block Lengths");
+	addLogColumn(pid, "Calculate Block Range");
+	addLogColumn(pid, "Decode Single Text");
+	addLogColumn(pid, "Merge Decoded Texts");
+
+	addLogData(pid, intToString(proc_number));
+	addLogData(pid, intToString(thread_count));
+	addLogData(pid, intToString(0));
+
 	takeTime(pid);
 
 	int totLength = 0;
@@ -82,7 +102,11 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
+	timeCheckPoint(pid, "Read File");
+
 	parseHeader(&header, fp);
+
+	timeCheckPoint(pid, "Parse Header");
 
 	if (DEBUG(pid)) {
 		printf("Header size: %lu\n", FILE_HEADER_ELEMENTS * sizeof(unsigned int));
@@ -92,6 +116,8 @@ int main(int argc, char *argv[]) {
 	parseHuffmanTree(root, fp);
 	int nodes = countTreeNodes(root);
 	int treeByteSize = nodes * sizeof(TreeArrayItem);
+
+	timeCheckPoint(pid, "Parse Huffman Tree");
 
 	if (DEBUG(pid)) {
 		printf("Encoded tree size: %d\n", treeByteSize);
@@ -103,6 +129,8 @@ int main(int argc, char *argv[]) {
 	int number_of_blocks = (fileSize - header.byteStartOfDimensionArray) / sizeof(unsigned short);
 	unsigned short *dimensions = calloc(number_of_blocks, sizeof(unsigned short));
 	parseBlockLengths(dimensions, fp, number_of_blocks, header.byteStartOfDimensionArray);
+
+	timeCheckPoint(pid, "Parse Block Lengths");
 
 	if (DEBUG(pid))
 		for (int i = 0; i < number_of_blocks; i++)
@@ -118,6 +146,8 @@ int main(int argc, char *argv[]) {
 	int startPos = (sizeof(FileHeader) * FILE_HEADER_ELEMENTS) + treeByteSize;
 	startPos += (pid != 0) ? calculatePrevTextSize(dimensions, start) : 0;
 
+	timeCheckPoint(pid, "Calculate Block Range");
+
 	decodingText.decodedText = decodeFromFile(
 		startPos,
 		dimensions,
@@ -127,6 +157,8 @@ int main(int argc, char *argv[]) {
 		root);
 
 	decodingText.length = strlen(decodingText.decodedText);
+
+	timeCheckPoint(pid, "Decode Single Text");
 
 	fclose(fp);
 
@@ -200,11 +232,13 @@ int main(int argc, char *argv[]) {
 	MPI_Gatherv(decodingText.decodedText, decodingText.length, MPI_CHAR, totalstring, strLengths, dispLengths, MPI_CHAR, 0, MPI_COMM_WORLD);
 #endif
 
-	if (pid == 0)
-		printf("Decoded text:\n%s\n", totalstring);
+	timeCheckPoint(pid, "Merge Decoded Texts");
 
-	takeTime(pid);
-	printTime(pid, "Time elapsed");
+	// if (pid == 0)
+	// 	printf("Decoded text:\n%s\n", totalstring);
+
+	// takeTime(pid);
+	// printTime(pid, "Time elapsed");
 	// saveTime(pid, LOG_FILE, "Time elapsed");
 
     freeBuffer(totalstring);

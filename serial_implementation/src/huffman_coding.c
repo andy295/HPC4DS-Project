@@ -1,5 +1,12 @@
 #include "include/huffman_coding.h"
 
+void timeCheckPoint(int pid, char* label){
+	takeTime(pid);
+	printTime(pid, label);
+	float time = getTime(pid, label);
+	addLogData(pid, floatToString(time));
+}
+
 int main() {
 	MPI_Init(NULL, NULL);
 
@@ -10,6 +17,13 @@ int main() {
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
 	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
+	addLogColumn(pid, "Read File");
+	addLogColumn(pid, "Get Char Frequencies");
+	addLogColumn(pid, "Sort Char Frequencies");
+	addLogColumn(pid, "Create Huffman Tree");
+	addLogColumn(pid, "Get Encoding from Tree");
+	addLogColumn(pid, "Encode Single Text");
+	addLogColumn(pid, "Write Encoded Text");
 	takeTime(pid);
 
 	CharFreqDictionary allChars = {.number_of_chars = 0, .charFreqs = NULL};
@@ -25,34 +39,46 @@ int main() {
 		return 1;
 	}
 
-	printf("Process %d: %ld characters read\n", pid, processes_text_length);
+	// printf("Process %d: %ld characters read\n", pid, processes_text_length);
 	addLogData(pid, intToString(proc_number));
-	addLogData(pid, intToString(1));
+	addLogData(pid, intToString(0));
 	addLogData(pid, intToString(processes_text_length));
+
+	timeCheckPoint(pid, "Read File");
 
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
 
+	timeCheckPoint(pid, "Get Char Frequencies");
+
 	oddEvenSort(&allChars);
 
-	takeTime(pid);
-	printTime(pid, "Time to sort frequencies");
+	timeCheckPoint(pid, "Sort Char Frequencies");
+
+	// takeTime(pid);
+	// printTime(pid, "Time to sort frequencies");
 
 	// creates the huffman tree
 	root = createHuffmanTree(&allChars);
 
-	takeTime(pid);
-	printTime(pid, "Time to create tree");
+	timeCheckPoint(pid, "Create Huffman Tree");
+
+	// takeTime(pid);
+	// printTime(pid, "Time to create tree");
 
 	// creates the encoding dictionary
 	getEncodingFromTree(&encodingDict, &allChars, root->item);
 
-	takeTime(pid);
-	printTime(pid, "Time to get encoding dictionary");
+	timeCheckPoint(pid, "Get Encoding from Tree");
+
+	// takeTime(pid);
+	// printTime(pid, "Time to get encoding dictionary");
 
 	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
 
-	takeTime(pid);
-	printTime(pid, "Time to encode text");
+	timeCheckPoint(pid, "Encode Single Text");
+
+	// takeTime(pid);
+	// printTime(pid, "Time to encode text");
 
 	// convert tree into a suitable form for writing to file
 	int byteSizeOfTree;
@@ -104,8 +130,10 @@ int main() {
 
 	// saveTime(pid, TIME_LOG_FILE, "Time elapsed");
 
-	float time = getTime(pid, "Time elapsed");
-	addLogData(pid, floatToString(time));
+	// float time = getTime(pid, "Time elapsed");
+	// addLogData(pid, floatToString(time));
+
+	timeCheckPoint(pid, "Write Encoded Text");
 
 	terminateDataLogger();
 
