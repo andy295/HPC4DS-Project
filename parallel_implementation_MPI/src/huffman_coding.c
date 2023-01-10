@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 		for (int i = 1; i < proc_number; i++) {
 			MPI_Status status;
 			CharFreqDictionary rcvCharFreq = {.number_of_chars = 0, .charFreqs = NULL};
-			MsgProbe probe = {.header.id = MSG_DICTIONARY, .header.size = 0, .header.type = &charFreqDictType, .header.position = 0, .pid = i, .tag = 0};
+			MsgProbe probe = {.header.id = MSG_DICTIONARY, .header.size = 0, .header.type = &charFreqDictType, .header.position = 0, .pid = MPI_ANY_SOURCE, .tag = MPI_ANY_TAG};
 			BYTE *buffer = prepareForReceive(&probe, &status);
 
 			MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
