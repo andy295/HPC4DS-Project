@@ -19,7 +19,7 @@
 #define MPI_TYPE_VER
 // #define BYTE_TYPE_VER
 
-#define DECODING_STR 1	// 0 - MPI_Pack and MPI_Unpack
+#define DECODING_STR 0	// 0 - MPI_Pack and MPI_Unpack
 						// 1 - MPI_Gather and MPI_Gatherv
 
 #define ENCODING_DICTIONARY_STR	1	// 0 - MPI_BCAST
@@ -28,7 +28,6 @@
 #define TREE_PRINT_WITH_FREQ 0
 #define BITS_IN_BYTE 8 
 #define ENDTEXT '\0'
-#define CHARS_PER_BLOCK 125
 #define MAX_DIGITS 10
 #define MAX_THREADS 512
 #define MASTER_PROCESS 0

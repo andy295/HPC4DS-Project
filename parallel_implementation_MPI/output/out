@@ -1,7 +1,0 @@
-Read File: 0.002881
-Parse Header: 0.000085
-Parse Huffman Tree: 0.000067
-Parse Block Lengths: 0.000172
-Calculate Block Range: 0.000015
-Decode Single Text: 0.010770
-Merge Decoded Texts: 0.235861

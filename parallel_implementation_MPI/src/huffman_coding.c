@@ -7,6 +7,8 @@ void timeCheckPoint(int pid, char* label){
 	addLogData(pid, floatToString(time));
 }
 
+int CHARS_PER_BLOCK = 125; 
+
 int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
 
@@ -17,6 +19,7 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
 	int thread_number = stringToInt(argv[1]);
+	CHARS_PER_BLOCK = stringToInt(argv[2]);
 	if (thread_number <= 0 || thread_number > MAX_THREADS) {
 		fprintf(stderr, "Invalid number of threads: %d\n", thread_number);
 		return 1;
@@ -26,15 +29,17 @@ int main(int argc, char *argv[]) {
 	omp_set_num_threads(thread_number);
 
 	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
-	addLogColumn(pid, "Read File");
-	addLogColumn(pid, "Get Char Frequencies");
-	addLogColumn(pid, "Merge Char Frequencies");
-	addLogColumn(pid, "Sort Char Frequencies");
-	addLogColumn(pid, "Create Huffman Tree");
-	addLogColumn(pid, "Get Encoding from Tree");
-	addLogColumn(pid, "Encode Single Text");
-	addLogColumn(pid, "Merge Encoded Texts");
-	addLogColumn(pid, "Write Encoded Text");
+	// addLogColumn(pid, "Read File");
+	// addLogColumn(pid, "Get Char Frequencies");
+	// addLogColumn(pid, "Merge Char Frequencies");
+	// addLogColumn(pid, "Sort Char Frequencies");
+	// addLogColumn(pid, "Create Huffman Tree");
+	// addLogColumn(pid, "Get Encoding from Tree");
+	// addLogColumn(pid, "Encode Single Text");
+	// addLogColumn(pid, "Merge Encoded Texts");
+	// addLogColumn(pid, "Write Encoded Text");
+	addLogColumn(pid, "Chars Per Block");
+	addLogColumn(pid, "Compression Ratio");
 
 	takeTime(pid);
 
@@ -55,12 +60,13 @@ int main(int argc, char *argv[]) {
 	addLogData(pid, intToString(proc_number));
 	addLogData(pid, intToString(thread_number));
 	addLogData(pid, intToString(processes_text_length));
+	addLogData(pid, intToString(CHARS_PER_BLOCK)); 
 
-	timeCheckPoint(pid, "Read File");
+	// timeCheckPoint(pid, "Read File");
 
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
 
-	timeCheckPoint(pid, "Get Char Frequencies");
+	// timeCheckPoint(pid, "Get Char Frequencies");
 
 	MPI_Datatype charFreqDictType;
 	buildDatatype(MSG_DICTIONARY, &charFreqDictType);
@@ -94,21 +100,21 @@ int main(int argc, char *argv[]) {
 			freeBuffer(rcvCharFreq.charFreqs);
 		}
 
-		timeCheckPoint(pid, "Merge Char Frequencies");
+		// timeCheckPoint(pid, "Merge Char Frequencies");
 
 		oddEvenSort(&allChars);
 
-		timeCheckPoint(pid, "Sort Char Frequencies");
+		// timeCheckPoint(pid, "Sort Char Frequencies");
 
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);
 
-		timeCheckPoint(pid, "Create Huffman Tree");
+		// timeCheckPoint(pid, "Create Huffman Tree");
 
 		// creates the encoding dictionary
 		getEncodingFromTree(&encodingDict, &allChars, root->item);
 
-		timeCheckPoint(pid, "Get Encoding from Tree");
+		// timeCheckPoint(pid, "Get Encoding from Tree");
 	}
 
 	MPI_Type_free(&charFreqDictType);
@@ -154,9 +160,9 @@ int main(int argc, char *argv[]) {
 
 	MPI_Type_free(&charEncDictType);
 
-	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length);
+	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length, CHARS_PER_BLOCK);
 
-	timeCheckPoint(pid, "Encode Single Text");
+	// timeCheckPoint(pid, "Encode Single Text");
 
 	// send the encoded text to the master process
 	if (pid != 0) {
@@ -188,7 +194,7 @@ int main(int argc, char *argv[]) {
 			freeBuffer(rcvEncTxt.encodedText);
 		}
 
-		timeCheckPoint(pid, "Merge Encoded Texts");
+		// timeCheckPoint(pid, "Merge Encoded Texts");
 	}
 
 	// master process writes data into file
@@ -239,7 +245,14 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	timeCheckPoint(pid, "Write Encoded Text");
+	// timeCheckPoint(pid, "Write Encoded Text");
+
+	int initialFileSize = getFileSize(SRC_FILE); 
+	int encodedFileSize = getFileSize(ENCODED_FILE); 
+
+	float compressionRatio = ((float)encodedFileSize)*100 / initialFileSize; 
+
+	addLogData(pid, floatToString(compressionRatio)); 
 
 	terminateDataLogger();
 
