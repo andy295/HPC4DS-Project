@@ -1,13 +1,6 @@
 #include "include/huffman_coding.h"
 
-void timeCheckPoint(int pid, char* label){
-	takeTime(pid);
-	printTime(pid, label);
-	float time = getTime(pid, label);
-	addLogData(pid, floatToString(time));
-}
-
-int CHARS_PER_BLOCK = 125; 
+static int charsPerBlock = 125; 
 
 int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
@@ -19,27 +12,21 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
 	int thread_number = stringToInt(argv[1]);
-	CHARS_PER_BLOCK = stringToInt(argv[2]);
 	if (thread_number <= 0 || thread_number > MAX_THREADS) {
 		fprintf(stderr, "Invalid number of threads: %d\n", thread_number);
+		return 1;
+	}
+
+	charsPerBlock = stringToInt(argv[2]);
+	if (charsPerBlock <= 0 || charsPerBlock > MAX_CHARS_PER_BLOCK) {
+		fprintf(stderr, "Invalid number of characters per block: %d\n", charsPerBlock);
 		return 1;
 	}
 
 	omp_set_dynamic(0);
 	omp_set_num_threads(thread_number);
 
-	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
-	// addLogColumn(pid, "Read File");
-	// addLogColumn(pid, "Get Char Frequencies");
-	// addLogColumn(pid, "Merge Char Frequencies");
-	// addLogColumn(pid, "Sort Char Frequencies");
-	// addLogColumn(pid, "Create Huffman Tree");
-	// addLogColumn(pid, "Get Encoding from Tree");
-	// addLogColumn(pid, "Encode Single Text");
-	// addLogColumn(pid, "Merge Encoded Texts");
-	// addLogColumn(pid, "Write Encoded Text");
-	addLogColumn(pid, "Chars Per Block");
-	addLogColumn(pid, "Compression Ratio");
+	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false, ENCODING);
 
 	takeTime(pid);
 
@@ -60,7 +47,7 @@ int main(int argc, char *argv[]) {
 	addLogData(pid, intToString(proc_number));
 	addLogData(pid, intToString(thread_number));
 	addLogData(pid, intToString(processes_text_length));
-	addLogData(pid, intToString(CHARS_PER_BLOCK)); 
+	addLogData(pid, intToString(charsPerBlock)); 
 
 	// timeCheckPoint(pid, "Read File");
 
@@ -160,7 +147,7 @@ int main(int argc, char *argv[]) {
 
 	MPI_Type_free(&charEncDictType);
 
-	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length, CHARS_PER_BLOCK);
+	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length, charsPerBlock);
 
 	// timeCheckPoint(pid, "Encode Single Text");
 

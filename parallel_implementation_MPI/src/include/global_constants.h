@@ -29,6 +29,7 @@
 #define BITS_IN_BYTE 8 
 #define ENDTEXT '\0'
 #define MAX_DIGITS 10
+#define MAX_CHARS_PER_BLOCK 10000
 #define MAX_THREADS 512
 #define MASTER_PROCESS 0
 

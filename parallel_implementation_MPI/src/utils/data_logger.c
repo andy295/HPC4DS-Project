@@ -4,7 +4,7 @@ static const int MAX_DATA_LOGGER_ROW_SIZE = 1000;
 
 DataLogger dataLogger = { NULL, 0, NULL, 0, 0, false};
 
-void initDataLogger(int pid, bool enable) {
+void initDataLogger(int pid, bool enable, int type) {
     dataLogger.referenceProcess = pid;
     dataLogger.active = enable;
 
@@ -16,6 +16,28 @@ void initDataLogger(int pid, bool enable) {
         addLogColumn(pid, "N.Threads");
         addLogColumn(pid, "N.Characters");
         // addLogColumn(pid, "Time");
+
+        if (type == ENCODING) {
+            // addLogColumn(pid, "Read File");
+            // addLogColumn(pid, "Get Char Frequencies");
+            // addLogColumn(pid, "Merge Char Frequencies");
+            // addLogColumn(pid, "Sort Char Frequencies");
+            // addLogColumn(pid, "Create Huffman Tree");
+            // addLogColumn(pid, "Get Encoding from Tree");
+            // addLogColumn(pid, "Encode Single Text");
+            // addLogColumn(pid, "Merge Encoded Texts");
+            // addLogColumn(pid, "Write Encoded Text");
+            addLogColumn(pid, "Chars Per Block");
+            addLogColumn(pid, "Compression Ratio");
+        } else if (type == DECODING) {
+            addLogColumn(pid, "Read File");
+            addLogColumn(pid, "Parse Header");
+            addLogColumn(pid, "Parse Huffman Tree");
+            addLogColumn(pid, "Parse Block Lengths");
+            addLogColumn(pid, "Calculate Block Range");
+            addLogColumn(pid, "Decode Single Text");
+            addLogColumn(pid, "Merge Decoded Texts");
+        }
     }
 }
 void addLogColumn(int pid, const char *name) {
@@ -70,11 +92,11 @@ void saveRowToFile(char *filename) {
     fclose(fp);
 }
 
-void setDataLoggerReferenceProcess(int pid) {
+void setDataLoggerReferenceProcess(int pid, int type) {
     if(dataLogger.active)
         dataLogger.referenceProcess = pid;
     else
-        initDataLogger(pid, true);
+        initDataLogger(pid, true, type);
 }
 
 void terminateDataLogger() {
@@ -86,9 +108,9 @@ void terminateDataLogger() {
     freeBuffer(dataLogger.logRow);
 }
 
-void enableDataLogger(int pid) {
+void enableDataLogger(int pid, int type) {
     if (dataLogger.active)
         return;
 
-    initDataLogger(pid, true);
+    initDataLogger(pid, true, type);
 }

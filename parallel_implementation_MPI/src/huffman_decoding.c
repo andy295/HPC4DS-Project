@@ -1,12 +1,5 @@
 #include "include/huffman_decoding.h"
 
-void timeCheckPoint(int pid, char* label){
-	takeTime(pid);
-	printTime(pid, label);
-	float time = getTime(pid, label);
-	addLogData(pid, floatToString(time));
-}
-
 int roundUp(int numToRound, int multiple) {
     if (multiple == 0)
         return numToRound;
@@ -72,14 +65,7 @@ int main(int argc, char *argv[]) {
 	omp_set_dynamic(0);
 	omp_set_num_threads(thread_number);
 
-	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
-	addLogColumn(pid, "Read File");
-	addLogColumn(pid, "Parse Header");
-	addLogColumn(pid, "Parse Huffman Tree");
-	addLogColumn(pid, "Parse Block Lengths");
-	addLogColumn(pid, "Calculate Block Range");
-	addLogColumn(pid, "Decode Single Text");
-	addLogColumn(pid, "Merge Decoded Texts");
+	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false, DECODING);
 
 	addLogData(pid, intToString(proc_number));
 	addLogData(pid, intToString(thread_number));
