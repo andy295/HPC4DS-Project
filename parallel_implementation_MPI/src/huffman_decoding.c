@@ -63,14 +63,14 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	int thread_count = stringToInt(argv[1]);
-	if (thread_count <= 0 || thread_count > MAX_THREADS) {
-		fprintf(stderr, "Invalid number of threads: %d\n", thread_count);
+	int thread_number = stringToInt(argv[1]);
+	if (thread_number <= 0 || thread_number > MAX_THREADS) {
+		fprintf(stderr, "Invalid number of threads: %d\n", thread_number);
 		return 1;
 	}
 
 	omp_set_dynamic(0);
-	omp_set_num_threads(thread_count);
+	omp_set_num_threads(thread_number);
 
 	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
 	addLogColumn(pid, "Read File");
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 	addLogColumn(pid, "Merge Decoded Texts");
 
 	addLogData(pid, intToString(proc_number));
-	addLogData(pid, intToString(thread_count));
+	addLogData(pid, intToString(thread_number));
 	addLogData(pid, intToString(0));
 
 	takeTime(pid);
