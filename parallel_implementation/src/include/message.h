@@ -20,7 +20,7 @@ static const int MSG_ENCODING_TEXT_SIZE = 2;
 static const int MSG_TEXT_SIZE = 1;
 #endif
 
-#ifdef BYTE_TYPE_VERSION
+#ifdef BYTE_TYPE_VER
 typedef struct MsgHeader {
     int id; // message id
     int size; // size of the message in bytes
@@ -53,7 +53,7 @@ typedef struct MsgText {
 } MsgText;
 #endif
 
-#ifdef MPI_TYPE_VERSION
+#ifdef MPI_TYPE_VER
 typedef struct MsgHeader {
     int id; // message id
     int size; // size of the message in bytes

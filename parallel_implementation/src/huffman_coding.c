@@ -1,12 +1,5 @@
 #include "include/huffman_coding.h"
 
-void timeCheckPoint(int pid, char* label){
-	takeTime(pid);
-	printTime(pid, label);
-	float time = getTime(pid, label);
-	addLogData(pid, floatToString(time));
-}
-
 int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
 
@@ -16,26 +9,16 @@ int main(int argc, char *argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &proc_number);
 	MPI_Comm_rank(MPI_COMM_WORLD, &pid);
 
-	int thread_count = proc_number; //stringToInt(argv[1]);
-	if (thread_count <= 0 || thread_count > MAX_THREADS) {
-		fprintf(stderr, "Invalid number of threads: %d\n", thread_count);
+	int thread_number = proc_number; //stringToInt(argv[1]);
+	if (thread_number <= 0 || thread_number > MAX_THREADS) {
+		fprintf(stderr, "Invalid number of threads: %d\n", thread_number);
 		return 1;
 	}
 
 	omp_set_dynamic(0);
-	omp_set_num_threads(thread_count);
+	omp_set_num_threads(thread_number);
 
-	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false);
-  	addLogColumn(pid, "Read File");
-	addLogColumn(pid, "Get Char Frequencies");
-	addLogColumn(pid, "Merge Char Frequencies");
-	addLogColumn(pid, "Sort Char Frequencies");
-	addLogColumn(pid, "Create Huffman Tree");
-	addLogColumn(pid, "Get Encoding from Tree");
-	addLogColumn(pid, "Send Encoding Table"); 
-	addLogColumn(pid, "Encode Single Text");
-	addLogColumn(pid, "Merge Encoded Texts");
-	addLogColumn(pid, "Write Encoded Text");
+	initDataLogger(MASTER_PROCESS, (pid == MASTER_PROCESS) ? true : false, ENCODING);
 
 	takeTime(pid);
 
@@ -54,7 +37,7 @@ int main(int argc, char *argv[]) {
 
 	// printf("Process %d: %ld characters read\n", pid, processes_text_length);
 	addLogData(pid, intToString(proc_number));
-	addLogData(pid, intToString(thread_count));
+	addLogData(pid, intToString(thread_number));
 	addLogData(pid, intToString(processes_text_length));
 
 	timeCheckPoint(pid, "Read File");
@@ -111,7 +94,7 @@ int main(int argc, char *argv[]) {
 
 		// creates the encoding dictionary
 		getEncodingFromTree(&encodingDict, &allChars, root->item);
-		
+
 		timeCheckPoint(pid, "Get Encoding from Tree");
 	}
 
