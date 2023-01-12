@@ -46,8 +46,8 @@ void copyEncodedText(EncodingText *encodingText, char *currentChar) {
 	*currentChar = 0;
 }
 
-void updateDimensions(int nrOfChars, unsigned short *dimensions, unsigned short *bitSizeOfBlock, int index, int CHARS_PER_BLOCK) {
-	int idx = (nrOfChars > 0) ? ((nrOfChars+1) / CHARS_PER_BLOCK) - 1 : index;
+void updateDimensions(int nrOfChars, unsigned short *dimensions, unsigned short *bitSizeOfBlock, int index, int charsPerBlock) {
+	int idx = (nrOfChars > 0) ? ((nrOfChars+1) / charsPerBlock) - 1 : index;
 	dimensions[idx] = *bitSizeOfBlock;
 	*bitSizeOfBlock = 0;
 }
@@ -71,10 +71,10 @@ void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingT
 	#endif
 }
 
-void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary *encodingDict, char *text, int total_chars, int CHARS_PER_BLOCK) {
+void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary *encodingDict, char *text, int total_chars, int charsPerBlock) {
 	char c = 0;
 
-	encodingText->nr_of_dim = (total_chars % CHARS_PER_BLOCK != 0) ? (total_chars / CHARS_PER_BLOCK) + 1 : total_chars / CHARS_PER_BLOCK;
+	encodingText->nr_of_dim = (total_chars % charsPerBlock != 0) ? (total_chars / charsPerBlock) + 1 : total_chars / charsPerBlock;
 	encodingText->dimensions = calloc(encodingText->nr_of_dim, sizeof(short));
 
 	encodingText->encodedText = malloc(sizeof(BYTE) * total_chars);
@@ -91,8 +91,8 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary 
 			}
 		}
 
-		if ((i+1) % CHARS_PER_BLOCK == 0 && i > 0) {
-			updateDimensions(i, encodingText->dimensions, &bitSizeOfBlock, 0, CHARS_PER_BLOCK);
+		if ((i+1) % charsPerBlock == 0 && i > 0) {
+			updateDimensions(i, encodingText->dimensions, &bitSizeOfBlock, 0, charsPerBlock);
 
 			if (encodingText->nr_of_bits > 0 && encodingText->nr_of_bits % BITS_IN_BYTE != 0)
 				copyEncodedText(encodingText, &c);
@@ -106,7 +106,7 @@ void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary 
 			copyEncodedText(encodingText, &c);
 
 		if (bitSizeOfBlock > 0)
-			updateDimensions(0, encodingText->dimensions, &bitSizeOfBlock, encodingText->nr_of_dim-1, CHARS_PER_BLOCK);
+			updateDimensions(0, encodingText->dimensions, &bitSizeOfBlock, encodingText->nr_of_dim-1, charsPerBlock);
 	}
 
 	// reduce encoded text size if this last is smaller than the allocated one

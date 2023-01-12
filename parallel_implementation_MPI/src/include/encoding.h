@@ -34,12 +34,12 @@ typedef struct DecodingText {
 bool findEncodingFromTree(char character, TreeNode *root, CharEncoding *dst, int depth);
 void appendStringToByteArray(CharEncoding *charEncoding, EncodingText *encodingText, char *currentChar);
 void copyEncodedText(EncodingText *encodingText, char *currentChar);
-void updateDimensions(int nrOfChars, unsigned short *dimensions, unsigned short *bitSizeOfBlock, int index, int CHARS_PER_BLOCK);
+void updateDimensions(int nrOfChars, unsigned short *dimensions, unsigned short *bitSizeOfBlock, int index, int charsPerBlock);
 char* appendCharacter(char *text, char c, int *idx);
 
 extern CharEncoding* getEncoding(CharEncodingDictionary *dict, char character);
 extern void getEncodingFromTree(CharEncodingDictionary *encodingDict, CharFreqDictionary *charFreqDict, TreeNode *root); 
-extern void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary *encodingDict, char *text, int total_chars,int CHARS_PER_BLOCK);
+extern void encodeStringToByteArray(EncodingText *encodingText, CharEncodingDictionary *encodingDict, char *text, int total_chars, int charsPerBlock);
 extern void mergeEncodedText(EncodingText *dst, EncodingText *src);
 
 extern char* decodeFromFile(int startByte, unsigned short *dimensions, int blockStart, int blockNr, FILE *fp, TreeNode *root);

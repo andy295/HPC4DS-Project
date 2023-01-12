@@ -64,7 +64,7 @@ void setTimeUtilsReferenceProcess(int pid) {
     timeUtils.lastElapsedTime = 0;
 }
 
-void timeCheckPoint(int pid, char* label) {
+void timeCheckPoint(int pid, char *label) {
 	takeTime(pid);
 	printTime(pid, label);
 	float time = getTime(pid, label);

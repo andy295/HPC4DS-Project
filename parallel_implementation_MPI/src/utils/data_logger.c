@@ -40,6 +40,7 @@ void initDataLogger(int pid, bool enable, int type) {
         }
     }
 }
+
 void addLogColumn(int pid, const char *name) {
     if (pid != dataLogger.referenceProcess)
         return;
