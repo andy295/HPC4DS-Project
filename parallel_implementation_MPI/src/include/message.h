@@ -59,7 +59,7 @@ typedef struct MsgHeader {
     int size; // size of the message in bytes
     MPI_Datatype *type; // message type
     int position; // position in the buffer
-} MsgHeader ;
+} MsgHeader;
 
 extern void buildDatatype(int msgId, MPI_Datatype *type);
 void buildCharFreqDictionaryType(MPI_Datatype *charFrecDictType);
