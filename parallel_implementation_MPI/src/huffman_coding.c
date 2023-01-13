@@ -1,6 +1,57 @@
 #include "include/huffman_coding.h"
 
-static int charsPerBlock = 125; 
+static int charsPerBlock = 125;
+
+void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_Datatype *charFreqDictType, bool withMaster) {
+    int half = proc_number / 2;
+
+    if (pid >= (half + (withMaster ? 0 : 1))) {
+        if (pid != 0) {
+			MsgHeader header = {.id = MSG_DICTIONARY, .size = 0, .type = charFreqDictType, .position = 0};
+			BYTE *buffer = getMessage(&header, dict);
+
+			if (buffer == NULL || header.size <= 0) {
+				fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
+				return 1;
+			}
+
+			int receiver = pid - half;
+			MPI_Send(buffer, header.position, MPI_PACKED, receiver, 0, MPI_COMM_WORLD);
+
+			freeBuffer(buffer);
+        }
+    } else {
+        if (pid != 0 || (pid == 0 && withMaster)) {
+			MPI_Status status;
+			CharFreqDictionary rcvCharFreq = {.number_of_chars = 0, .charFreqs = NULL};
+			MsgProbe probe = {
+				.header.id = MSG_DICTIONARY,
+				.header.size = 0,
+				.header.type = charFreqDictType,
+				.header.position = 0,
+				.pid = pid + half,
+				.tag = 0};
+			BYTE *buffer = prepareForReceive(&probe, &status);
+
+			MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
+			setMessage(&probe.header, &rcvCharFreq, buffer);
+
+			mergeCharFreqs(dict, &rcvCharFreq, LAST_R);
+
+			freeBuffer(buffer);
+			freeBuffer(rcvCharFreq.charFreqs);
+        }
+
+        if (half % 2 != 0 && withMaster)
+            --half;
+        else if (half % 2 != 0 && !withMaster) {
+            ++half;
+            withMaster = true;
+        }
+
+        unorderedSendRecv(half, pid, dict, charFreqDictType, withMaster);
+    }
+}
 
 int main(int argc, char *argv[]) {
 	MPI_Init(NULL, NULL);
@@ -58,35 +109,48 @@ int main(int argc, char *argv[]) {
 	MPI_Datatype charFreqDictType;
 	buildDatatype(MSG_DICTIONARY, &charFreqDictType);
 
-	// send the character frequencies to the master process
-	if (pid != 0) {
-		MsgHeader header = {.id = MSG_DICTIONARY, .size = 0, .type = &charFreqDictType, .position = 0};
-		BYTE *buffer = getMessage(&header, &allChars);
+	if (proc_number <= 0) {
+		// send the character frequencies to the master process
+		if (pid != 0) {
+			MsgHeader header = {.id = MSG_DICTIONARY, .size = 0, .type = &charFreqDictType, .position = 0};
+			BYTE *buffer = getMessage(&header, &allChars);
 
-		if (buffer == NULL || header.size <= 0) {
-			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
-			return 1;
-		}
+			if (buffer == NULL || header.size <= 0) {
+				fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
+				return 1;
+			}
 
-		MPI_Send(buffer, header.position, MPI_PACKED, 0, 0, MPI_COMM_WORLD);
-
-		freeBuffer(buffer);
-	} else { // receive the character frequencies dictionary from the other processes
-		for (int i = 1; i < proc_number; i++) {
-			MPI_Status status;
-			CharFreqDictionary rcvCharFreq = {.number_of_chars = 0, .charFreqs = NULL};
-			MsgProbe probe = {.header.id = MSG_DICTIONARY, .header.size = 0, .header.type = &charFreqDictType, .header.position = 0, .pid = MPI_ANY_SOURCE, .tag = MPI_ANY_TAG};
-			BYTE *buffer = prepareForReceive(&probe, &status);
-
-			MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
-			setMessage(&probe.header, &rcvCharFreq, buffer);
-
-			mergeCharFreqs(&allChars, &rcvCharFreq, LAST_R);
+			MPI_Send(buffer, header.position, MPI_PACKED, 0, 0, MPI_COMM_WORLD);
 
 			freeBuffer(buffer);
-			freeBuffer(rcvCharFreq.charFreqs);
+		} else { // receive the character frequencies dictionary from the other processes
+			for (int i = 1; i < proc_number; i++) {
+				MPI_Status status;
+				CharFreqDictionary rcvCharFreq = {.number_of_chars = 0, .charFreqs = NULL};
+				MsgProbe probe = {.header.id = MSG_DICTIONARY, .header.size = 0, .header.type = &charFreqDictType, .header.position = 0, .pid = MPI_ANY_SOURCE, .tag = MPI_ANY_TAG};
+				BYTE *buffer = prepareForReceive(&probe, &status);
+
+				MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
+				setMessage(&probe.header, &rcvCharFreq, buffer);
+
+				mergeCharFreqs(&allChars, &rcvCharFreq, LAST_R);
+
+				freeBuffer(buffer);
+				freeBuffer(rcvCharFreq.charFreqs);
+			}
+		}
+	} else {
+		bool withMaster = true;
+		int np = proc_number;
+		if (np % 2 != 0) {
+			--np;
+			withMaster = false;
 		}
 
+		unorderedSendRecv(np, pid, &allChars, &charFreqDictType, withMaster);
+	}
+
+	if (pid == 0) {
 		// timeCheckPoint(pid, "Merge Char Frequencies");
 
 		oddEvenSort(&allChars);
