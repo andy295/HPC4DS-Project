@@ -208,7 +208,7 @@ CharEncoding* getEncoding(CharEncodingDictionary *dict, char character) {
 void mergeDecodedText(DecodingText *dst, DecodingText *src) {
 	int oldLength = --(dst->length);
 	dst->length += src->length;
-	dst->decodedText = realloc(dst->decodedText, sizeof(char) * dst->length);
-
+	dst->decodedText = realloc(dst->decodedText, sizeof(char) * (dst->length + src->length));
+	// memcpy(dst->decodedText + dst->length, src->decodedText, src->length);
 	memcpy(dst->decodedText + oldLength, src->decodedText, src->length);
 }

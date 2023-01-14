@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 
 	takeTime(pid);
 
-	int totLength = 0;
+	// int totLength = 0;
 	int *strLengths = NULL;
 	int *dispLengths = NULL;
     char *totalstring = NULL;
@@ -118,9 +118,9 @@ int main(int argc, char *argv[]) {
 
 	timeCheckPoint(pid, "Parse Block Lengths");
 
-	if (DEBUG(pid))
-		for (int i = 0; i < number_of_blocks; i++)
-			printf("dimensions[%d]: %d\n", i, dimensions[i]);
+	// if (DEBUG(pid))
+	// 	for (int i = 0; i < number_of_blocks; i++)
+	// 		printf("dimensions[%d]: %d\n", i, dimensions[i]);
 
 	int start = 0;
 	int end = 0;
@@ -180,6 +180,12 @@ int main(int argc, char *argv[]) {
 			freeBuffer(buffer);
 		}
 	}
+
+	timeCheckPoint(pid, "Merge Decoded Texts");
+
+	if (pid == 0)
+		printf("Decoded text:\n%s\n", decodingText.decodedText);
+
 #elif DECODING_STR == 1
 	if (pid == 0)
 		strLengths = calloc(proc_number, sizeof(int));
@@ -216,12 +222,12 @@ int main(int argc, char *argv[]) {
 
 	// send/receive the decoded text
 	MPI_Gatherv(decodingText.decodedText, decodingText.length, MPI_CHAR, totalstring, strLengths, dispLengths, MPI_CHAR, 0, MPI_COMM_WORLD);
-#endif
-
+	
 	timeCheckPoint(pid, "Merge Decoded Texts");
 
-	// if (pid == 0)
-	// 	printf("Decoded text:\n%s\n", totalstring);
+	if (pid == 0)
+		printf("Decoded text:\n%s\n", totalstring);
+#endif
 
 	// takeTime(pid);
 	// printTime(pid, "Time elapsed");
