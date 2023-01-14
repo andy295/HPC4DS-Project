@@ -1,10 +1,8 @@
 # HPC4DS-Project - Huffman Coding
 
-High performance computing for data science project.
+High Performance Computing for Data Science project.
 
-Andrea Cristiano, matr. 229370
-
-Gabriele Padovani, matr. 229207
+Andrea Cristiano, matr. 229370  ----- Gabriele Padovani, matr. 229207
 
 ## Project Structure
 
