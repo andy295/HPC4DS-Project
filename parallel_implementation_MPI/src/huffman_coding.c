@@ -6,21 +6,25 @@ void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_D
     int half = proc_number / 2;
 
     if (pid >= (half + (withMaster ? 0 : 1))) {
-        if (pid != 0) {
-			MsgHeader header = {.id = MSG_DICTIONARY, .size = 0, .type = charFreqDictType, .position = 0};
-			BYTE *buffer = getMessage(&header, dict);
+         if (pid == 0)
+            return;
 
-			if (buffer == NULL || header.size <= 0) {
-				fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
-				return;
-			}
+		MsgHeader header = {.id = MSG_DICTIONARY, .size = 0, .type = charFreqDictType, .position = 0};
+		BYTE *buffer = getMessage(&header, dict);
 
-			int receiver = pid - half;
-			MPI_Send(buffer, header.position, MPI_PACKED, receiver, 0, MPI_COMM_WORLD);
+		if (buffer == NULL || header.size <= 0) {
+			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
+			return;
+		}
 
-			freeBuffer(buffer);
-        }
+		int receiver = pid - half;
+		MPI_Send(buffer, header.position, MPI_PACKED, receiver, 0, MPI_COMM_WORLD);
+
+		freeBuffer(buffer);
     } else {
+		if (half <= 0)
+			return;
+
         if (pid != 0 || (pid == 0 && withMaster)) {
 			MPI_Status status;
 			CharFreqDictionary rcvCharFreq = {.number_of_chars = 0, .charFreqs = NULL};
@@ -42,8 +46,10 @@ void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_D
 			freeBuffer(rcvCharFreq.charFreqs);
         }
 
-        if (half % 2 != 0 && withMaster)
+        if (half % 2 != 0 && withMaster) {
             --half;
+			withMaster = false;
+		}
         else if (half % 2 != 0 && !withMaster) {
             ++half;
             withMaster = true;
