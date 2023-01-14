@@ -11,7 +11,7 @@ Gabriele Padovani, matr. 229207
 The project structure is split into three main sections: 
 - Serial implementation (found in the folder `serial_implementation`): which consists in a basic version of huffman encoding without using any multi-process or threading technique; 
 - Parallel basic implementation (found in the folder `parallel_implementation`): which makes use of basic MPI_Send and MPI_Recv calls, as well as openMP directives.
-- Parallel mpi implementation (found in the folder `parallel_implementation_MPI`): which also uses advanced MPI techniques, such as ...
+- Parallel mpi implementation (found in the folder `parallel_implementation_MPI`): which also uses advanced MPI techniques, such as MPI_Gather and MPI_Bcast.
 
 ## Running
 
