@@ -18,16 +18,16 @@ void initDataLogger(int pid, bool enable, int type) {
         // addLogColumn(pid, "Time");
 
         if (type == ENCODING) {
-            // addLogColumn(pid, "Read File");
-            // addLogColumn(pid, "Get Char Frequencies");
-            // addLogColumn(pid, "Merge Char Frequencies");
-            // addLogColumn(pid, "Sort Char Frequencies");
-            // addLogColumn(pid, "Create Huffman Tree");
-            // addLogColumn(pid, "Get Encoding from Tree");
-            // addLogColumn(pid, "Encode Single Text");
-            // addLogColumn(pid, "Merge Encoded Texts");
-            // addLogColumn(pid, "Write Encoded Text");
             addLogColumn(pid, "Chars Per Block");
+            addLogColumn(pid, "Read File");
+            addLogColumn(pid, "Get Char Frequencies");
+            addLogColumn(pid, "Merge Char Frequencies");
+            addLogColumn(pid, "Sort Char Frequencies");
+            addLogColumn(pid, "Create Huffman Tree");
+            addLogColumn(pid, "Get Encoding from Tree");
+            addLogColumn(pid, "Encode Single Text");
+            addLogColumn(pid, "Merge Encoded Texts");
+            addLogColumn(pid, "Write Encoded Text");
             addLogColumn(pid, "Compression Ratio");
         } else if (type == DECODING) {
             addLogColumn(pid, "Read File");

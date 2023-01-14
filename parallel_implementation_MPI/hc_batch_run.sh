@@ -1,6 +1,6 @@
 
 #!/bin/bash
-repeat_executions=3
+repeat_executions=1
 
 start_num_of_processes=1
 end_num_of_processes=16

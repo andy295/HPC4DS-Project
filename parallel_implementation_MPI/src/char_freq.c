@@ -46,31 +46,55 @@ void getCharFreqsFromText(CharFreqDictionary *dict, char text[], long len, int p
 }
 
 void oddEvenSort(CharFreqDictionary *res) {
-    int phase = 0;
-    int i = 0;
+    // int phase = 0;
+    // int i = 0;
     CharFreq tmp = {.character = 0, .frequency = 0};
 
-    #pragma omp parallel num_threads(omp_get_max_threads()) default(none) shared(res) firstprivate(phase, i, tmp)
-    for (phase = 0; phase < res->number_of_chars; phase++) {
-        if (phase % 2 == 0) {
-            #pragma omp for
-            for (i = 1; i < res->number_of_chars; i += 2) {
+    // #pragma omp parallel num_threads(omp_get_max_threads()) default(none) shared(res) firstprivate(phase, i, tmp)
+    // for (phase = 0; phase < res->number_of_chars; phase++) {
+    //     if (phase % 2 == 0) {
+    //         #pragma omp for
+    //         for (i = 1; i < res->number_of_chars; i += 2) {
+    //             if (res->charFreqs[i-1].frequency > res->charFreqs[i].frequency) {
+    //                 tmp = res->charFreqs[i-1];
+    //                 res->charFreqs[i-1] = res->charFreqs[i];
+    //                 res->charFreqs[i] = tmp;
+    //             }
+    //         }
+    //     } else {
+    //         #pragma omp for
+    //         for (i = 1; i < res->number_of_chars - 1; i += 2) {
+    //             if (res->charFreqs[i].frequency > res->charFreqs[i+1].frequency) {
+    //                 tmp = res->charFreqs[i+1];
+    //                 res->charFreqs[i+1] = res->charFreqs[i];
+    //                 res->charFreqs[i] = tmp;
+    //             }
+    //         }
+    //     }
+    // }
+
+	int n = res->number_of_chars;
+	int phase, i;
+
+    for (phase = 0; phase < n; phase++) {
+        if (phase % 2 == 0)
+#pragma omp parallel for shared(res, n) private(i, tmp)
+            for (i = 1; i < n; i += 2) {
                 if (res->charFreqs[i-1].frequency > res->charFreqs[i].frequency) {
-                    tmp = res->charFreqs[i-1];
-                    res->charFreqs[i-1] = res->charFreqs[i];
-                    res->charFreqs[i] = tmp;
+					tmp = res->charFreqs[i];
+                    res->charFreqs[i] = res->charFreqs[i-1];
+                    res->charFreqs[i-1] = tmp;
                 }
             }
-        } else {
-            #pragma omp for
-            for (i = 1; i < res->number_of_chars - 1; i += 2) {
+        else
+#pragma omp parallel for shared(res, n) private(i, tmp)
+            for (i = 1; i < n - 1; i += 2) {
                 if (res->charFreqs[i].frequency > res->charFreqs[i+1].frequency) {
-                    tmp = res->charFreqs[i+1];
-                    res->charFreqs[i+1] = res->charFreqs[i];
-                    res->charFreqs[i] = tmp;
+                    tmp = res->charFreqs[i];
+                    res->charFreqs[i] = res->charFreqs[i+1];
+                    res->charFreqs[i+1] = tmp;
                 }
             }
-        }
     }
 }
 

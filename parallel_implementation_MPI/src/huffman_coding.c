@@ -12,7 +12,7 @@ void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_D
 
 			if (buffer == NULL || header.size <= 0) {
 				fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
-				return 1;
+				return;
 			}
 
 			int receiver = pid - half;
@@ -68,7 +68,10 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	charsPerBlock = stringToInt(argv[2]);
+	if (argc > 2) {
+		charsPerBlock = stringToInt(argv[2]);
+	} 
+	
 	if (charsPerBlock <= 0 || charsPerBlock > MAX_CHARS_PER_BLOCK) {
 		fprintf(stderr, "Invalid number of characters per block: %d\n", charsPerBlock);
 		return 1;
@@ -100,11 +103,11 @@ int main(int argc, char *argv[]) {
 	addLogData(pid, intToString(processes_text_length));
 	addLogData(pid, intToString(charsPerBlock)); 
 
-	// timeCheckPoint(pid, "Read File");
+	timeCheckPoint(pid, "Read File");
 
 	getCharFreqsFromText(&allChars, text, processes_text_length, pid);
 
-	// timeCheckPoint(pid, "Get Char Frequencies");
+	timeCheckPoint(pid, "Get Char Frequencies");
 
 	MPI_Datatype charFreqDictType;
 	buildDatatype(MSG_DICTIONARY, &charFreqDictType);
@@ -151,21 +154,21 @@ int main(int argc, char *argv[]) {
 	}
 
 	if (pid == 0) {
-		// timeCheckPoint(pid, "Merge Char Frequencies");
+		timeCheckPoint(pid, "Merge Char Frequencies");
 
 		oddEvenSort(&allChars);
 
-		// timeCheckPoint(pid, "Sort Char Frequencies");
+		timeCheckPoint(pid, "Sort Char Frequencies");
 
 		// creates the huffman tree
 		root = createHuffmanTree(&allChars);
 
-		// timeCheckPoint(pid, "Create Huffman Tree");
+		timeCheckPoint(pid, "Create Huffman Tree");
 
 		// creates the encoding dictionary
 		getEncodingFromTree(&encodingDict, &allChars, root->item);
 
-		// timeCheckPoint(pid, "Get Encoding from Tree");
+		timeCheckPoint(pid, "Get Encoding from Tree");
 	}
 
 	MPI_Type_free(&charFreqDictType);
@@ -213,7 +216,7 @@ int main(int argc, char *argv[]) {
 
 	encodeStringToByteArray(&encodingText, &encodingDict, text, processes_text_length, charsPerBlock);
 
-	// timeCheckPoint(pid, "Encode Single Text");
+	timeCheckPoint(pid, "Encode Single Text");
 
 	// send the encoded text to the master process
 	if (pid != 0) {
@@ -245,7 +248,7 @@ int main(int argc, char *argv[]) {
 			freeBuffer(rcvEncTxt.encodedText);
 		}
 
-		// timeCheckPoint(pid, "Merge Encoded Texts");
+		timeCheckPoint(pid, "Merge Encoded Texts");
 	}
 
 	// master process writes data into file
@@ -296,7 +299,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	// timeCheckPoint(pid, "Write Encoded Text");
+	timeCheckPoint(pid, "Write Encoded Text");
 
 	int initialFileSize = getFileSize(SRC_FILE); 
 	int encodedFileSize = getFileSize(ENCODED_FILE); 
