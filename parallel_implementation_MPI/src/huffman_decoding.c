@@ -192,8 +192,8 @@ int main(int argc, char *argv[]) {
 				recvDecodingText(&decodingText, i);
 		}
 
-		timeCheckPoint(pid, "Merge Decoded Texts");
 	}
+	timeCheckPoint(pid, "Merge Decoded Texts");
 
 	if (pid == 0)
 		printf("Decoded text:\n%s\n", decodingText.decodedText);

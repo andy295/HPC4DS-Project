@@ -234,9 +234,9 @@ int main(int argc, char *argv[]) {
 			for (; i < proc_number; i += 2)
 				recvEncodingText(&encodingText, i);
 
-			timeCheckPoint(pid, "Merge Encoded Texts");
 		}
 	}
+	timeCheckPoint(pid, "Merge Encoded Texts");
 
 	// master process writes data into file
 	if (pid == 0) {
