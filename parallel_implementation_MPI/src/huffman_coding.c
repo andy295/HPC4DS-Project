@@ -2,44 +2,6 @@
 
 static int charsPerBlock = 125;
 
-bool useMasterProcess(int *proc_number, bool withMaster) {
-	if (*proc_number % 2 != 0 && withMaster) {
-		--(*proc_number);
-		return false;
-	}
-	else if (*proc_number % 2 != 0 && !withMaster) {
-		++(*proc_number);
-		return true;
-	}
-
-	return withMaster;
-}
-
-bool calculateSenderReceiver(int proc_number, int pid, int *sender, int *receiver) {
-    if (pid == 0 && proc_number % 2 != 0)
-        return false;
-
-    if (proc_number % 2 == 0) {
-        if (pid % 2 == 0) {
-            *receiver = pid;
-            *sender = pid + 1;
-        } else {
-            *receiver = pid - 1;
-            *sender = pid;
-        }
-    } else {
-        if (pid % 2 == 0) {
-            *receiver = pid - 1;
-            *sender = pid;
-        } else {
-            *receiver = pid;
-            *sender = pid + 1;
-        }
-    }
-
-    return true;
-}
-
 void recvEncodingText(EncodingText *encodingText, int sender) {
 	MPI_Status status;
 	EncodingText rcvEncTxt = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
@@ -56,7 +18,7 @@ void recvEncodingText(EncodingText *encodingText, int sender) {
 	freeBuffer(rcvEncTxt.encodedText);
 }
 
-void semiOrderedSendRecv(int pid, EncodingText *encodingText, int sender, int receiver) {
+void semiOrderedEncTextSendRecv(int pid, EncodingText *encodingText, int sender, int receiver) {
     if (pid == sender) {
         if (pid == 0)
             return;
@@ -80,11 +42,11 @@ void semiOrderedSendRecv(int pid, EncodingText *encodingText, int sender, int re
 		// printf("Process %d: receiving message from process %d\n", pid, sender);
 		recvEncodingText(encodingText, sender);
 		// printf("Process %d: receiver message from process %d\n", pid, sender);
-		semiOrderedSendRecv(pid, encodingText, pid, 0);
+		semiOrderedEncTextSendRecv(pid, encodingText, pid, 0);
     }
 }
 
-void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_Datatype *charFreqDictType, bool withMaster) {
+void unorderedCharFreqDictSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_Datatype *charFreqDictType, bool withMaster) {
     int half = proc_number / 2;
 
     if (pid >= (half + (withMaster ? 0 : 1))) {
@@ -129,7 +91,7 @@ void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_D
         }
 
 		withMaster = useMasterProcess(&half, withMaster);
-        unorderedSendRecv(half, pid, dict, charFreqDictType, withMaster);
+        unorderedCharFreqDictSendRecv(half, pid, dict, charFreqDictType, withMaster);
     }
 }
 
@@ -195,7 +157,7 @@ int main(int argc, char *argv[]) {
 		int np = proc_number;
 		bool withMaster = true;
 		withMaster = useMasterProcess(&np, withMaster);
-		unorderedSendRecv(np, pid, &allChars, &charFreqDictType, withMaster);
+		unorderedCharFreqDictSendRecv(np, pid, &allChars, &charFreqDictType, withMaster);
 
 		MPI_Type_free(&charFreqDictType);
 	}
@@ -270,7 +232,7 @@ int main(int argc, char *argv[]) {
 		int sender;
 		int receiver;
 		if (calculateSenderReceiver(proc_number, pid, &sender, &receiver))
-			semiOrderedSendRecv(pid, &encodingText, sender, receiver);
+			semiOrderedEncTextSendRecv(pid, &encodingText, sender, receiver);
 
 		if (pid == 0) {
 			// receive the encoded text from each process and store in a unique buffer
