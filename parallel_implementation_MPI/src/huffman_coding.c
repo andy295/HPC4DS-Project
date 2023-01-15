@@ -2,15 +2,86 @@
 
 static int charsPerBlock = 125;
 
-void useMasterProcess(int *proc_number, bool *withMaster) {
+bool useMasterProcess(int *proc_number, bool withMaster) {
 	if (*proc_number % 2 != 0 && withMaster) {
 		--(*proc_number);
-		*withMaster = false;
+		return false;
 	}
 	else if (*proc_number % 2 != 0 && !withMaster) {
 		++(*proc_number);
-		*withMaster = true;
+		return true;
 	}
+
+	return withMaster;
+}
+
+bool calculateSenderReceiver(int proc_number, int pid, int *sender, int *receiver) {
+    if (pid == 0 && proc_number % 2 != 0)
+        return false;
+
+    if (proc_number % 2 == 0) {
+        if (pid % 2 == 0) {
+            *receiver = pid;
+            *sender = pid + 1;
+        } else {
+            *receiver = pid - 1;
+            *sender = pid;
+        }
+    } else {
+        if (pid % 2 == 0) {
+            *receiver = pid - 1;
+            *sender = pid;
+        } else {
+            *receiver = pid;
+            *sender = pid + 1;
+        }
+    }
+
+    return true;
+}
+
+void recvEncodingText(EncodingText *encodingText, int sender) {
+	MPI_Status status;
+	EncodingText rcvEncTxt = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
+	MsgProbe probe = {.header.id = MSG_ENCODING_TEXT, .header.size = 0, .header.type = NULL, .header.position = 0, .pid = sender, .tag = 0};
+	BYTE *buffer = prepareForReceive(&probe, &status);
+
+	MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, 0, MPI_COMM_WORLD, &status);
+	setMessage(&probe.header, &rcvEncTxt, buffer);
+
+	mergeEncodedText(encodingText, &rcvEncTxt);
+
+	freeBuffer(buffer);
+	freeBuffer(rcvEncTxt.dimensions);
+	freeBuffer(rcvEncTxt.encodedText);
+}
+
+void semiOrderedSendRecv(int pid, EncodingText *encodingText, int sender, int receiver) {
+    if (pid == sender) {
+        if (pid == 0)
+            return;
+        
+		MsgHeader header = {.id = MSG_ENCODING_TEXT, .size = 0, .type = NULL, .position = 0};
+		BYTE *buffer = getMessage(&header, encodingText);
+
+		if (buffer == NULL || header.size <= 0) {
+			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
+			return;
+		}
+
+		// printf("Process %d: sending message to process %d\n", pid, receiver);
+
+		MPI_Send(buffer, header.position, MPI_PACKED, receiver, 0, MPI_COMM_WORLD);
+		// printf("Process %d: sent message to process %d\n", pid, receiver);
+
+		freeBuffer(buffer);
+    } else {
+
+		// printf("Process %d: receiving message from process %d\n", pid, sender);
+		recvEncodingText(encodingText, sender);
+		// printf("Process %d: receiver message from process %d\n", pid, sender);
+		semiOrderedSendRecv(pid, encodingText, pid, 0);
+    }
 }
 
 void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_Datatype *charFreqDictType, bool withMaster) {
@@ -57,7 +128,7 @@ void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_D
 			freeBuffer(rcvCharFreq.charFreqs);
         }
 
-		useMasterProcess(&half, &withMaster);
+		withMaster = useMasterProcess(&half, withMaster);
         unorderedSendRecv(half, pid, dict, charFreqDictType, withMaster);
     }
 }
@@ -123,7 +194,7 @@ int main(int argc, char *argv[]) {
 
 		int np = proc_number;
 		bool withMaster = true;
-		useMasterProcess(&np, &withMaster);
+		withMaster = useMasterProcess(&np, withMaster);
 		unorderedSendRecv(np, pid, &allChars, &charFreqDictType, withMaster);
 
 		MPI_Type_free(&charFreqDictType);
@@ -196,33 +267,17 @@ int main(int argc, char *argv[]) {
 
 	if (proc_number > 1) {
 		// send the encoded text to the master process
-		if (pid != 0) {
-			MsgHeader header = {.id = MSG_ENCODING_TEXT, .size = 0, .type = NULL, .position = 0};
-			BYTE *buffer = getMessage(&header, &encodingText);
+		int sender;
+		int receiver;
+		if (calculateSenderReceiver(proc_number, pid, &sender, &receiver))
+			semiOrderedSendRecv(pid, &encodingText, sender, receiver);
 
-			if (buffer == NULL || header.size <= 0) {
-				fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
-				return 1;
-			}
-
-			MPI_Send(buffer, header.position, MPI_PACKED, 0, 0, MPI_COMM_WORLD);
-
-			freeBuffer(buffer);
-		} else { // receive the encoded text from each process and store in unique buffer
-			for (int i = 1; i < proc_number; i++) {
-				MPI_Status status;
-				EncodingText rcvEncTxt = {.nr_of_dim = 0, .nr_of_bytes = 0, .nr_of_bits = 0, .dimensions = NULL, .encodedText = NULL};
-				MsgProbe probe = {.header.id = MSG_ENCODING_TEXT, .header.size = 0, .header.type = NULL, .header.position = 0, .pid = i, .tag = 0};
-				BYTE *buffer = prepareForReceive(&probe, &status);
-
-				MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, 0, MPI_COMM_WORLD, &status);
-				setMessage(&probe.header, &rcvEncTxt, buffer);
-
-				mergeEncodedText(&encodingText, &rcvEncTxt);
-
-				freeBuffer(buffer);
-				freeBuffer(rcvEncTxt.dimensions);
-				freeBuffer(rcvEncTxt.encodedText);
+		if (pid == 0) {
+			// receive the encoded text from each process and store in a unique buffer
+			int i = (proc_number % 2 == 0) ? 2 : 1;
+			for (; i < proc_number; i += 2) {
+				// printf("Process %d: Receiving encoded text from process %d\n", pid, i);
+				recvEncodingText(&encodingText, i);
 			}
 
 			timeCheckPoint(pid, "Merge Encoded Texts");
