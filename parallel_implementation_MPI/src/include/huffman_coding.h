@@ -11,3 +11,6 @@
 #include "../utils/time_utils.h"
 #include "../utils/data_logger.h"
 #include "../utils/conversion_utils.h"
+
+void useMasterProcess(int *proc_number, bool *withMaster);
+void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_Datatype *charFreqDictType, bool withMaster);

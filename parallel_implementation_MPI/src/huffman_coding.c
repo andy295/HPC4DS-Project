@@ -2,11 +2,22 @@
 
 static int charsPerBlock = 125;
 
+void useMasterProcess(int *proc_number, bool *withMaster) {
+	if (*proc_number % 2 != 0 && withMaster) {
+		--(*proc_number);
+		*withMaster = false;
+	}
+	else if (*proc_number % 2 != 0 && !withMaster) {
+		++(*proc_number);
+		*withMaster = true;
+	}
+}
+
 void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_Datatype *charFreqDictType, bool withMaster) {
     int half = proc_number / 2;
 
     if (pid >= (half + (withMaster ? 0 : 1))) {
-         if (pid == 0)
+        if (pid == 0)
             return;
 
 		MsgHeader header = {.id = MSG_DICTIONARY, .size = 0, .type = charFreqDictType, .position = 0};
@@ -46,15 +57,7 @@ void unorderedSendRecv(int proc_number, int pid, CharFreqDictionary *dict, MPI_D
 			freeBuffer(rcvCharFreq.charFreqs);
         }
 
-        if (half % 2 != 0 && withMaster) {
-            --half;
-			withMaster = false;
-		}
-        else if (half % 2 != 0 && !withMaster) {
-            ++half;
-            withMaster = true;
-        }
-
+		useMasterProcess(&half, &withMaster);
         unorderedSendRecv(half, pid, dict, charFreqDictType, withMaster);
     }
 }
@@ -118,13 +121,9 @@ int main(int argc, char *argv[]) {
 		MPI_Datatype charFreqDictType;
 		buildDatatype(MSG_DICTIONARY, &charFreqDictType);
 
-		bool withMaster = true;
 		int np = proc_number;
-		if (np % 2 != 0) {
-			--np;
-			withMaster = false;
-		}
-
+		bool withMaster = true;
+		useMasterProcess(&np, &withMaster);
 		unorderedSendRecv(np, pid, &allChars, &charFreqDictType, withMaster);
 
 		MPI_Type_free(&charFreqDictType);
