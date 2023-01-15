@@ -31,17 +31,11 @@ void semiOrderedEncTextSendRecv(int pid, EncodingText *encodingText, int sender,
 			return;
 		}
 
-		// printf("Process %d: sending message to process %d\n", pid, receiver);
-
 		MPI_Send(buffer, header.position, MPI_PACKED, receiver, 0, MPI_COMM_WORLD);
-		// printf("Process %d: sent message to process %d\n", pid, receiver);
 
 		freeBuffer(buffer);
     } else {
-
-		// printf("Process %d: receiving message from process %d\n", pid, sender);
 		recvEncodingText(encodingText, sender);
-		// printf("Process %d: receiver message from process %d\n", pid, sender);
 		semiOrderedEncTextSendRecv(pid, encodingText, pid, 0);
     }
 }
@@ -237,10 +231,8 @@ int main(int argc, char *argv[]) {
 		if (pid == 0) {
 			// receive the encoded text from each process and store in a unique buffer
 			int i = (proc_number % 2 == 0) ? 2 : 1;
-			for (; i < proc_number; i += 2) {
-				// printf("Process %d: Receiving encoded text from process %d\n", pid, i);
+			for (; i < proc_number; i += 2)
 				recvEncodingText(&encodingText, i);
-			}
 
 			timeCheckPoint(pid, "Merge Encoded Texts");
 		}
