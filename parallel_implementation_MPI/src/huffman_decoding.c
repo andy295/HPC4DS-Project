@@ -1,19 +1,5 @@
 #include "include/huffman_decoding.h"
 
-int roundUp(int numToRound, int multiple) {
-    if (multiple == 0)
-        return numToRound;
-
-    int remainder = abs(numToRound) % multiple;
-    if (remainder == 0)
-        return numToRound;
-
-    if (numToRound < 0)
-        return -(abs(numToRound) - remainder);
-    else
-        return numToRound + multiple - remainder;
-}
-
 int calculatePrevTextSize(unsigned short *dimensions, int nrOfBlocks) {
 	int prevTextSize = 0;
 
@@ -45,6 +31,46 @@ void calculateBlockRange(int nrOfBlocks, int nrOfProcs, int pid, int *start, int
 	*end = *start + quotient;
 	if (quoto != 0 && (pid == 0 || pid < quoto))
 		++(*end);
+}
+
+void recvDecodingText(DecodingText *decodingText, int sender) {
+	MPI_Status status;
+	DecodingText rcvText = {.length = 0, .decodedText = NULL};
+	MsgProbe probe = {.header.id = MSG_TEXT, .header.size = 0, .header.type = NULL, .header.position = 0, .pid = sender, .tag = 0};
+
+	BYTE *buffer = prepareForReceive(&probe, &status);
+
+	MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
+	setMessage(&probe.header, &rcvText, buffer);
+
+	mergeDecodedText(decodingText, &rcvText);
+
+	freeBuffer(rcvText.decodedText);
+	freeBuffer(buffer);
+}
+
+void semiOrderedDecTextSendRecv(int pid, DecodingText *decodingText, int sender, int receiver) {
+    if (pid == sender) {
+        if (pid == 0)
+            return;
+
+		MsgHeader header = {.id = MSG_TEXT, .size = 0, .type = NULL, .position = 0};
+		BYTE *buffer = getMessage(&header, decodingText->decodedText);
+
+		if (buffer == NULL || header.size <= 0) {
+			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
+			return;
+		}
+
+		MPI_Send(buffer, header.position, MPI_PACKED, receiver, 0, MPI_COMM_WORLD);
+
+		freeBuffer(buffer);
+    } else {
+		++decodingText->length;
+
+		recvDecodingText(decodingText, sender);
+		semiOrderedDecTextSendRecv(pid, decodingText, pid, 0);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -149,81 +175,69 @@ int main(int argc, char *argv[]) {
 	fclose(fp);
 
 #if DECODING_STR == 0
-	if (pid != 0) {
-		MsgHeader header = {.id = MSG_TEXT, .size = 0, .type = NULL, .position = 0};
-		BYTE *buffer = getMessage(&header, decodingText.decodedText);
+	if (proc_number > 1) {
+		// send the decoded text to the master process
 
-		if (buffer == NULL || header.size <= 0) {
-			fprintf(stderr, "Process %d: Error while creating message %s\n", pid, getMsgName(header.id));
-			return 1;
+		int sender;
+		int receiver;
+		if (calculateSenderReceiver(proc_number, pid, &sender, &receiver))
+			semiOrderedDecTextSendRecv(pid, &decodingText, sender, receiver);
+		else if (pid == 0)
+			++decodingText.length;
+
+		if (pid == 0) {
+			// receive decoded text from each process and store in a unique buffer
+			int i = (proc_number % 2 == 0) ? 2 : 1;
+			for (; i < proc_number; i += 2 )
+				recvDecodingText(&decodingText, i);
 		}
 
-		MPI_Send(buffer, header.position, MPI_PACKED, 0, 0, MPI_COMM_WORLD);
-
-		freeBuffer(buffer);
-	} else {
-		++decodingText.length;
-
-		for (int i = 1; i < proc_number; i++) {
-			MPI_Status status;
-			DecodingText rcvText = {.length = 0, .decodedText = NULL};
-			MsgProbe probe = {.header.id = MSG_TEXT, .header.size = 0, .header.type = NULL, .header.position = 0, .pid = i, .tag = 0};
-
-			BYTE *buffer = prepareForReceive(&probe, &status);
-
-			MPI_Recv(buffer, probe.header.size, MPI_PACKED, probe.pid, probe.tag, MPI_COMM_WORLD, &status);
-			setMessage(&probe.header, &rcvText, buffer);
-
-			mergeDecodedText(&decodingText, &rcvText);
-
-			freeBuffer(rcvText.decodedText);
-			freeBuffer(buffer);
-		}
+		timeCheckPoint(pid, "Merge Decoded Texts");
 	}
-
-	timeCheckPoint(pid, "Merge Decoded Texts");
 
 	if (pid == 0)
 		printf("Decoded text:\n%s\n", decodingText.decodedText);
 
 #elif DECODING_STR == 1
-	if (pid == 0)
-		strLengths = calloc(proc_number, sizeof(int));
+	if (proc_number > 1) {
+		if (pid == 0)
+			strLengths = calloc(proc_number, sizeof(int));
 
-	// send/receive the length of the decoded text
-	MPI_Gather(&decodingText.length, 1, MPI_INT, strLengths, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		// send/receive the length of the decoded text
+		MPI_Gather(&decodingText.length, 1, MPI_INT, strLengths, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-	if (pid == 0) {
-		dispLengths = calloc(proc_number, sizeof(int));
+		if (pid == 0) {
+			dispLengths = calloc(proc_number, sizeof(int));
 
-		totLength += strLengths[0];
+			totLength += strLengths[0];
 
-		for (int i = 1; i < proc_number; i++) {
-			totLength += strLengths[i];
-			dispLengths[i] = dispLengths[i-1] + strLengths[i-1];
+			for (int i = 1; i < proc_number; i++) {
+				totLength += strLengths[i];
+				dispLengths[i] = dispLengths[i-1] + strLengths[i-1];
+			}
+
+			// becuase of the '\0' character
+			++totLength;
+
+			totalstring = calloc(totLength, sizeof(char));
+			totalstring[totLength-1] = ENDTEXT;
+
+			if (DEBUG(pid)) {
+				for (int i = 0; i < proc_number; i++)
+					printf("Process %d - strLengths[%d]: %d\n", i, i, strLengths[i]);
+
+				for (int i = 0; i < proc_number; i++)
+					printf("Process %d - dispLengths[%d]: %d\n", i, i, dispLengths[i]);
+
+				printf("Process %d - totalstring: %d\n", pid, totLength);
+			}
 		}
 
-		// becuase of the '\0' character
-		++totLength;
-
-		totalstring = calloc(totLength, sizeof(char));
-		totalstring[totLength-1] = ENDTEXT;
-
-		if (DEBUG(pid)) {
-			for (int i = 0; i < proc_number; i++)
-				printf("Process %d - strLengths[%d]: %d\n", i, i, strLengths[i]);
-
-			for (int i = 0; i < proc_number; i++)
-				printf("Process %d - dispLengths[%d]: %d\n", i, i, dispLengths[i]);
-
-			printf("Process %d - totalstring: %d\n", pid, totLength);
-		}
+		// send/receive the decoded text
+		MPI_Gatherv(decodingText.decodedText, decodingText.length, MPI_CHAR, totalstring, strLengths, dispLengths, MPI_CHAR, 0, MPI_COMM_WORLD);
+		
+		timeCheckPoint(pid, "Merge Decoded Texts");
 	}
-
-	// send/receive the decoded text
-	MPI_Gatherv(decodingText.decodedText, decodingText.length, MPI_CHAR, totalstring, strLengths, dispLengths, MPI_CHAR, 0, MPI_COMM_WORLD);
-	
-	timeCheckPoint(pid, "Merge Decoded Texts");
 
 	if (pid == 0)
 		printf("Decoded text:\n%s\n", totalstring);
