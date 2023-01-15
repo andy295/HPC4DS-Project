@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
 	if (argc > 2)
 		charsPerBlock = stringToInt(argv[2]);
 	
-	if (charsPerBlock <= 0 || charsPerBlock > MAX_CHARS_PER_BLOCK) {
+	if (charsPerBlock < MIN_CHARS_PER_BLOCK || charsPerBlock > MAX_CHARS_PER_BLOCK) {
 		fprintf(stderr, "Invalid number of characters per block: %d\n", charsPerBlock);
 		return 1;
 	}
@@ -236,6 +236,7 @@ int main(int argc, char *argv[]) {
 
 		}
 	}
+
 	timeCheckPoint(pid, "Merge Encoded Texts");
 
 	// master process writes data into file

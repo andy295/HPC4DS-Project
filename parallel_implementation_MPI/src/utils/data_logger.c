@@ -55,7 +55,7 @@ void addLogData(int pid, char *data) {
         return;
 
     if (data == NULL) {
-        fprintf(stderr, "Error: invalid log data value\n");
+        fprintf(stderr, "Error: invalid data value\n");
         return;
     }
 
