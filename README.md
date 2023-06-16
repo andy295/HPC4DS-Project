@@ -1,17 +1,17 @@
-# HPC4DS-Project - Huffman Coding
+# 🚀 HPC4DS-Project - Huffman Coding 🔐
 
 High Performance Computing for Data Science project.
 
 Andrea Cristiano, matr. 229370  ----- Gabriele Padovani, matr. 229207
 
-## Project Structure
+## Project Structure 🏘️
 
 The project structure is split into three main sections: 
 - Serial implementation (found in the folder `serial_implementation`): which consists in a basic version of huffman encoding without using any multi-process or threading technique; 
 - Parallel basic implementation (found in the folder `parallel_implementation`): which makes use of basic MPI_Send and MPI_Recv calls, as well as openMP directives.
 - Parallel mpi implementation (found in the folder `parallel_implementation_MPI`): which also uses advanced MPI techniques, such as MPI_Gather and MPI_Bcast.
 
-## Running
+## Running 🏃‍♀️
 
 First of all download and move into the repository: 
 ```
@@ -47,7 +47,7 @@ The same folder is also used to store the output and error files, as well as any
 ./serial_implementation/output/data.csv
 ```
 
-## Resources
+## Resources 🔎
 
 - https://iq.opengenus.org/huffman-encoding/
 - https://stackoverflow.com/questions/31796662/is-there-any-way-to-parallelize-huffman-encoding-implementation-on-hardware
